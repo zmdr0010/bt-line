@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a making shape v1</title>
+</head>
+<body onload="init()">
+  <div style="margin: 8px">
+    <button onclick="onClickAddShp()">add shp</button>
+    <button onclick="changeMode()">change edit</button>
+    <button onclick="changeStyle()">change style</button>
+    <button onclick="onClickPrint()">print</button>
+    <button onclick="onClickSave()">save</button>
+  </div>
+  <div><canvas id="id-canvas"></canvas></div>
+
+  <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-order.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-part.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-shape-point.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script>
+    const MODE_ADD_COLOR = 'ivory'
+    const MODE_EDIT_COLOR = 'gray'
+
+    let canvas
+    let ctx
+
+    let keyLeft = 'm'//'z'//'ArrowLeft'
+    let keyRight = '.'//'c'//'ArrowRight'
+    let keyUp = 'k'//'s'//'ArrowUp'
+    let keyDown = ','//'x'//'ArrowDown'
+    // let keyDrw = 'o'
+    // let keyClear = 'p'
+    let keyPrint = 'p'
+    let keySave = 's'
+    let keyNextP = 'e'
+    let keyPrevP = 'r'
+    let keyAddP = 't' // shift remove
+    let keyAddShape = 'a'
+    let keyChgMode = '-'
+    let keyChgStyle = '='
+
+    let column = 50
+    let row = 50
+    let pSize = 20
+    let pList = []
+    let addList = []
+    let shpInfo
+    let mode = 'add' // add/edit
+    let style = 'stroke' // stroke/fill (width 1/0)
+    let selectedP
+
+    function init() {
+      canvas = document.getElementById('id-canvas')
+      canvas.width = window.innerWidth - 16 - 16
+      canvas.height = window.innerHeight - 16 - 16
+      // canvas.style.backgroundColor = 'gray'
+      canvas.style.backgroundColor = 'ivory'
+      ctx = canvas.getContext('2d')
+
+      shpInfo = {
+        uCode: `shp-${getCurrentDateUCode()}`,
+        w: 0,
+        h: 0,
+        x: 0,
+        y: 0,
+        pointInfo: {
+          uCode: `shape-point-${getCurrentDateUCode()}`,
+          column: column,
+          row: row,
+          list: []
+        },
+        list: [],
+        child: [],
+        itvX: pSize,
+        itvY: pSize
+      }
+
+      canvas.addEventListener('mousedown', (e) => {
+        const c = Math.floor(e.offsetX / pSize)
+        const r = Math.floor(e.offsetY / pSize)
+        const px = c * pSize
+        const py = r * pSize
+        console.log(`mousedown x: ${e.offsetX}, y: ${e.offsetY}, c: ${c}, r: ${r}, px: ${px}, py: ${py}`)
+
+        let p = shpInfo.pointInfo.list.find(p => p.c === c && p.r === r)
+        if (mode === 'add') {
+          if (!p) {
+            p = { i: shpInfo.pointInfo.list.length, c: c, r: r, x: px, y: py }
+            shpInfo.pointInfo.list.push(p)
+          }
+          if (addList.indexOf(p) < 0) addList.push(p)
+        } else {
+          if (p) {
+            selectedP = p
+          } else {
+            if (selectedP) {
+              selectedP.c = c
+              selectedP.r = r
+              selectedP.x = px
+              selectedP.y = py
+            }
+          }
+        }
+
+        draw()
+      })
+
+      document.addEventListener('keydown', onKeyDown)
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      for (const p of shpInfo.pointInfo.list) drawCircle(ctx, p.x + pSize/2, p.y + pSize/2, (pSize-2)/2, 'blue')
+
+      drawLineInfo(ctx, shpInfo, pSize/2, pSize/2, true, false)
+
+      for (const p of addList) drawCircle(ctx, p.x + pSize/2, p.y + pSize/2, (pSize-2)/2, 'red')
+
+      if (selectedP) drawCircle(ctx, selectedP.x + pSize/2, selectedP.y + pSize/2, (pSize-2)/2, 'red')
+    }
+
+    function addShp() {
+      if (addList.length < 1) return
+      const pList = addList.concat([])
+      console.log(pList)
+      pList.push(pList[0])
+      shpInfo.list.push({ width: 1, color: 'black', list: pList})
+      addList = []
+      draw()
+    }
+
+    function onClickAddShp() {
+      if (mode !== 'add') return
+      addShp()
+    }
+
+    function onKeyDown(e) {
+      if (e.key === keyAddShape) addShp()
+      if (e.key === keySave) onClickSave()
+      if (e.key === keyPrint) onClickPrint()
+      if (e.key === keyChgStyle) changeStyle()
+      if (e.key === keyChgMode) changeMode()
+    }
+
+    function onClickSave() {
+      if (shpInfo.list.length < 1) return
+
+      const strSet = fitShp()
+      saveString(strSet.pointSet.split('/')[0], strSet.pointSet)
+      saveString(strSet.shpSet.split('/')[0], strSet.shpSet)
+    }
+
+    function onClickPrint() {
+      fitShp()
+    }
+
+    function fitShp() {
+      // fit
+      let minC = 100000000000
+      let maxC = -100000000000
+      let minR = 100000000000
+      let maxR = -100000000000
+      for (const p of shpInfo.pointInfo.list) {
+        minC = Math.min(minC, p.c)
+        maxC = Math.max(maxC, p.c)
+        minR = Math.min(minR, p.r)
+        maxR = Math.max(maxR, p.r)
+      }
+      const info = structuredClone(shpInfo)
+      info.pointInfo.column = maxC - minC + 1
+      info.pointInfo.row = maxR - minR + 1
+      console.log(info)
+      for (const p of info.pointInfo.list) {
+        p.c -= minC
+        p.r -= minR
+        p.x = p.c * pSize
+        p.y = p.r * pSize
+      }
+
+      const strSet = createStrSetShapeAndPoint(info)
+      console.log(strSet)
+      return strSet
+    }
+
+    function changeStyle() {
+      if (style === 'stroke') {
+        style = 'fill'
+      } else {
+        style = 'stroke'
+      }
+
+      for (const dw of shpInfo.list) {
+        if (style === 'stroke') {
+          dw.width = 1
+        } else {
+          dw.width = 0
+        }
+      }
+      draw()
+    }
+
+    function changeMode() {
+      selectedP = null
+      addList = []
+      if (mode === 'add') {
+        mode = 'edit'
+        canvas.style.backgroundColor = MODE_EDIT_COLOR
+      } else {
+        mode = 'add'
+        canvas.style.backgroundColor = MODE_ADD_COLOR
+      }
+      draw()
+    }
+  </script>
+</body>
+</html>
