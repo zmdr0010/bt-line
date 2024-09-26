@@ -5,13 +5,15 @@
   <title>a making shape v1</title>
 </head>
 <body onload="init()">
-  <div style="margin: 8px">
-    <button onclick="onClickAddShp()">add shp</button>
-    <button onclick="changeMode()">change edit</button>
-    <button onclick="changeStyle()">change style</button>
-    <button onclick="onClickPrint()">print</button>
-    <button onclick="onClickSave()">save</button>
-  </div>
+<div style="margin: 8px">
+  <button style="margin: 4px" onclick="onClickAddShp()">add shp</button>
+  <button style="margin: 4px" onclick="onClickClearAdd()">clear add</button>
+  <button style="margin: 4px" onclick="popShape()">pop shape</button>
+  <button style="margin: 4px" onclick="changeMode()">change edit</button>
+  <button style="margin: 4px" onclick="changeStyle()">change style</button>
+  <button style="margin: 4px" onclick="onClickPrint()">print</button>
+  <button style="margin: 4px" onclick="onClickSave()">save</button>
+</div>
   <div><canvas id="id-canvas"></canvas></div>
 
   <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
@@ -44,6 +46,8 @@
     let keyAddShape = 'a'
     let keyChgMode = '-'
     let keyChgStyle = '='
+    let keyClearAdd = 'z'
+    let keyPopShape = 'x'
 
     let column = 50
     let row = 50
@@ -146,6 +150,8 @@
       if (e.key === keyPrint) onClickPrint()
       if (e.key === keyChgStyle) changeStyle()
       if (e.key === keyChgMode) changeMode()
+      if (e.key === keyClearAdd) onClickClearAdd()
+      if (e.key === keyPopShape) popShape()
     }
 
     function onClickSave() {
@@ -216,6 +222,43 @@
         canvas.style.backgroundColor = MODE_ADD_COLOR
       }
       draw()
+    }
+
+    function onClickClearAdd() {
+      for (const p of addList) {
+        const index = shpInfo.pointInfo.list.indexOf(p)
+        if (p) {
+          let isInShape = false
+          for (const dw of shpInfo.list) {
+            for (const sp of dw.list) {
+              if (p === sp) {
+                isInShape = true
+                break
+              }
+            }
+          }
+          if (!isInShape) shpInfo.pointInfo.list.splice(index, 1)
+        }
+      }
+      addList = []
+      draw()
+    }
+
+    function popShape() {
+      shpInfo.list.pop()
+      shpInfo.pointInfo.list = []
+      let count = 0
+      for (const dw of shpInfo.list) {
+        for (const p of dw.list) {
+          const index = shpInfo.pointInfo.list.indexOf(p)
+          if (index < 0) {
+            shpInfo.pointInfo.list.push(p)
+            p.i = count
+            count++
+          }
+        }
+      }
+      onClickClearAdd()
     }
   </script>
 </body>
