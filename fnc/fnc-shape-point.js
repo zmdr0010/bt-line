@@ -31,7 +31,7 @@ function createShapePointInfo(set, itvX, itvY) {
 // override lineInfo
 // uCode/point uCode/shape num/pI,pI,pI/pI,pI ... list
 // itvX, itvY - interval x, interval y
-function createSimpleShapeInfo(set, pointSetList, itvX, itvY) {
+function createSimpleShapeInfo(set, pointSetList, itvX, itvY, width=1, color='black') {
   const setSplit = set.split('/')
   const uCode = setSplit[0]
   const pointUCode = setSplit[1]
@@ -54,7 +54,7 @@ function createSimpleShapeInfo(set, pointSetList, itvX, itvY) {
     }
     pList.push(firstP)
     // default set: width 1, black
-    list.push({ width: 1, color: 'black', list: pList })
+    list.push({ width: width, color: color, list: pList })
   }
   const shapeInfo = {
     uCode: uCode,

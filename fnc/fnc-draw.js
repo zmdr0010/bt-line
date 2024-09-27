@@ -14,7 +14,9 @@ function drawPointList(ctx, info, sx=0, sy=0) {
   let type = (info.width > 0) ? 'stroke' : 'fill'
   ctx.fillStyle = info.color
   ctx.strokeStyle = info.color
-  ctx.lineWidth = info.width
+  let lineW = info.width
+  if (lineW < 1) lineW = 2 // shape fill has margin between shape
+  ctx.lineWidth = lineW
   ctx.beginPath()
   let isFirst = true
   for (const p of info.list) {
@@ -29,6 +31,7 @@ function drawPointList(ctx, info, sx=0, sy=0) {
   }
   if (type === 'fill') {
     // ctx.closePath()
+    ctx.stroke()
     ctx.fill()
   } else {
     // ctx.closePath()
