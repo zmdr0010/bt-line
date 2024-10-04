@@ -31,7 +31,7 @@ function drawPointList(ctx, info, sx=0, sy=0) {
   }
   if (type === 'fill') {
     // ctx.closePath()
-    // ctx.stroke() // shape fill has margin between shape
+    // ctx.stroke()
     ctx.fill()
   } else {
     // ctx.closePath()
@@ -83,13 +83,13 @@ function drawPointsIndexCircle(ctx, info, sx=0, sy=0) {
   }
 }
 
-function drawIndexCircle(ctx, i, sx=0, sy=0) {
+function drawIndexCircle(ctx, i, sx=0, sy=0, color='black') {
   const x = sx
   const y = sy
-  drawCircle(ctx, x, y, 10)
-  ctx.font = '16px serif'
-  let m = -4
-  if (i > 9) m = -8
+  drawCircle(ctx, x, y, 8, color)
+  ctx.font = '12px serif'
+  let m = -3.5
+  if (i > 9) m = -7
   ctx.strokeText(`${i}`, x+m, y+4)
 }
 

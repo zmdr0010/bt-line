@@ -208,3 +208,79 @@ function fitSimpleLineInfo(info) {
   }
   calculateLineInfoSize(info)
 }
+
+// info: lineInfo
+// uCode/point num/x,y,x,y ... (point list)/shape num/pI,pI,pI,pI.../pI,pI... (shape list)
+function createLinePointSet(info) {
+  let str = `line-point-${getCurrentDateUCode()}/${info.pointInfo.list.length}/`
+  for (const p of info.pointInfo.list) {
+    str += `${p.x},${p.y},`
+  }
+  str = str.slice(0, str.length-1)
+  str += `/${info.list.length}`
+  for (const dw of info.list) {
+    str += '/'
+    for (const p of dw.list) {
+      str += `${info.pointInfo.list.indexOf(p)},`
+    }
+    str = str.slice(0, str.length-1)
+  }
+  return str
+}
+
+// uCode/point num/x,y,x,y ... (point list)/shape num/pI,pI,pI,pI.../pI,pI... (shape list)
+function createSimpleLineFromLinePointSet(set) {
+  const setSplit = set.split('/')
+  const uCode = setSplit[0]
+  const pointNum = Number(setSplit[1])
+  const pStr = setSplit[2]
+  const pStrSplit = pStr.split(',')
+  const pList = []
+  for (let i=0; i<pStrSplit.length; i+=2) {
+    pList.push({ i: pList.length, x: Number(pStrSplit[i]), y: Number(pStrSplit[i+1])})
+  }
+  const shapeNum = Number(setSplit[3])
+  const list = []
+  for (let i=4; i<setSplit.length; i++) {
+    const shp = { width: 1, color: 'black', list: [] }
+    const shpStr = setSplit[i]
+    const shpStrSplit = shpStr.split(',')
+    for (const pI of shpStrSplit) {
+      shp.list.push(pList[Number(pI)])
+    }
+    list.push(shp)
+  }
+  const lineInfo = {
+    uCode: `line-${getCurrentDateUCode()}`,
+    w: 0,
+    h: 0,
+    x: 0,
+    y: 0,
+    list: list,
+    child: [],
+    pointInfo: {
+      list: pList
+    }
+  }
+  calculateLineInfoSize(lineInfo)
+  return lineInfo
+}
+
+// colorInfo.list (matching lineInfo.list)
+function coloringLineInfo(lineInfo, colorInfo) {
+  for (let i=0; i<colorInfo.list.length; i++) {
+    const shp = lineInfo.list[i]
+    const c = colorInfo.list[i]
+    shp.width = c.width
+    shp.color = c.color
+  }
+}
+
+// uCode/line uCode/width,color/width,color/width,color ... list (matching shape.list index)
+function createColorSet(colorInfo) {
+  let str = `${colorInfo.uCode}/${colorInfo.lineUCode}`
+  for (const c of colorInfo.list) {
+    str += `/${c.width},${c.color}`
+  }
+  return str
+}

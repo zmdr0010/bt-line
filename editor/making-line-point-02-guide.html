@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>making line point 02 guide</title>
+</head>
+<body onload="init()">
+  <div style="margin: 16px">
+    shape(i order): <input id="id-input-add-shape" type="text" />
+    <button onclick="addShape()">add shape</button>
+    <button onclick="clearInputAddShape()">X</button>
+  </div>
+  <div style="margin: 16px">
+    select pointI: <input id="id-input-select-point-i" type="number" min="0" />
+    <button onclick="selectPointI()">select</button>
+    <button onclick="nextPointI()">next</button>
+    <button onclick="prevPointI()">prev</button>
+    x: <input id="id-input-point-x" type="number" />
+    y: <input id="id-input-point-y" type="number" />
+    <button onclick="movePoint()">move point</button>
+    <label id="id-label-mode">add</label>
+    <button onclick="changeMode()">change mode</button>
+    <button onclick="popPoint()">pop point</button>
+  </div>
+  <div style="margin: 16px">
+    select shpI: <input id="id-input-select-shp-i" type="number" min="0" />
+    <button onclick="selectShp()">select</button>
+    <button onclick="nextShp()">next</button>
+    <button onclick="prevShp()">prev</button>
+    <button onclick="removeShp()">remove</button>
+  </div>
+  <div style="margin: 8px">
+    <button style="margin: 4px" onclick="print()">print</button>
+    <button style="margin: 4px" onclick="save()">save</button>
+  </div>
+  <div style="margin: 8px">
+    width: <input id="id-input-width" type="number" value="1" />
+    color: <input id="id-input-color" type="text" value="black" />
+    <button onclick="changeColor()">change</button>
+    <button onclick="nextPalette()">next palette</button>
+    <button onclick="prevPalette()">prev palette</button>
+    <label id="id-label-palette">palette name</label>
+  </div>
+  <div style="display: flex; margin: 16px" id="id-palette-container"></div>
+  <div style="margin: 8px">
+    guide uCode: <input id="id-input-guide-ucode" type="text" />
+    <button onclick="changeGuide()">change guide</button>
+    <button onclick="clearGuideInput()">X</button>
+    x: <input id="id-input-guide-x" type="number" />
+    y: <input id="id-input-guide-y" type="number" />
+    <button onclick="moveGuide()">move</button>
+    visible: <input id="id-input-guide-visible" type="checkbox" checked />
+    scaleX: <input id="id-input-guide-scale-x" type="number" value="1.0" />
+    scaleY: <input id="id-input-guide-scale-y" type="number" value="1.0" />
+    <button onclick="changeGuideScale()">change</button>
+  </div>
+  <div style="margin: 8px"><canvas id="id-canvas"></canvas></div>
+
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script>
+    const lineSetList = [
+      'line-from-color-shape-20240927192525/90/90/9/0/ForestGreen/30,30,60,30,60,60,30,60,30,30/0/DarkOliveGreen/20,10,60,0,60,30,30,30,20,10/0/SeaGreen/0,30,20,10,30,30,0,40,0,30/0/OliveDrab/0,40,30,30,30,60,0,70,0,40/0/Lime/0,70,30,60,30,90,0,90,0,70/0/DarkSeaGreen/30,60,60,60,60,90,30,90,30,60/0/MediumAquamarine/60,0,90,20,90,30,60,30,60,0/0/Olive/60,30,90,30,90,50,60,60,60,30/0/SeaGreen/60,60,90,50,90,70,60,90,60,60',
+      'line-from-color-shape-20240927192449/90/70/4/0/MediumTurquoise/10,0,90,0,60,40,20,40,10,0/0/LightSeaGreen/10,0,20,40,40,70,0,60,10,0/0/Teal/20,40,60,40,50,70,40,70,20,40/0/LightSeaGreen/60,40,90,0,90,50,50,70,60,40',
+      'line-from-color-shape-20240927192419/70/100/8/0/Blue/0,20,20,10,50,20,10,40,0,20/0/MediumBlue/20,10,50,0,70,10,50,20,20,10/0/MediumBlue/0,20,10,40,20,70,0,60,0,20/0/RoyalBlue/0,60,20,70,30,100,10,90,0,60/0/CornflowerBlue/10,40,50,20,50,50,20,70,10,40/0/SkyBlue/20,70,50,50,50,80,30,100,20,70/0/LightSteelBlue/50,20,70,10,70,40,50,50,50,20/0/SteelBlue/50,50,70,40,70,70,50,80,50,50',
+      'line-from-color-shape-20240927192337/100/110/10/0/Purple/0,30,30,40,30,70,10,60,0,30/0/Violet/0,30,40,10,80,20,30,40,0,30/0/Thistle/40,10,70,0,100,10,80,20,40,10/0/Magenta/30,40,80,20,80,60,30,70,30,40/0/MediumOrchid/80,20,100,10,100,50,80,60,80,20/0/Purple/80,60,100,50,100,80,70,90,80,60/0/DarkMagenta/30,70,80,60,70,90,40,100,30,70/0/DarkViolet/10,60,30,70,20,90,10,90,10,60/0/DarkSlateBlue/10,90,20,90,30,110,10,110,10,90/0/DarkViolet/20,90,30,70,40,100,30,110,20,90',
+      'line-from-color-shape-20240927192249/90/110/8/0/Goldenrod/10,30,40,30,20,60,0,50,10,30/0/Tan/10,30,60,0,80,30,40,30,10,30/0/Burlywood/60,0,90,10,90,50,80,30,60,0/0/SaddleBrown/0,50,20,60,20,90,0,80,0,50/0/Brown/0,80,20,90,10,110,0,110,0,80/0/Maroon/40,30,50,70,20,90,20,60,40,30/0/SaddleBrown/20,90,50,70,50,100,10,110,20,90/0/DarkGoldenrod/40,30,80,30,90,50,50,70,40,30',
+      'line-from-color-shape-20240927192203/90/110/10/0/Khaki/10,30,40,30,20,60,0,50,10,30/0/PeachPuff/10,30,60,0,80,30,40,30,10,30/0/PaleGoldenrod/60,0,90,10,80,70,80,30,60,0/0/Gold/0,50,20,60,20,90,0,80,0,50/0/DarkKhaki/0,80,20,90,10,110,0,110,0,80/0/Gold/40,30,50,70,20,90,20,60,40,30/0/Khaki/20,90,50,70,50,100,10,110,20,90/0/PeachPuff/40,30,80,30,80,70,50,70,40,30/0/Yellow/50,70,80,70,80,90,50,100,50,70/0/DarkKhaki/80,70,90,10,90,50,80,90,80,70',
+      'line-from-color-shape-20240927192108/110/90/9/0/DarkRed/0,40,20,50,30,90,10,80,0,40/0/Red/20,10,50,30,20,50,0,40,20,10/0/Red/20,10,60,0,70,20,50,30,20,10/0/Crimson/60,0,90,10,90,20,70,20,60,0/0/Crimson/90,10,110,20,110,30,90,20,90,10/0/IndianRed/20,50,50,30,50,70,30,90,20,50/0/IndianRed/50,30,70,20,70,60,50,70,50,30/0/LightCoral/70,20,90,20,90,50,70,60,70,20/0/Salmon/90,20,110,30,110,60,90,50,90,20',
+      'line-from-color-shape-20240927191935/110/80/7/0/MediumVioletRed/0,40,40,30,40,60,10,60,0,40/0/PaleVioletRed/10,60,40,60,70,80,20,80,10,60/0/MediumVioletRed/40,30,80,30,80,50,40,60,40,30/0/DeepPink/40,60,80,50,90,70,70,80,40,60/0/HotPink/60,0,100,0,80,30,40,30,60,0/0/MediumVioletRed/100,0,110,20,80,50,80,30,100,0/0/MediumVioletRed/110,20,110,50,90,70,80,50,110,20',
+      'line-from-color-shape-20240927191826/120/100/9/0/gray/30,0,70,0,20,30,0,30,30,0/0/black/0,30,20,30,40,60,0,60,0,30/0/gray/0,60,40,60,50,80,10,100,0,60/0/black/20,30,70,0,70,40,40,60,20,30/0/black/40,60,70,40,80,70,50,80,40,60/0/gray/70,0,100,10,100,40,70,40,70,0/0/black/100,10,120,20,110,40,100,40,100,10/0/black/100,40,110,40,110,60,100,70,100,40/0/gray/70,40,100,40,100,70,80,70,70,40',
+
+      'line-from-place-line-20240927194544/190/220/44/0/DarkRed/0,70,20,80,30,120,10,110,0,70/0/Red/20,40,50,60,20,80,0,70,20,40/0/Red/20,40,60,30,70,50,50,60,20,40/0/Crimson/60,30,90,40,90,50,70,50,60,30/0/Crimson/90,40,110,50,110,60,90,50,90,40/0/IndianRed/20,80,50,60,50,100,30,120,20,80/0/IndianRed/50,60,70,50,70,90,50,100,50,60/0/LightCoral/70,50,90,50,90,80,70,90,70,50/0/Salmon/90,50,110,60,110,90,90,80,90,50/0/Purple/40,140,70,150,70,180,50,170,40,140/0/Violet/40,140,80,120,120,130,70,150,40,140/0/Thistle/80,120,110,110,140,120,120,130,80,120/0/Magenta/70,150,120,130,120,170,70,180,70,150/0/MediumOrchid/120,130,140,120,140,160,120,170,120,130/0/Purple/120,170,140,160,140,190,110,200,120,170/0/DarkMagenta/70,180,120,170,110,200,80,210,70,180/0/DarkViolet/50,170,70,180,60,200,50,200,50,170/0/DarkSlateBlue/50,200,60,200,70,220,50,220,50,200/0/DarkViolet/60,200,70,180,80,210,70,220,60,200/0/ForestGreen/80,70,110,70,110,100,80,100,80,70/0/DarkOliveGreen/70,50,110,40,110,70,80,70,70,50/0/SeaGreen/50,70,70,50,80,70,50,80,50,70/0/OliveDrab/50,80,80,70,80,100,50,110,50,80/0/Lime/50,110,80,100,80,130,50,130,50,110/0/DarkSeaGreen/80,100,110,100,110,130,80,130,80,100/0/MediumAquamarine/110,40,140,60,140,70,110,70,110,40/0/Olive/110,70,140,70,140,90,110,100,110,70/0/SeaGreen/110,100,140,90,140,110,110,130,110,100/0/gray/60,0,100,0,50,30,30,30,60,0/0/black/30,30,50,30,70,60,30,60,30,30/0/gray/30,60,70,60,80,80,40,100,30,60/0/black/50,30,100,0,100,40,70,60,50,30/0/black/70,60,100,40,110,70,80,80,70,60/0/gray/100,0,130,10,130,40,100,40,100,0/0/black/130,10,150,20,140,40,130,40,130,10/0/black/130,40,140,40,140,60,130,70,130,40/0/gray/100,40,130,40,130,70,110,70,100,40/0/MediumVioletRed/80,70,120,60,120,90,90,90,80,70/0/PaleVioletRed/90,90,120,90,150,110,100,110,90,90/0/MediumVioletRed/120,60,160,60,160,80,120,90,120,60/0/DeepPink/120,90,160,80,170,100,150,110,120,90/0/HotPink/140,30,180,30,160,60,120,60,140,30/0/MediumVioletRed/180,30,190,50,160,80,160,60,180,30/0/MediumVioletRed/190,50,190,80,170,100,160,80,190,50',
+      'line-from-line-coloring-20240928091833/190/260/63/0/MediumVioletRed/0,70,20,80,30,120,10,110,0,70/0/DeepPink/20,40,50,60,20,80,0,70,20,40/0/PaleVioletRed/20,40,60,30,70,50,50,60,20,40/0/HotPink/60,30,90,40,90,50,70,50,60,30/0/LightPink/90,40,110,50,110,60,90,50,90,40/0/Pink/20,80,50,60,50,100,30,120,20,80/0/LightPink/50,60,70,50,70,90,50,100,50,60/0/HotPink/70,50,90,50,90,80,70,90,70,50/0/PaleVioletRed/90,50,110,60,110,90,90,80,90,50/0/Black/50,150,70,140,90,140,80,160,50,150/0/DarkSlateGray/70,140,100,130,110,130,90,140,70,140/0/DimGray/100,130,120,120,130,120,110,130,100,130/0/SlateGray/110,130,130,120,140,140,120,150,110,130/0/LightSlateGray/120,150,140,140,140,160,120,180,120,150/0/DarkGray/140,160,140,170,130,190,120,180,140,160/0/Silver/90,140,110,130,120,150,100,160,90,140/0/LightGray/100,160,120,150,120,180,100,200,100,160/0/Gainsboro/100,200,120,180,130,190,100,220,100,200/0/LightGray/90,140,100,160,80,190,80,160,90,140/0/Silver/80,190,100,160,100,200,80,210,80,190/0/DarkGray/80,210,100,200,100,220,80,240,80,210/0/LightSlateGray/50,150,80,160,80,190,50,180,50,150/0/Gray/50,180,80,190,80,210,60,210,50,180/0/SlateGray/60,210,80,210,60,240,50,240,60,210/0/DimGray/50,240,60,240,70,260,60,260,50,240/0/DarkSlateGray/60,240,80,210,80,240,70,260,60,240/0/DarkGreen/40,80,50,100,60,130,40,110,40,80/0/Green/40,80,60,60,70,80,50,100,40,80/0/DarkOliveGreen/60,60,80,50,90,60,70,80,60,60/0/ForestGreen/90,60,120,60,80,90,70,80,90,60/0/SeaGreen/120,60,140,80,120,90,80,90,120,60/0/Olive/120,60,150,70,140,100,140,80,120,60/0/OliveDrab/50,100,70,80,80,90,70,110,50,100/0/MediumSeaGreen/80,90,120,90,100,110,70,110,80,90/0/LimeGreen/50,100,70,110,90,130,60,130,50,100/0/Lime/40,110,60,130,70,160,50,140,40,110/0/SpringGreen/60,130,90,150,90,170,70,160,60,130/0/MediumSpringGreen/90,150,110,150,110,170,90,170,90,150/0/DarkSeaGreen/60,130,90,130,110,150,90,150,60,130/0/MediumAquamarine/110,150,120,130,130,150,110,170,110,150/0/YellowGreen/120,130,130,110,140,130,130,150,120,130/0/LawnGreen/120,90,140,80,140,100,150,120,140,130,130,110,120,90/0/Chartreuse/100,110,120,90,130,110,120,130,100,110/0/LightGreen/70,110,100,110,120,130,110,150,90,130,70,110/0/DarkRed/60,0,100,0,50,30,30,30,60,0/0/Red/30,30,50,30,70,60,30,60,30,30/0/Firebrick/30,60,70,60,80,80,40,100,30,60/0/Crimson/50,30,100,0,100,40,70,60,50,30/0/IndianRed/70,60,100,40,110,70,80,80,70,60/0/Salmon/100,0,130,10,130,40,100,40,100,0/0/DarkSalmon/130,10,150,20,140,40,130,40,130,10/0/LightSalmon/130,40,140,40,140,60,130,70,130,40/0/DarkSalmon/100,40,130,40,130,70,110,70,100,40/0/DarkKhaki/110,70,140,70,120,100,100,90,110,70/0/Gold/110,70,160,40,180,70,140,70,110,70/0/Khaki/160,40,190,50,180,110,180,70,160,40/0/PeachPuff/100,90,120,100,120,130,100,120,100,90/0/Yellow/100,120,120,130,110,150,100,150,100,120/0/PaleGoldenrod/140,70,150,110,120,130,120,100,140,70/0/Moccasin/120,130,150,110,150,140,110,150,120,130/0/PapayaWhip/140,70,180,70,180,110,150,110,140,70/0/LightGoldenrodYellow/150,110,180,110,180,130,150,140,150,110/0/LemonChiffon/180,110,190,50,190,90,180,130,180,110',
+
+      'line-from-shp-20240928101229/100/320/17/1/black/20,80,60,40,80,60,60,100,20,80/1/black/20,80,20,140,60,160,60,100,20,80/1/black/60,100,80,60,100,160,60,160,60,100/1/black/60,160,100,160,80,200,60,160/1/black/60,160,80,200,40,220,20,140,60,160/1/black/40,220,60,280,80,260,80,200,40,220/1/black/100,160,80,200,80,260,100,220,100,160/1/black/20,80,0,40,20,40,60,40,20,80/1/black/0,40,0,120,20,140,20,80,0,40/1/black/0,120,20,140,40,220,20,180,0,120/1/black/20,180,40,220,60,280,20,280,0,240,20,180/1/black/20,280,60,320,60,280,20,280/1/black/60,280,80,260,100,220,100,280,60,320,60,280/1/black/0,40,40,0,60,40,0,40/1/black/40,0,80,20,80,60,60,40,40,0/1/black/80,20,100,80,80,60,80,20/1/black/100,80,100,160,80,60,100,80',
+      'line-from-shp-20240928104736/420/300/9/1/black/160,0,220,20,80,120,80,60,160,0/1/black/0,160,20,100,200,60,220,120,160,140,140,100,60,120,60,160,0,160/1/black/220,120,300,80,340,60,360,80,360,120,420,80,380,20,200,60,220,120/1/black/60,120,80,140,120,140,140,100,60,120/1/black/80,140,60,200,60,160,60,120,80,140/1/black/120,140,140,100,160,140,140,200,120,140/1/black/0,160,60,160,60,200,20,200,40,260,0,260,0,160/1/black/140,200,200,200,180,260,260,220,220,120,160,140,140,200/1/black/220,120,300,80,340,60,360,80,360,120,320,180,320,280,280,300,260,220,220,120',
+      'line-from-shp-20240928105226/260/200/12/1/black/20,40,80,20,100,40,40,60,20,40/1/black/40,60,40,120,0,120,20,40,40,60/1/black/40,60,140,80,160,60,100,40,40,60/1/black/80,20,100,0,120,0,140,20,160,20,160,0,200,0,160,60,100,40,80,20/1/black/140,80,160,120,180,100,160,60,140,80/1/black/200,0,220,40,220,60,240,80,260,80,240,120,200,100,180,100,160,60,200,0/1/black/40,60,140,80,160,120,120,120,100,100,40,60/1/black/120,120,160,120,180,100,200,100,180,160,140,160,120,120/1/black/200,100,240,120,240,200,180,160,200,100/1/black/100,100,60,180,40,120,40,60,100,100/1/black/0,120,40,120,60,180,0,180,0,120/1/black/60,180,100,100,120,120,140,160,60,180',
+
+      'line-20241002143903/300/230/9/1/black/2,97,102,86,110,167,-4,157,2,97/1/black/-4,157,110,167,140,200,31,185,-4,157/1/black/31,185,140,200,168,220,50,202,31,185/1/black/50,202,168,220,170,241,60,215,50,202/1/black/2,97,113,30,211,2,223,24,102,86,2,97/1/black/211,2,275,22,286,38,223,24,211,2/1/black/102,86,223,24,286,38,300,109,275,143,140,200,110,167,102,86/1/black/140,200,265,147,256,171,168,220,140,200/1/black/168,220,256,171,251,178,170,241,168,220',
+
+      'line-point-20241002182310/329/285/6/1/black/49,53,35,71,65,108,130,129,192,112,152,104,168,88,132,91,90,79,71,56,91,32,49,53/1/black/49,53,35,71,65,108,130,129,192,112,196,138,153,153,114,201,104,236,112,256,78,243,46,211,17,174,3,125,10,89,49,53/1/black/91,32,164,14,200,12,245,15,276,25,268,49,228,72,168,88,132,91,90,79,71,56,91,32/1/black/168,88,228,72,268,49,276,25,311,47,308,65,277,90,229,111,192,112,152,104,168,88/1/black/192,112,229,111,277,90,308,65,311,47,329,76,325,128,318,159,296,181,242,216,167,247,112,256,104,236,114,201,153,153,196,138,192,112/1/black/46,211,78,243,112,256,167,247,242,216,296,181,281,209,211,253,114,285,87,280,53,244,46,211',
+      'line-point-20241002192906/205/160/6/1/black/40,45,55,45,60,50,50,65,35,75,25,70,30,55,40,45/1/black/15,55,30,55,25,70,35,75,50,65,60,50,90,45,100,70,105,115,90,120,70,115,25,115,5,105,0,85,15,55/1/black/40,45,100,15,110,10,125,0,170,0,180,20,140,55,125,45,110,55,100,70,90,45,60,50,55,45,40,45/1/black/100,70,110,55,125,45,140,55,180,20,195,25,205,45,200,70,180,85,160,105,140,120,120,120,105,115,100,70/1/black/105,115,120,120,140,120,130,135,115,150,100,155,105,135,90,120,105,115/1/black/25,115,70,115,90,120,105,135,100,155,80,160,55,160,45,150,30,135,25,115',
+
+      // '',
+    ]
+
+    // uCode/shape uCode/width,color/width,color/width,color ... list (matching shape.list index)
+    const shpColorSetList = [
+      'shp-color-20240927171224/shape-20240926134324/0,purple/0,salmon/0,seagreen/0,seashell/0,rosybrown/0,plum/0,royalblue',
+      'shp-color-20240927172902/shape-20240926134119/0,gray/0,black/0,gray/0,black/0,black/0,gray/0,black/0,black/0,gray',
+      // '',
+    ]
+
+    const paletteSetList = [
+      'smp-palette-0/Pink colors/MediumVioletRed,DeepPink,PaleVioletRed,HotPink,LightPink,Pink',
+      'smp-palette-1/Red colors/DarkRed,Red,Firebrick,Crimson,IndianRed,LightCoral,Salmon,DarkSalmon,LightSalmon',
+      'smp-palette-2/Orange colors/OrangeRed,Tomato,DarkOrange,Coral,Orange',
+      'smp-palette-3/Yellow colors/DarkKhaki,Gold,Khaki,PeachPuff,Yellow,PaleGoldenrod,Moccasin,PapayaWhip,LightGoldenrodYellow,LemonChiffon,LightYellow',
+      'smp-palette-4/Brown colors/Maroon,Brown,SaddleBrown,Sienna,Chocolate,DarkGoldenrod,Peru,RosyBrown,Goldenrod,SandyBrown,Tan,Burlywood,Wheat,NavajoWhite,Bisque,BlanchedAlmond,Cornsilk',
+      'smp-palette-5/Purple, violet and magenta colors/Indigo,Purple,DarkMagenta,DarkViolet,DarkSlateBlue,BlueViolet,DarkOrchid,Fuchsia,Magenta,SlateBlue,MediumSlateBlue,MediumOrchid,MediumPurple,Orchid,Violet,Plum,Thistle,Lavender',
+      'smp-palette-6/Blue colors/MidnightBlue,Navy,DarkBlue,MediumBlue,Blue,RoyalBlue,SteelBlue,DodgerBlue,DeepSkyBlue,CornflowerBlue,SkyBlue,LightSkyBlue,LightSteelBlue,LightBlue,PowderBlue',
+      'smp-palette-7/Cyan colors/Teal,DarkCyan,LightSeaGreen,CadetBlue,DarkTurquoise,MediumTurquoise,Turquoise,Aqua,Cyan,Aquamarine,PaleTurquoise,LightCyan',
+      'smp-palette-8/Green colors/DarkGreen,Green,DarkOliveGreen,ForestGreen,SeaGreen,Olive,OliveDrab,MediumSeaGreen,LimeGreen,Lime,SpringGreen,MediumSpringGreen,DarkSeaGreen,MediumAquamarine,YellowGreen,LawnGreen,Chartreuse,LightGreen,GreenYellow,PaleGreen',
+      'smp-palette-9/White colors/MistyRose,AntiqueWhite,Linen,Beige,WhiteSmoke,LavenderBlush,OldLace,AliceBlue,Seashell,GhostWhite,Honeydew,FloralWhite,Azure,MintCream,Snow,Ivory,White',
+      'smp-palette-10/Gray and black colors/Black,DarkSlateGray,DimGray,SlateGray,Gray,LightSlateGray,DarkGray,Silver,LightGray,Gainsboro',
+      // '',
+    ]
+
+    let keyLeft = 'b'//'m'//'z'//'ArrowLeft'
+    let keyRight = 'm'//'.'//'c'//'ArrowRight'
+    let keyUp = 'h'//'k'//'s'//'ArrowUp'
+    let keyDown = 'n'//','//'x'//'ArrowDown'
+    let keyPrint = 'p'
+    let keySave = 's'
+    let keyNextP = ']'
+    let keyPrevP = '['
+    let keyNextShp = '='
+    let keyPrevShp = '-'
+    let keyChangeMode = '\\'
+    let keyAddShp = 'Enter'
+
+    let canvas
+    let ctx
+    let sx = 100
+    let sy = 100
+    let linePointInfo
+    let selectPI = 0
+    let resultInfo
+    let itvX = 1
+    let itvY = 1
+    let selectShpI = 0
+    let colorInfo
+    let currentPaletteI
+    let colorInfoList = []
+    let guideInfo
+    let guideX = 50
+    let guideY = 50
+    let isVisibleGuide = true
+    let guideDX = 0
+    let guideDY = 0
+    let mode = 'add' // add/edit
+
+    function init() {
+      canvas = document.getElementById('id-canvas')
+      canvas.width = window.innerWidth - 16 - 16
+      canvas.height = window.innerHeight - 16 - 16
+      canvas.style.backgroundColor = 'ivory'
+      ctx = canvas.getContext('2d')
+      canvas.addEventListener('mousedown', onMouseDown)
+      document.addEventListener('keydown', onKeyDown)
+      const inputGuideVisible = document.getElementById('id-input-guide-visible')
+      inputGuideVisible.addEventListener('change', () => {
+        isVisibleGuide = inputGuideVisible.checked
+        draw()
+      })
+
+      linePointInfo = {
+        uCode: `line-${getCurrentDateUCode()}`,
+        w: 0,
+        h: 0,
+        x: 0,
+        y: 0,
+        pointInfo: {
+          list: []
+        },
+        list: [],
+        child: []
+      }
+
+      colorInfo = {
+        uCode: `color-${getCurrentDateUCode()}`,
+        lineUCode: linePointInfo.uCode,
+        list: [
+          // { width: 1, color: 'black'}
+        ]
+      }
+
+      initColorInfo()
+
+      draw()
+    }
+
+    function onMouseDown(e) {
+      const mx = e.offsetX
+      const my = e.offsetY
+      const x = mx - sx
+      const y = my - sy
+      if (mode === 'add') {
+        const pList = linePointInfo.pointInfo.list
+        const p = pList.find(p => p.x === x && p.y === y)
+        if (!p) pList.push({ i: pList.length, x: x, y: y })
+        if (pList.length === 1) updatePointInput()
+      } else {
+        if (selectPI >= linePointInfo.pointInfo.list.length) return
+        const p = linePointInfo.pointInfo.list[selectPI]
+        if (!p) return
+        p.x = x
+        p.y = y
+      }
+      draw()
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      ctx.beginPath()
+      ctx.strokeStyle = 'gray'
+      ctx.lineWidth = 1
+      ctx.strokeRect(sx, sy, 1000, 1000)
+
+      if (guideInfo && isVisibleGuide) drawLineInfo(ctx, guideInfo, sx + guideX, sy + guideY)
+
+      if (linePointInfo.list.length > 0) drawLineInfo(ctx, linePointInfo, sx, sy)
+
+      const pList = linePointInfo.pointInfo.list
+      const selectedP = pList[selectPI]
+      for (const p of pList) {
+        if (selectedP === p) {
+          drawIndexCircle(ctx, p.i, p.x + sx, p.y + sy, 'red')
+        } else {
+          drawIndexCircle(ctx, p.i, p.x + sx, p.y + sy)
+        }
+      }
+
+      // result
+      if (resultInfo && resultInfo.list.length > 0) {
+        if (guideInfo && isVisibleGuide) {
+          const p0 = resultInfo.pointInfo.list[0]
+          const px = p0.x + sx + 1050
+          const py = p0.y + sy
+          const gx = px + guideDX
+          const gy = py + guideDY
+          drawLineInfo(ctx, guideInfo, gx, gy)
+        }
+        drawLineInfo(ctx, resultInfo, sx + 1050, sy, true)
+      }
+    }
+
+    function print() {
+      const lineSet = createSimpleLineStrSet(resultInfo)
+      const linePointSet = createLinePointSet(resultInfo)
+      colorInfo.lineUCode = linePointSet.split('/')[0]
+      const colorSet = createColorSet(colorInfo)
+      console.log(lineSet)
+      console.log(linePointSet)
+      console.log(colorSet)
+    }
+
+    function save() {
+      const lineSet = createSimpleLineStrSet(resultInfo)
+      const linePointSet = createLinePointSet(resultInfo)
+      colorInfo.lineUCode = linePointSet.split('/')[0]
+      const colorSet = createColorSet(colorInfo)
+      saveString(resultInfo.uCode, lineSet)
+      saveString(colorInfo.lineUCode, linePointSet)
+      saveString(colorInfo.uCode, colorSet)
+    }
+
+    function addShape() {
+      const input = document.getElementById('id-input-add-shape')
+      const str = input.value
+      if (str.length < 1) return
+      const strSplit = str.split(',')
+      const shp = { width: 1, color: 'black', list: [] }
+      const pList = linePointInfo.pointInfo.list
+      for (const ist of strSplit) {
+        const i = Number(ist)
+        shp.list.push(pList[i])
+      }
+      linePointInfo.list.push(shp)
+      colorInfo.list.push({ width: 1, color: 'black' })
+      if (linePointInfo.list.length === 1) {
+        const inputSelect = document.getElementById('id-input-select-shp-i')
+        inputSelect.value = selectShpI
+        shp.width = 0
+        shp.color = 'red'
+      }
+      input.value = ''
+      updateResultInfo()
+      draw()
+    }
+
+    function clearInputAddShape() {
+      const input = document.getElementById('id-input-add-shape')
+      input.value = ''
+    }
+
+    function selectPointI() {
+      const input = document.getElementById('id-input-select-point-i')
+      const i = Number(input.value)
+      const pList = linePointInfo.pointInfo.list
+      if (i >= pList.length) return
+      selectPI = i
+      updatePointInput()
+      draw()
+    }
+
+    function nextPointI() {
+      selectPI++
+      if (selectPI >= linePointInfo.pointInfo.list.length) selectPI = 0
+      const input = document.getElementById('id-input-select-point-i')
+      input.value = selectPI
+      updatePointInput()
+      draw()
+    }
+
+    function prevPointI() {
+      selectPI--
+      if (selectPI < 0) selectPI = linePointInfo.pointInfo.list.length - 1
+      const input = document.getElementById('id-input-select-point-i')
+      input.value = selectPI
+      updatePointInput()
+      draw()
+    }
+
+    function updatePointInput() {
+      const selectedP = linePointInfo.pointInfo.list[selectPI]
+      const inputX = document.getElementById('id-input-point-x')
+      const inputY = document.getElementById('id-input-point-y')
+      inputX.value = selectedP.x
+      inputY.value = selectedP.y
+    }
+
+    function onKeyDown(e) {
+      if (e.key === keySave) save()
+      if (e.key === keyPrint) print()
+      if (e.key === keyLeft) move(-1, 0)
+      if (e.key === keyRight) move(1, 0)
+      if (e.key === keyUp) move(0, -1)
+      if (e.key === keyDown) move(0, 1)
+      if (e.key === keyNextP) nextPointI()
+      if (e.key === keyPrevP) prevPointI()
+      if (e.key === keyNextShp) nextShp()
+      if (e.key === keyPrevShp) prevShp()
+      if (e.key === keyChangeMode) changeMode()
+      if (e.key === keyAddShp) addShape()
+    }
+
+    function move(dx, dy) {
+      const selectedP = linePointInfo.pointInfo.list[selectPI]
+      if (!selectedP) return
+      selectedP.x += dx * itvX
+      selectedP.y += dy * itvY
+      updateResultInfo()
+      draw()
+    }
+
+    function movePoint() {
+      const selectedP = linePointInfo.pointInfo.list[selectPI]
+      if (!selectedP) return
+      const inputX = document.getElementById('id-input-point-x')
+      const inputY = document.getElementById('id-input-point-y')
+      selectedP.x = Number(inputX.value)
+      selectedP.y = Number(inputY.value)
+      updateResultInfo()
+      draw()
+    }
+
+    function popPoint() {
+      const lastP = linePointInfo.pointInfo.list[linePointInfo.pointInfo.list.length-1]
+      let hasShp = false
+      for (const shp of linePointInfo.list) {
+        for (const p of shp.list) {
+          if (p === lastP) {
+            hasShp = true
+            break
+          }
+        }
+      }
+      if (hasShp) {
+        console.log('has shp return')
+        return
+      }
+
+      linePointInfo.pointInfo.list.pop()
+      draw()
+    }
+
+    function updateResultInfo() {
+      resultInfo = structuredClone(linePointInfo)
+      coloringLineInfo(resultInfo, colorInfo)
+
+      // check guide dx, dy from p[0]
+      const gx = guideX + sx
+      const gy = guideY + sy
+      const p0 = resultInfo.pointInfo.list[0]
+      const px = p0.x + sx
+      const py = p0.y + sy
+      guideDX = gx - px
+      guideDY = gy - py
+      fitSimpleLineInfo(resultInfo)
+    }
+
+    function selectShp() {
+      if (linePointInfo.list.length < 1) return
+      const input = document.getElementById('id-input-select-shp-i')
+      const i = Number(input.value)
+      if (i >= linePointInfo.list.length) return
+      selectShpI = i
+      updateSelectShp()
+      draw()
+    }
+
+    function nextShp() {
+      if (linePointInfo.list.length < 1) return
+      selectShpI++
+      if (selectShpI >= linePointInfo.list.length) selectShpI = 0
+      const input = document.getElementById('id-input-select-shp-i')
+      input.value = selectShpI
+      updateSelectShp()
+      draw()
+    }
+
+    function prevShp() {
+      if (linePointInfo.list.length < 1) return
+      selectShpI--
+      if (selectShpI < 0) selectShpI = linePointInfo.list.length - 1
+      const input = document.getElementById('id-input-select-shp-i')
+      input.value = selectShpI
+      updateSelectShp()
+      draw()
+    }
+
+    function removeShp() {
+      if (linePointInfo.list.length < 1 || selectShpI >= linePointInfo.list.length) return
+      linePointInfo.list.splice(selectShpI, 1)
+      colorInfo.list.splice(selectShpI, 1)
+      selectShpI = 0
+      const input = document.getElementById('id-input-select-shp-i')
+      input.value = selectShpI
+      updateSelectShp()
+      updateResultInfo()
+      draw()
+    }
+
+    function updateSelectShp() {
+      if (linePointInfo.list.length < 1) return
+      const selectedShp = linePointInfo.list[selectShpI]
+      if (!selectedShp) return
+      for (const shp of linePointInfo.list) {
+        shp.width = 1
+        shp.color = 'black'
+      }
+      selectedShp.width = 0
+      selectedShp.color = 'red'
+    }
+
+    function initColorInfo() {
+      colorInfoList = []
+      currentPaletteI = 0
+      for (const set of paletteSetList) {
+        const setSplit = set.split('/')
+        const uCode = setSplit[0]
+        const name = setSplit[1]
+        const str = setSplit[2]
+        const strSplit = str.split(',')
+        colorInfoList.push({
+          uCode: uCode,
+          name: name,
+          list: strSplit
+        })
+      }
+      changeColorInfo()
+    }
+
+    function changeColorInfo() {
+      const container = document.getElementById('id-palette-container')
+      const label = document.getElementById('id-label-palette')
+      container.innerHTML = ''
+      const current = colorInfoList[currentPaletteI]
+      label.innerText = current.name
+      for (const color of current.list) {
+        const div = document.createElement('div')
+        div.style.width = '30px'
+        div.style.height = '30px'
+        div.style.backgroundColor = color
+        div.addEventListener('click', () => {
+          const inputColor = document.getElementById('id-input-color')
+          inputColor.value = color
+          changeColor()
+        })
+        container.appendChild(div)
+      }
+    }
+
+    function nextPalette() {
+      currentPaletteI++
+      if (currentPaletteI >= colorInfoList.length) currentPaletteI = 0
+      changeColorInfo()
+    }
+
+    function prevPalette() {
+      currentPaletteI--
+      if (currentPaletteI < 0) currentPaletteI = colorInfoList.length - 1
+      changeColorInfo()
+    }
+
+    function changeColor() {
+      const inputWidth = document.getElementById('id-input-width')
+      const inputColor = document.getElementById('id-input-color')
+      const current = resultInfo.list[selectShpI]
+      current.width = Number(inputWidth.value)
+      current.color = inputColor.value
+      const c = colorInfo.list[selectShpI]
+      c.width = current.width
+      c.color = current.color
+      draw()
+    }
+
+    function changeGuide() {
+      const input = document.getElementById('id-input-guide-ucode')
+      const uCode = input.value
+      const lineSet = lineSetList.find(s => s.split('/')[0] === uCode)
+      if (!lineSet) return
+      guideInfo = createSimpleLineInfo(lineSet)
+      changeGuideScale()
+      // guideInfo.x = guideX
+      // guideInfo.y = guideY
+      const inputX = document.getElementById('id-input-guide-x')
+      const inputY = document.getElementById('id-input-guide-y')
+      inputX.value = guideX
+      inputY.value = guideY
+      draw()
+    }
+
+    function moveGuide() {
+      if (!guideInfo) return
+      const inputX = document.getElementById('id-input-guide-x')
+      const inputY = document.getElementById('id-input-guide-y')
+      guideX = Number(inputX.value)
+      guideY = Number(inputY.value)
+      // guideInfo.x = guideX
+      // guideInfo.y = guideY
+      updateResultInfo()
+      draw()
+    }
+
+    function clearGuideInput() {
+      const input = document.getElementById('id-input-guide-ucode')
+      input.value = ''
+    }
+
+    function changeGuideScale() {
+      const inputSX = document.getElementById('id-input-guide-scale-x')
+      const inputSY = document.getElementById('id-input-guide-scale-y')
+      const scaleX = Number(inputSX.value)
+      const scaleY = Number(inputSY.value)
+      guideInfo = createScaledLineInfo(guideInfo, scaleX, scaleY)
+      draw()
+    }
+
+    function changeMode() {
+      if (mode === 'add') {
+        mode = 'edit'
+        canvas.style.backgroundColor = 'lightblue'
+      } else {
+        mode = 'add'
+        canvas.style.backgroundColor = 'ivory'
+      }
+      const label = document.getElementById('id-label-mode')
+      label.innerText = mode
+    }
+  </script>
+</body>
+</html>
