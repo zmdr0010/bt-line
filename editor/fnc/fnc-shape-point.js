@@ -36,8 +36,6 @@ function createSimpleShapeInfo(set, pointSetList, itvX, itvY, width=1, color='bl
   const uCode = setSplit[0]
   const pointUCode = setSplit[1]
   const pointSet = pointSetList.find(st => st.split('/')[0] === pointUCode)
-  console.log(pointUCode)
-  console.log(pointSet)
   const pointInfo = createShapePointInfo(pointSet, itvX, itvY)
   const num = Number(setSplit[2])
   const list = []
@@ -194,5 +192,8 @@ function createStrSetShapeAndPoint(info) {
     }
   }
   pointSet = pointSet.slice(0, pointSet.length-1)
-  return { shpSet: shpSet, pointSet: pointSet }
+  const shp = structuredClone(info)
+  calculateLineInfoSize(shp)
+  shp.uCode = `line-from-shp-${getCurrentDateUCode()}`
+  return { shpSet: shpSet, pointSet: pointSet, lineSet: createSimpleLineStrSet(shp) }
 }
