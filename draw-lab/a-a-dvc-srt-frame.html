@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a a dvc srt frame</title>
+</head>
+<body onload="init()">
+  <div style="margin: 10px">
+    <canvas style="border: solid 1px" id="id-canvas"></canvas>
+  </div>
+
+  <script>
+    function init() {
+      const canvas = document.getElementById('id-canvas')
+      canvas.width = window.innerWidth - 16 * 2
+      canvas.height = window.innerHeight - 16 * 3
+      const ctx = canvas.getContext('2d')
+
+      const frm00 = {
+        w: 100,
+        h: 100,
+        x: 0,
+        y: 0,
+        color: 'black',
+        type: 'base' // (draw type) base: line rect, ... etc custom
+      }
+
+      // column, row ??
+    }
+  </script>
+</body>
+</html>
