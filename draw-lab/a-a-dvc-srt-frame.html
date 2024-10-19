@@ -9,12 +9,26 @@
     <canvas style="border: solid 1px" id="id-canvas"></canvas>
   </div>
 
+  <script type="text/javascript" src="fnc/fnc-outline.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script type="text/javascript" src="info/sample/raw-info-00.js"></script>
   <script>
+    let rawInfoList = []
+    let canvas
+    let ctx
+
     function init() {
-      const canvas = document.getElementById('id-canvas')
+      canvas = document.getElementById('id-canvas')
       canvas.width = window.innerWidth - 16 * 2
       canvas.height = window.innerHeight - 16 * 3
-      const ctx = canvas.getContext('2d')
+      ctx = canvas.getContext('2d')
+
+      rawInfoList = rawInfo00List
 
       const frm00 = {
         w: 100,
@@ -25,7 +39,143 @@
         type: 'base' // (draw type) base: line rect, ... etc custom
       }
 
-      // column, row ??
+      // column, row
+
+      const rawInfo = {
+        column: 4,
+        row: 4,
+        raw: [
+          0,1,1,1,
+          1,1,0,1,
+          1,1,0,1,
+          0,1,0,1
+        ]
+      }
+      drawRaw(ctx, rawInfo, 10, 10, 50)
+
+      const pList = calculatePList(rawInfo)
+      console.log(pList)
+      drawPList(ctx, pList, 300, 10, 50)
+
+      const linePList = []
+      makeLinePList(pList[0], linePList, 50)
+      console.log(linePList)
+      drawLinePList(ctx, linePList, 600, 10, 'white')
+
+      const line = createLine(linePList, 'gray', 'blue')
+      console.log(line)
+      drawLineInfo(ctx, line, 900, 10)
+
+      drawRawInfoList()
+    }
+
+    function drawRaw(ctx, info, sx, sy, size) {
+      for (let i=0; i<info.raw.length; i++) {
+        const rw = info.raw[i]
+        const c = i % info.column
+        const r = Math.floor(i / info.column)
+        const x = c * size + sx
+        const y = r * size + sy
+        if (rw > 0) {
+          ctx.beginPath()
+          ctx.lineWidth = 1
+          ctx.strokeStyle = 'black'
+          ctx.strokeRect(x, y, size, size)
+        }
+      }
+    }
+
+    function drawPList(ctx, list, sx, sy, size) {
+      for (const p of list) {
+        const x = p.c * size + sx
+        const y = p.r * size + sy
+        ctx.beginPath()
+        ctx.strokeStyle = 'black'
+        ctx.lineWidth = 1
+        ctx.strokeRect(x-4, y-4, 8, 8)
+        if (p.top) {
+          ctx.moveTo(x, y)
+          ctx.lineTo(x, y - size)
+        }
+        if (p.right) {
+          ctx.moveTo(x, y)
+          ctx.lineTo(x + size, y)
+        }
+        if (p.bottom) {
+          ctx.moveTo(x, y)
+          ctx.lineTo(x, y + size)
+        }
+        if (p.left) {
+          ctx.moveTo(x, y)
+          ctx.lineTo(x - size, y)
+        }
+        ctx.stroke()
+      }
+    }
+
+    function drawLinePList(ctx, list, sx, sy, color='black') {
+      let isFirst = true
+      ctx.beginPath()
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 1
+      ctx.fillStyle = color
+      for (const p of list) {
+        const x = p.x + sx
+        const y = p.y + sy
+        if (isFirst) {
+          isFirst = false
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      }
+      ctx.fill()
+      ctx.stroke()
+    }
+
+    // list: pList
+    function createLine(list, color='white', lineColor='black', lineW=1) {
+      let set = `line-${getCurrentDateUCode()}/100/100/2/0/${color}/`
+      for (const p of list) set += `${p.x},${p.y},`
+      set = set.slice(0, set.length-1)
+      set += `/${lineW}/${lineColor}/`
+      for (const p of list) set += `${p.x},${p.y},`
+      set = set.slice(0, set.length-1)
+      console.log(set)
+      const line = createSimpleLineInfo(set)
+      fitSimpleLineInfo(line)
+      return createLinePointFromLineInfo(line)
+    }
+
+    function drawRawInfoList(size=30) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      const maxC = 8
+      let c = 0
+      let sx = 10
+      let sy = 10
+      let maxH = 0
+      for (const raw of rawInfoList) {
+        const pList = calculatePList(raw)
+        const linePList = []
+        makeLinePList(pList[0], linePList, size)
+        const line = createLine(linePList, 'Lavender', 'Brown')
+        drawLineInfo(ctx, line, sx, sy)
+
+        // for (const p of line.pointInfo.list) {
+        //   drawCircle(ctx, p.x + sx, p.y + sy, 4, 'red')
+        // }
+
+        sx += line.w + 20
+        maxH = Math.max(maxH, line.h)
+        c++
+        if (c > maxC) {
+          c = 0
+          sy += maxH + 20
+          sx = 10
+          maxH = 0
+        }
+      }
     }
   </script>
 </body>
