@@ -214,7 +214,6 @@ function makeP(c, r, info, pList, rectList) {
 
 function checkPLine(p, pList) {
   if (p.top === null && p.right === null && p.bottom === null && p.left === null) {
-    console.log(p)
     pList.splice(pList.indexOf(p), 1)
   }
 }
