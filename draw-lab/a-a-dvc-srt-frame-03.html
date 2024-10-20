@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a a dvc srt frame 03</title>
+</head>
+<body onload="init()">
+  <div style="margin: 10px">
+    <canvas style="border: solid 1px" id="id-canvas"></canvas>
+  </div>
+
+  <script type="text/javascript" src="fnc/fnc-outline.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script type="text/javascript" src="info/sample/raw-info-00.js"></script>
+  <script>
+    let rawInfoList = []
+    let canvas
+    let ctx
+
+    let szw = 40
+    let szh = 40
+
+    function init() {
+      canvas = document.getElementById('id-canvas')
+      canvas.width = window.innerWidth - 16 * 2
+      canvas.height = (window.innerHeight - 16 * 3) * 6
+      ctx = canvas.getContext('2d')
+
+      rawInfoList = rawInfo00List
+
+      const frm00 = {
+        w: 100,
+        h: 100,
+        x: 0,
+        y: 0,
+        color: 'black',
+        type: 'base' // (draw type) base: line rect, ... etc custom
+      }
+
+      // column, row
+
+      const rawInfo = {
+        column: 4,
+        row: 4,
+        raw: [
+          0,1,1,1,
+          1,1,0,0,
+          1,1,1,1,
+          0,1,0,1
+        ]
+      }
+      drawRaw(ctx, rawInfo, 10, 10, szw)
+
+      const pList = calculatePList(rawInfo)
+      const linePList = []
+      makeLinePList(pList[0], linePList, szw, szh)
+
+      drawLinePList(ctx, linePList, 200, 10, 'white')
+      let i = 0
+      for (const p of linePList) {
+        drawIndexCircle(ctx, i, p.x + 200, p.y + 10)
+        i++
+      }
+
+      // check edge
+      // no top, left -> left top edge
+      // no bottom, left -> left bottom edge
+      // no top, right -> right top edge
+      // no bottom, right -> right bottom edge
+      const inAddPList = editPListEdgeInOutSide(linePList, szw, szh, 'in')
+      drawLinePList(ctx, inAddPList, 400, 10, 'white')
+      const outAddPList = editPListEdgeInOutSide(linePList, szw, szh, 'out')
+      drawLinePList(ctx, outAddPList, 600, 10, 'white')
+      const inoutAddPList = editPListEdgeInOutSide(linePList, szw, szh)
+      drawLinePList(ctx, inoutAddPList, 800, 10, 'white')
+
+      const inCurvePList = editPListEdgeInOutSide(linePList, szw, szh, 'in', 'curve')
+      drawLinePList(ctx, inCurvePList, 1000, 10, 'white')
+      const outCurvePList = editPListEdgeInOutSide(linePList, szw, szh, 'out', 'curve')
+      drawLinePList(ctx, outCurvePList, 1200, 10, 'white')
+      const inoutCurvePList = editPListEdgeInOutSide(linePList, szw, szh, 'inout', 'curve')
+      drawLinePList(ctx, inoutCurvePList, 1400, 10, 'white')
+
+      const inSlicePList = editPListEdgeInOutSide(linePList, szw, szh, 'in', 'slice')
+      drawLinePList(ctx, inSlicePList, 400, 210, 'white')
+      const outSlicePList = editPListEdgeInOutSide(linePList, szw, szh, 'out', 'slice')
+      drawLinePList(ctx, outSlicePList, 600, 210, 'white')
+      const inoutSlicePList = editPListEdgeInOutSide(linePList, szw, szh, 'inout', 'slice')
+      drawLinePList(ctx, inoutSlicePList, 800, 210, 'white')
+
+      const line = createLinePointFromOutlinePList(inoutAddPList, 'gray', 'blue')
+      drawLineInfo(ctx, line, 10, 210)
+    }
+
+    function drawRaw(ctx, info, sx, sy, size) {
+      for (let i=0; i<info.raw.length; i++) {
+        const rw = info.raw[i]
+        const c = i % info.column
+        const r = Math.floor(i / info.column)
+        const x = c * size + sx
+        const y = r * size + sy
+        if (rw > 0) {
+          ctx.beginPath()
+          ctx.lineWidth = 1
+          ctx.strokeStyle = 'black'
+          ctx.strokeRect(x, y, size, size)
+        }
+      }
+    }
+
+    function drawLinePList(ctx, list, sx, sy, color='black') {
+      let isFirst = true
+      ctx.beginPath()
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 1
+      ctx.fillStyle = color
+      for (const p of list) {
+        const x = p.x + sx
+        const y = p.y + sy
+        if (isFirst) {
+          isFirst = false
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      }
+      ctx.fill()
+      ctx.stroke()
+    }
+  </script>
+</body>
+</html>

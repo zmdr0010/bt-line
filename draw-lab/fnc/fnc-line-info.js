@@ -335,3 +335,15 @@ function createLinePointFromLineInfo(info) {
   }
   return linePoint
 }
+
+function createLinePointFromOutlinePList(pList, color='white', lineColor='black', lineW=1) {
+  let set = `line-${getCurrentDateUCode()}/100/100/2/0/${color}/`
+  for (const p of pList) set += `${p.x},${p.y},`
+  set = set.slice(0, set.length-1)
+  set += `/${lineW}/${lineColor}/`
+  for (const p of pList) set += `${p.x},${p.y},`
+  set = set.slice(0, set.length-1)
+  const line = createSimpleLineInfo(set)
+  fitSimpleLineInfo(line)
+  return createLinePointFromLineInfo(line)
+}

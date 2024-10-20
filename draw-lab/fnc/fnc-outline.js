@@ -1,34 +1,34 @@
 // p has two line
 // p0 ---- p1 line
 // remove p0 go line, p1 from line
-function makeLinePList(p, list, size) {
-  list.push({ x: p.c * size, y: p.r * size })
+function makeLinePList(p, list, szw, szh) {
+  list.push({ x: p.c * szw, y: p.r * szh })
   if (p.top) {
     p.top.bottom = null
     const top = p.top
     p.top = null
-    makeLinePList(top, list, size)
+    makeLinePList(top, list, szw, szh)
     return
   }
   if (p.right) {
     const right = p.right
     p.right.left = null
     p.right = null
-    makeLinePList(right, list, size)
+    makeLinePList(right, list, szw, szh)
     return
   }
   if (p.bottom) {
     const bottom = p.bottom
     p.bottom.top = null
     p.bottom = null
-    makeLinePList(bottom, list, size)
+    makeLinePList(bottom, list, szw, szh)
     return
   }
   if (p.left) {
     const left = p.left
     p.left.right = null
     p.left = null
-    makeLinePList(left, list, size)
+    makeLinePList(left, list, szw, szh)
     return
   }
 }

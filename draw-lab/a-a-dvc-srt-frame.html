@@ -59,7 +59,7 @@
 
       const linePList = []
 
-      makeLinePList(pList[0], linePList, 50)
+      makeLinePList(pList[0], linePList, 50, 50)
 
       // check edge
       // no top, left -> left top edge
@@ -176,7 +176,7 @@
       for (const raw of rawInfoList) {
         const pList = calculatePList(raw)
         let linePList = []
-        makeLinePList(pList[0], linePList, size)
+        makeLinePList(pList[0], linePList, size, size)
         const editInOutList = editEdgeInOutSide(linePList, size, size/4, size/4)
         const editInList = editEdgeInSide(linePList, size, size/4, size/4)
         const editOutList = editEdgeOutSide(linePList, size, size/4, size/4)
