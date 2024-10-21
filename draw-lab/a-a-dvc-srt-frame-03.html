@@ -139,6 +139,13 @@
       // 1, 2: not edge <- not adding
       const targetP = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'curve', { iList: [0,1,2,3], list: [] })
       drawLinePList(ctx, targetP, 10, 800, 'white')
+
+      const allType = [
+        'right-top', 'right-bottom', 'left-top', 'left-bottom',
+        'right-top-inside', 'right-bottom-inside', 'left-top-inside', 'left-bottom-inside'
+      ]
+      const targetAll = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'add-p', { iList: [], list: allType })
+      drawLinePList(ctx, targetAll, 10, 1000, 'white')
     }
 
     function drawRaw(ctx, info, sx, sy, size) {

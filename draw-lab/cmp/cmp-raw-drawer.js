@@ -82,10 +82,13 @@ const CmpRawDrawer = {
           list.push(aList[i * dColumn + j])
         }
       }
+      if (list.length < 1) return null
       return {
+        uCode: `raw-${getCurrentDateUCode()}`,
         column: rColumn,
         row: rRow,
-        list: list
+        raw: list,
+        rawNum: list.length
       }
     }
 

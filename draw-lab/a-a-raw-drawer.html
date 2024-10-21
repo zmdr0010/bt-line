@@ -20,6 +20,7 @@
   <script type="text/javascript" src="fnc/fnc-draw.js"></script>
   <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
   <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-raw-info.js"></script>
   <script type="text/javascript" src="cmp/cmp-btn.js"></script>
   <script type="text/javascript" src="cmp/cmp-common.js"></script>
   <script type="text/javascript" src="cmp/cmp-input.js"></script>
@@ -44,11 +45,19 @@
     }
 
     function print() {
-      console.log(rawDrawer.getRawInfo())
+      const rawInfo = rawDrawer.getRawInfo()
+      console.log(rawInfo)
+      if (!rawInfo) return
+      console.log(createRawStrSet(rawInfo))
+
     }
 
     function save() {
-
+      const rawInfo = rawDrawer.getRawInfo()
+      if (!rawInfo) return
+      const str = createRawStrSet(rawInfo)
+      console.log(str)
+      saveString(rawInfo.uCode, str)
     }
   </script>
 </body>
