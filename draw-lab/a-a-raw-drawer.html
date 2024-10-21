@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a a raw drawer</title>
+</head>
+<body onload="init()">
+  <div style="margin: 20px">
+    border: <input id="id-checkbox-border" type="checkbox" onchange="changeBorder()" />
+    <button onclick="print()">print</button>
+    <button onclick="save()">save</button>
+  </div>
+  <div style="margin: 20px" id="id-container"></div>
+
+  <script type="text/javascript" src="fnc/fnc-outline.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script>
+    let rawDrawer
+
+    function init() {
+      const container = document.getElementById('id-container')
+      rawDrawer = CmpRawDrawer.create()
+      const drawerDiv = rawDrawer.init()
+      container.appendChild(drawerDiv)
+
+      document.addEventListener('keydown', (e) => {
+        rawDrawer.onKeyDown(e)
+      })
+    }
+
+    function changeBorder() {
+      rawDrawer.changeBorder(getChecked('id-checkbox-border'))
+    }
+
+    function print() {
+      console.log(rawDrawer.getRawInfo())
+    }
+
+    function save() {
+
+    }
+  </script>
+</body>
+</html>

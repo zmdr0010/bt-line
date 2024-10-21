@@ -58,6 +58,7 @@
       drawRaw(ctx, rawInfo, 10, 10, szw)
 
       const pList = calculatePList(rawInfo)
+      console.log(pList)
       const linePList = []
       makeLinePList(pList[0], linePList, szw, szh)
 
@@ -96,6 +97,48 @@
 
       const line = createLinePointFromOutlinePList(inoutAddPList, 'gray', 'blue')
       drawLineInfo(ctx, line, 10, 210)
+
+
+      // right-top: left, bottom -> [-1, 1]
+      // right-bottom: top, left (left, top) -> [-1, -1]
+      // left-top: bottom, right (right, bottom) -> [1, 1]
+      // left-bottom: right, top -> [1, -1]
+      // right-top-inside: bottom, left (left, bottom) -> [-1, 1]
+      // right-bottom-inside: left, top -> [-1, -1]
+      // left-top-inside: right, bottom -> [1, 1]
+      // left-bottom-inside: top, right (right, top) -> [1, -1]
+
+      const rightTopAdd = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'add-p', { iList: [], list: ['right-top', 'left-bottom'] })
+      const rightTopSlice = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'slice', { iList: [], list: ['right-top', 'left-bottom'] })
+      const rightTopCurve = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'curve', { iList: [], list: ['right-top', 'left-bottom'] })
+      drawLinePList(ctx, rightTopAdd, 10, 400, 'white')
+      drawLinePList(ctx, rightTopSlice, 200, 400, 'white')
+      drawLinePList(ctx, rightTopCurve, 400, 400, 'white')
+
+      const leftTopAdd = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'add-p', { iList: [], list: ['left-top', 'right-bottom'] })
+      const leftTopSlice = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'slice', { iList: [], list: ['left-top', 'right-bottom'] })
+      const leftTopCurve = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'curve', { iList: [], list: ['left-top', 'right-bottom'] })
+      drawLinePList(ctx, leftTopAdd, 700, 400, 'white')
+      drawLinePList(ctx, leftTopSlice, 900, 400, 'white')
+      drawLinePList(ctx, leftTopCurve, 1100, 400, 'white')
+
+      const inRightTopAdd = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'add-p', { iList: [], list: ['right-top-inside', 'left-bottom-inside'] })
+      const inRightTopSlice = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'slice',{ iList: [], list: ['right-top-inside', 'left-bottom-inside'] })
+      const inRightTopCurve = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'curve', { iList: [], list: ['right-top-inside', 'left-bottom-inside'] })
+      drawLinePList(ctx, inRightTopAdd, 10, 600, 'white')
+      drawLinePList(ctx, inRightTopSlice, 200, 600, 'white')
+      drawLinePList(ctx, inRightTopCurve, 400, 600, 'white')
+
+      const inLeftTopAdd = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'add-p', { iList: [], list: ['left-top-inside', 'right-bottom-inside'] })
+      const inLeftTopSlice = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'slice', { iList: [], list: ['left-top-inside', 'right-bottom-inside'] })
+      const inLeftTopCurve = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'curve', { iList: [], list: ['left-top-inside', 'right-bottom-inside'] })
+      drawLinePList(ctx, inLeftTopAdd, 700, 600, 'white')
+      drawLinePList(ctx, inLeftTopSlice, 900, 600, 'white')
+      drawLinePList(ctx, inLeftTopCurve, 1100, 600, 'white')
+
+      // 1, 2: not edge <- not adding
+      const targetP = editPListEdgeInOutSide(linePList, szw, szh, 'target', 'curve', { iList: [0,1,2,3], list: [] })
+      drawLinePList(ctx, targetP, 10, 800, 'white')
     }
 
     function drawRaw(ctx, info, sx, sy, size) {
@@ -133,6 +176,7 @@
       ctx.fill()
       ctx.stroke()
     }
+
   </script>
 </body>
 </html>
