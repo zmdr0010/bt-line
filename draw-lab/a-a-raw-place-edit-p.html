@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a a raw place edit p</title>
+  <style>
+    .menu {
+      height: 100%;
+      width: 30%;
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+    }
+    .main {
+      height: 100%;
+      width: calc(100% - 30% - 8px - 16px - 400px);
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+      left: calc(30%);
+    }
+    .preview {
+      width: 400px;
+      height: 100%;
+      /*background-color: lightgray;*/
+      position: fixed;
+      right: 0;
+      /*top: 0;*/
+      z-index: 1;
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div class="menu" id="id-menu">
+  </div>
+  <div class="main" id="id-main">
+    <div style="margin: 10px">
+      <canvas style="border: solid 1px" id="id-canvas"></canvas>
+    </div>
+  </div>
+  <div class="preview" id="id-preview"></div>
+
+  <script type="text/javascript" src="fnc/fnc-outline.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-point.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edit-p-set.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-raw-info.js"></script>
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="info/sample/rawSet00.js"></script>
+  <script>
+    let rawSetList = []
+
+    let canvas
+    let ctx
+    let szw = 20
+    let szh = 20
+    let sx = 10
+    let sy = 10
+    let lineList = []
+    let crntI = -1
+    let color = 'white'
+    let lineColor = 'black'
+    let lineWidth = 1
+    let editType = 'none'
+    let editTypeList = [ 'none', 'add-p', 'remove-p', 'slice', 'curve' ]
+    let iList = []
+    let edgeList = []
+
+    function init() {
+      const main = document.getElementById('id-main')
+      canvas = document.getElementById('id-canvas')
+      canvas.width = main.offsetWidth - 22
+      canvas.height = main.offsetHeight - 22 - 8
+      ctx = canvas.getContext('2d')
+
+      rawSetList = rawSet00List
+
+      makeMenu()
+
+      document.addEventListener('keydown', (e) => {
+      })
+    }
+
+    function makeMenu() {
+      const menu = document.getElementById('id-menu')
+      makeInputRawUCode(menu)
+      makeStartEdit(menu)
+      makeLinePlaceEdit(menu)
+    }
+
+    function makeInputRawUCode(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeInputTextBtn('id-input-raw-ucode', container.content, 'raw uCode: ', 'add', () => {
+        add()
+      })
+      // list: [ { id: '', labelTxt: '', onClick: null } ]
+      makeBtnGroup(container.content, [
+        { id: 'id-btn-print', labelTxt: 'print', onClick: () => { print() } },
+        { id: 'id-btn-save', labelTxt: 'save', onClick: () => { save() } }
+      ])
+    }
+
+    function makeStartEdit(menu) {
+      const container = createContainer()
+      container.content.innerText = 'adding line info'
+      menu.appendChild(container.border)
+      makeInputNum('id-input-szw', container.content, 'szw: ', szw,
+        () => { szw = getInputValueNumber('id-input-szw') })
+
+      makeInputNum('id-input-szh', container.content, 'szh: ', szh,
+        () => { szh = getInputValueNumber('id-input-szh') })
+      makeInputNum('id-input-start-x', container.content, 'start x: ', sx,
+        () => { sx = getInputValueNumber('id-input-start-x') })
+      makeInputNum('id-input-start-y', container.content, 'start y: ', sy,
+        () => { sy = getInputValueNumber('id-input-start-y') })
+
+      makeInputTextBtn('id-input-color', container.content, 'color: ', 'change',
+        () => {
+          color = getInputValue('id-input-color')
+        })
+      changeInputValue('id-input-color', color)
+
+      makeInputTextBtn('id-input-line-color', container.content, 'line color: ', 'change',
+        () => {
+          lineColor = getInputValue('id-input-line-color')
+        })
+      changeInputValue('id-input-line-color', lineColor)
+
+      makeInputNum('id-input-line-width', container.content, 'line width: ', lineWidth,
+        () => {
+          lineWidth = getInputValueNumber('id-input-line-width')
+        })
+
+      makeSelect('id-select-edit-type', container.content, 'edit type: ', 'choose edit type',
+        () => { editType = getInputValue('id-select-edit-type') })
+      initSelect('id-select-edit-type', editTypeList)
+
+      makeInputTextBtn('id-input-i-list', container.content, 'iList: ', 'change',
+        () => {
+          iList = []
+          const str = getInputValue('id-input-i-list')
+          const split = str.split(',')
+          for (const st of split) {
+            iList.push(Number(st))
+          }
+        })
+      makeInputTextBtn('id-input-edge-type-list', container.content, 'edge type list: ', 'change',
+        () => {
+          edgeList = []
+          const str = getInputValue('id-input-edge-type-list')
+          const split = str.split(',')
+          for (const st of split) {
+            if (st === 'left-top' || st === 'left-bottom'
+              || st === 'right-top' || st === 'right-bottom'
+              || st === 'left-top-inside' || st === 'left-bottom-inside'
+              || st === 'right-top-inside' || st === 'right-bottom-inside') edgeList.push(st)
+          }
+        })
+    }
+
+    function makeLinePlaceEdit(menu) {
+      const container = createContainer()
+      container.content.innerText = 'current line info'
+      menu.appendChild(container.border)
+      makeSimpleTxtDiv('id-txt-div-line-place', container.content, `[${crntI}]`)
+      makeBtnGroup(container.content, [
+        { id: 'id-btn-next', labelTxt: 'next',
+          onClick: () => {
+            crntI++
+            if (crntI >= lineList.length) crntI = 0
+            updateCrnt()
+          } },
+        { id: 'id-btn-prev', labelTxt: 'prev',
+          onClick: () => {
+            crntI--
+            if (crntI < 0) crntI = lineList.length - 1
+            updateCrnt()
+          } },
+        { id: 'id-btn-front', labelTxt: 'front',
+          onClick: () => {
+            if (lineList.length < 0) return
+            let next = crntI + 1
+            if (next >= lineList.length) next = lineList.length - 1
+            if (crntI === next) return
+            const nLine = lineList[next]
+            const crnt = lineList[crntI]
+            lineList[crntI] = nLine
+            lineList[next] = crnt
+            crntI = next
+            updateCrnt()
+          } },
+        { id: 'id-btn-back', labelTxt: 'back',
+          onClick: () => {
+            if (lineList.length < 0) return
+            let prev = crntI - 1
+            if (prev < 0) prev = 0
+            if (crntI === prev) return
+            const pLine = lineList[prev]
+            const crnt = lineList[crntI]
+            lineList[prev] = crnt
+            lineList[crntI] = pLine
+            crntI = prev
+            updateCrnt()
+          } },
+        { id: 'id-btn-remove', labelTxt: 'remove',
+          onClick: () => {
+            if (lineList.length < 0) return
+            lineList.splice(crntI, 1)
+            if (lineList.length <= 0) {
+              crntI = -1
+              draw()
+            } else {
+              crntI = 0
+              updateCrnt()
+            }
+          } },
+      ])
+      makeInputNum('id-input-line-x', container.content, 'x: ', 0,
+        () => {
+          const crntLine = lineList[crntI]
+          crntLine.x = getInputValueNumber('id-input-line-x')
+          draw()
+        })
+      makeInputNum('id-input-line-y', container.content, 'y: ', 0,
+        () => {
+          const crntLine = lineList[crntI]
+          crntLine.y = getInputValueNumber('id-input-line-y')
+          draw()
+      })
+    }
+
+    function print() {
+
+    }
+
+    function save() {
+
+    }
+
+    function add() {
+      const rawUCode = getInputValue('id-input-raw-ucode')
+      const rawSet = rawSetList.find(s => s.split('/')[0] === rawUCode)
+      const rawInfo = createRawInfo(rawSet)
+      const pList = calculatePList(rawInfo)
+      const linePList = []
+      makeLinePList(pList[0], linePList, szw, szh)
+      let line = createLinePointFromOutlinePList(linePList, color, lineColor, lineWidth)
+
+      if (editType === 'remove-p' && iList.length > 0) {
+        console.log(iList)
+        const editList = editOutPInfoList(linePList, szw, szh, iList, editType)
+        line = createLinePointFromOutlinePList(editList, color, lineColor, lineWidth)
+      }
+
+      if (editType !== 'none' && editType !== 'remove-p' && edgeList.length > 0) {
+        const editList = editPListEdgeInOutSide(linePList, szw, szh, 'target', editType, { iList: [], list: edgeList })
+        line = createLinePointFromOutlinePList(editList, color, lineColor, lineWidth)
+      }
+
+      line.x = sx
+      line.y = sy
+      lineList.push(line)
+      crntI = lineList.length - 1
+      updateCrnt()
+      draw()
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      for (const line of lineList) {
+        drawLineInfo(ctx, line, line.x, line.y)
+      }
+    }
+
+    function updateCrnt() {
+      const crntLine = lineList[crntI]
+      changeInputValue('id-input-line-x', crntLine.x)
+      changeInputValue('id-input-line-y', crntLine.y)
+      changeSimpleTxtDiv('id-txt-div-line-place', `[${crntI}]`)
+      draw()
+    }
+  </script>
+</body>
+</html>

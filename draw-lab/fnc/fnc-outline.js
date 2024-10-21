@@ -159,7 +159,7 @@ function checkRectOnP(p, rectList) {
 // start raw[0] -> c + 1
 // next r + 1
 function makeP(c, r, info, pList, rectList) {
-  const i = r * info.row + c
+  const i = r * info.column + c
   const column = info.column
   const row = info.row
   const rw = info.raw[i]

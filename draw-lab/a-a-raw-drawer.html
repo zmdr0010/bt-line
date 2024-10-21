@@ -3,14 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <title>a a raw drawer</title>
+  <style>
+    .menu {
+      height: 100%;
+      width: 30%;
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+    }
+    .main {
+      height: 100%;
+      width: calc(100% - 30% - 8px - 16px - 400px);
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+      left: calc(30%);
+    }
+    .preview {
+      width: 400px;
+      height: 100%;
+      /*background-color: lightgray;*/
+      position: fixed;
+      right: 0;
+      /*top: 0;*/
+      z-index: 1;
+    }
+  </style>
 </head>
 <body onload="init()">
-  <div style="margin: 20px">
-    border: <input id="id-checkbox-border" type="checkbox" onchange="changeBorder()" />
-    <button onclick="print()">print</button>
-    <button onclick="save()">save</button>
+  <div class="menu" id="id-menu">
+    <div style="margin: 20px">
+      border: <input id="id-checkbox-border" type="checkbox" onchange="changeBorder()" />
+      <button onclick="drawRaw()">draw</button>
+      <button onclick="print()">print</button>
+      <button onclick="save()">save</button>
+    </div>
+    <div style="margin: 20px" id="id-container"></div>
+    <div style="margin: 20px">
+      <canvas style="border: solid 1px; margin: 10px" id="id-canvas-raw"></canvas>
+    </div>
   </div>
-  <div style="margin: 20px" id="id-container"></div>
+  <div class="main" id="id-main"></div>
+  <div class="preview" id="id-preview"></div>
 
   <script type="text/javascript" src="fnc/fnc-outline.js"></script>
   <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
@@ -28,8 +62,15 @@
   <script type="text/javascript" src="cmp/cmp-select.js"></script>
   <script>
     let rawDrawer
+    let rawCanvas
+    let rawCtx
 
     function init() {
+      rawCanvas = document.getElementById('id-canvas-raw')
+      rawCanvas.width = 422
+      rawCanvas.height = 422
+      rawCtx = rawCanvas.getContext('2d')
+
       const container = document.getElementById('id-container')
       rawDrawer = CmpRawDrawer.create()
       const drawerDiv = rawDrawer.init()
@@ -58,6 +99,49 @@
       const str = createRawStrSet(rawInfo)
       console.log(str)
       saveString(rawInfo.uCode, str)
+    }
+
+    function drawRaw() {
+      rawCtx.clearRect(0, 0, rawCanvas.width, rawCanvas.height)
+
+      const rawInfo = rawDrawer.getRawInfo()
+      if (!rawInfo) return
+      console.log(rawInfo)
+      const pList = calculatePList(rawInfo)
+      const linePList = []
+      makeLinePList(pList[0], linePList, 20, 20)
+      drawIndexPList(rawCtx, linePList, 10, 10, 'white')
+    }
+
+    function drawIndexPList(ctx, pList, sx, sy, color) {
+      drawLinePList(ctx, pList, sx, sy, color)
+      let i = 0
+      const last = pList.length - 1
+      for (const p of pList) {
+        if (i === last) break
+        drawIndexCircle(ctx, i, p.x + sx, p.y + sy)
+        i++
+      }
+    }
+
+    function drawLinePList(ctx, list, sx, sy, color='black') {
+      let isFirst = true
+      ctx.beginPath()
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 1
+      ctx.fillStyle = color
+      for (const p of list) {
+        const x = p.x + sx
+        const y = p.y + sy
+        if (isFirst) {
+          isFirst = false
+          ctx.moveTo(x, y)
+        } else {
+          ctx.lineTo(x, y)
+        }
+      }
+      ctx.fill()
+      ctx.stroke()
     }
   </script>
 </body>
