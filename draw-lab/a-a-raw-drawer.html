@@ -32,6 +32,23 @@
 </head>
 <body onload="init()">
   <div class="menu" id="id-menu">
+<!--    <div style="margin: 20px; border: solid 1px">-->
+<!--      <div style="margin: 10px">-->
+<!--        <div style="margin: 4px">-->
+<!--          colum: <input id="id-input-column" type="number" value="20" onchange="changeColumn()">-->
+<!--        </div>-->
+<!--        <div style="margin: 4px">-->
+<!--          row: <input id="id-input-row" type="number" value="20" onchange="changeRow()">-->
+<!--        </div>-->
+<!--        <div style="margin: 4px">-->
+<!--          szw: <input id="id-input-szw" type="number" value="20" onchange="changeSzw()">-->
+<!--        </div>-->
+<!--        <div style="margin: 4px">-->
+<!--          szh: <input id="id-input-szh" type="number" value="20" onchange="changeSzh()">-->
+<!--        </div>-->
+<!--        <div style="margin: 10px"><button onclick="changeDrawer()">raw drawer change</button></div>-->
+<!--      </div>-->
+<!--    </div>-->
     <div style="margin: 20px">
       border: <input id="id-checkbox-border" type="checkbox" onchange="changeBorder()" />
       <button onclick="drawRaw()">draw</button>
@@ -39,12 +56,29 @@
       <button onclick="save()">save</button>
     </div>
     <div style="margin: 20px" id="id-container"></div>
+  </div>
+  <div class="main" id="id-main">
+    <div style="margin: 20px">
+      index circle: <input id="id-checkbox-index-circle" type="checkbox" onchange="changeIsOnIndexCircle()" />
+      layerColor: <input id="id-checkbox-layer-color" type="checkbox" onchange="changeIsOnLayerColor()" />
+    </div>
     <div style="margin: 20px">
       <canvas style="border: solid 1px; margin: 10px" id="id-canvas-raw"></canvas>
     </div>
   </div>
-  <div class="main" id="id-main"></div>
-  <div class="preview" id="id-preview"></div>
+  <div class="preview" id="id-preview">
+    <div style="margin: 20px; border: solid 1px" id="id-div-layer">
+      <div style="margin: 10px">
+        <div style="margin: 4px"><label id="id-label-current-layer">current layer: [0]</label></div>
+        <div>
+          <button style="margin: 4px" onclick="nextLayer()">next</button>
+          <button style="margin: 4px" onclick="prevLayer()">prev</button>
+          <button style="margin: 4px" onclick="addLayer()">+</button>
+          <button style="margin: 4px" onclick="removeLayer()">-</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script type="text/javascript" src="fnc/fnc-outline.js"></script>
   <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
@@ -64,17 +98,40 @@
     let rawDrawer
     let rawCanvas
     let rawCtx
+    let isOnIndexCircle = false
+
+    let column = 20
+    let row = 20
+    let szw = 20
+    let szh = 20
+
+    let colorList = ['slategray', 'Tomato', 'Aquamarine', 'Brown', 'Crimson', 'DarkKhaki', 'DarkSlateBlue',
+      'Gold', 'IndianRed', 'LightBlue', 'LightSalmon', 'LimeGreen', 'MediumSeaGreen', 'Moccasin',
+      'Orchid', 'Pink']
+    let colorCount = 1
+    let crntLayerI = 0
+    let layers = [
+      {
+        i: 0, // id, matching colorI
+        color: 'slategray',
+        rawInfo: null
+      }
+    ]
+    let isOnLayerColor = false
 
     function init() {
+      const main = document.getElementById('id-main')
       rawCanvas = document.getElementById('id-canvas-raw')
-      rawCanvas.width = 422
-      rawCanvas.height = 422
+      rawCanvas.width = main.offsetWidth - 40 * 2
+      rawCanvas.height = main.offsetHeight - 40 * 4
       rawCtx = rawCanvas.getContext('2d')
 
       const container = document.getElementById('id-container')
-      rawDrawer = CmpRawDrawer.create()
+      rawDrawer = CmpRawDrawer.create(column, row, szw, szh)
       const drawerDiv = rawDrawer.init()
       container.appendChild(drawerDiv)
+
+      changeLayer()
 
       document.addEventListener('keydown', (e) => {
         rawDrawer.onKeyDown(e)
@@ -104,23 +161,42 @@
     function drawRaw() {
       rawCtx.clearRect(0, 0, rawCanvas.width, rawCanvas.height)
 
-      const rawInfo = rawDrawer.getRawInfo()
-      if (!rawInfo) return
-      console.log(rawInfo)
-      const pList = calculatePList(rawInfo)
-      const linePList = []
-      makeLinePList(pList[0], linePList, 20, 20)
-      drawIndexPList(rawCtx, linePList, 10, 10, 'white')
+      // const rawInfo = rawDrawer.getRawInfo(false)
+      // if (!rawInfo) return
+      // console.log(rawInfo)
+      // const pList = calculatePList(rawInfo)
+      // const linePList = []
+      // makeLinePList(pList[0], linePList, 20, 20)
+      // drawIndexPList(rawCtx, linePList, 10, 10, 'white')
+
+      for (const layer of layers) {
+        rawDrawer.changeOnColor(layer.color)
+        const rawInfo = rawDrawer.getRawInfo(false)
+        console.log(rawInfo)
+        layer.rawInfo = rawInfo
+        if (!rawInfo || rawInfo.rawNum < 1) continue
+        const pList = calculatePList(rawInfo)
+        const linePList = []
+        makeLinePList(pList[0], linePList, 20, 20)
+        let color = 'white'
+        if (isOnLayerColor) color = layer.color
+        drawIndexPList(rawCtx, linePList, 10, 10, color)
+      }
+
+      const crntLayer = layers[crntLayerI]
+      rawDrawer.changeOnColor(crntLayer.color)
     }
 
     function drawIndexPList(ctx, pList, sx, sy, color) {
       drawLinePList(ctx, pList, sx, sy, color)
       let i = 0
       const last = pList.length - 1
-      for (const p of pList) {
-        if (i === last) break
-        drawIndexCircle(ctx, i, p.x + sx, p.y + sy)
-        i++
+      if (isOnIndexCircle) {
+        for (const p of pList) {
+          if (i === last) break
+          drawIndexCircle(ctx, i, p.x + sx, p.y + sy)
+          i++
+        }
       }
     }
 
@@ -142,6 +218,72 @@
       }
       ctx.fill()
       ctx.stroke()
+    }
+
+    function changeIsOnIndexCircle() {
+      isOnIndexCircle = getChecked('id-checkbox-index-circle')
+    }
+
+    // function changeColumn() {
+    //   column = getInputValueNumber('id-input-column')
+    // }
+    //
+    // function changeRow() {
+    //   row = getInputValueNumber('id-input-row')
+    // }
+    //
+    // function changeSzw() {
+    //   szw = getInputValueNumber('id-input-szw')
+    // }
+    //
+    // function changeSzh() {
+    //   szh = getInputValueNumber('id-input-szh')
+    // }
+    //
+    // function changeDrawer() {
+    //   rawDrawer.changeDrawerSize(column, row, szw, szh)
+    // }
+
+    function nextLayer() {
+      crntLayerI++
+      if (crntLayerI >= layers.length) crntLayerI = 0
+      changeLayer()
+    }
+
+    function prevLayer() {
+      crntLayerI--
+      if (crntLayerI < 0) crntLayerI = layers.length - 1
+      changeLayer()
+    }
+
+    function addLayer() {
+      layers.push({
+        i: colorCount, // id, matching colorI
+        color: colorList[colorCount],
+        rawInfo: null
+      })
+      colorCount++
+      crntLayerI = layers.length - 1
+      changeLayer()
+    }
+
+    function removeLayer() {
+      if (layers.length === 1) return
+      layers.slice(crntLayerI, 1)
+      crntLayerI = 0
+      changeLayer()
+    }
+
+    function changeLayer() {
+      const crntLayer = layers[crntLayerI]
+      rawDrawer.changeOnColor(crntLayer.color)
+      changeSimpleTxtDiv('id-label-current-layer', `current layer: [${crntLayerI}]`)
+      const div = document.getElementById('id-div-layer')
+      div.style.backgroundColor = crntLayer.color
+    }
+
+    function changeIsOnLayerColor() {
+      isOnLayerColor = getChecked('id-checkbox-layer-color')
     }
   </script>
 </body>

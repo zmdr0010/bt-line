@@ -12,7 +12,8 @@ const CmpRawDrawer = {
       keyRight: 'm',
       keyUp: 'h',
       keyDown: 'n',
-      keyOnOff: 'd'
+      keyOnOff: 'd',
+      container: null
     }
 
     let crntC = -1
@@ -20,10 +21,16 @@ const CmpRawDrawer = {
 
     function init() {
       const container = createContainer()
+      drawer.container = container
       container.content.style.display = 'inline-block'
       container.border.id = 'id-container-border-cmp-raw-drawer'
       container.border.style.width = `${drawer.column * drawer.szw + 22}px`
       container.border.style.height = `${drawer.row * drawer.szh + 22}px`
+      makeRawBoard()
+      return container.border
+    }
+
+    function makeRawBoard() {
       for (let i=0; i<drawer.row; i++) {
         const rDiv = document.createElement('div')
         rDiv.id = `id-r-${i}`
@@ -45,12 +52,24 @@ const CmpRawDrawer = {
           })
           rDiv.appendChild(cDiv)
         }
-        container.content.appendChild(rDiv)
+        drawer.container.content.appendChild(rDiv)
       }
-      return container.border
     }
 
-    function getRawInfo() {
+    function changeDrawerSize(column, row, szw, szh) {
+      drawer.column = column
+      drawer.row = row
+      drawer.szw = szw
+      drawer.szh = szh
+      // drawer.container.border.style.width = `${drawer.column * drawer.szw + 22}px`
+      // drawer.container.border.style.height = `${drawer.row * drawer.szh + 22}px`
+      drawer.container.content.innerHTML = ''
+      makeRawBoard()
+      // drawer.container.border.style.width = `${drawer.container.content.offsetWidth}px`
+      // drawer.container.border.style.height = `${drawer.container.content.offsetHeight}px`
+    }
+
+    function getRawInfo(isOnFit=true) {
       const aList = []
       const dColumn = drawer.column
       const dRow = drawer.row
@@ -63,7 +82,7 @@ const CmpRawDrawer = {
       for (let i=0; i<length; i++) {
         const div = document.getElementById(`id-c-${i}`)
         let rw = 0
-        if (div.style.backgroundColor === drawer.onColor) rw = 1
+        if (div.style.backgroundColor === drawer.onColor.toLowerCase()) rw = 1
         const c = i % dColumn
         const r = Math.floor(i / dColumn)
         if (rw === 1) {
@@ -75,15 +94,22 @@ const CmpRawDrawer = {
         }
         aList.push(rw)
       }
-      const list = []
-      console.log(`minC: ${minC}, maxC: ${maxC}, minR: ${minR}, maxR: ${maxR}`)
-      const rColumn = maxC - minC + 1
-      const rRow = maxR - minR + 1
-      for (let i=minR; i<=maxR; i++) {
-        for (let j=minC; j<=maxC; j++) {
-          list.push(aList[i * dColumn + j])
+      let list = []
+      let rColumn = dColumn
+      let rRow = dRow
+      if (isOnFit) {
+        console.log(`minC: ${minC}, maxC: ${maxC}, minR: ${minR}, maxR: ${maxR}`)
+        rColumn = maxC - minC + 1
+        rRow = maxR - minR + 1
+        for (let i=minR; i<=maxR; i++) {
+          for (let j=minC; j<=maxC; j++) {
+            list.push(aList[i * dColumn + j])
+          }
         }
+      } else {
+        list = aList
       }
+
       if (list.length < 1) return null
       return {
         uCode: `raw-${getCurrentDateUCode()}`,
@@ -158,11 +184,22 @@ const CmpRawDrawer = {
       }
     }
 
+    function changeOnColor(color) {
+      drawer.onColor = color
+    }
+
+    function changeOffColor(color) {
+      drawer.offColor = color
+    }
+
     return {
       init: init,
       getRawInfo: getRawInfo,
       onKeyDown: onKeyDown,
       changeBorder: changeBorder,
+      // changeDrawerSize: changeDrawerSize,
+      changeOnColor: changeOnColor,
+      changeOffColor: changeOffColor,
       column: drawer.column,
       row: drawer.row,
       szw: drawer.szw,

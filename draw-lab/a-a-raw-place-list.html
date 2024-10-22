@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>a a raw list</title>
+  <title>a a raw place list</title>
 
   <style>
     #snackbar {
@@ -48,6 +48,8 @@
 
   <script type="text/javascript" src="fnc/fnc-outline.js"></script>
   <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-point.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edit-p-set.js"></script>
   <script type="text/javascript" src="fnc/fnc-save.js"></script>
   <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
   <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
@@ -55,8 +57,18 @@
   <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
   <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
   <script type="text/javascript" src="fnc/fnc-raw-info.js"></script>
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
   <script type="text/javascript" src="info/sample/raw-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/edit-p-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/place-edit-p-set-00.js"></script>
   <script>
+    let editPSetList = []
+    let editPSetInfoList = []
+    let placeEditPSetList = []
     let rawSetList = []
 
     let szw = 20
@@ -69,37 +81,33 @@
       const prmIsOn = urlPrm.get('isOn')
       if (prmIsOn) isDrawingIndex = (prmIsOn.toLowerCase() === 'true')
 
+      editPSetList = editPSet00List
+      placeEditPSetList = placeEditPSet00List
       rawSetList = rawSet00List
+      for (const pSet of editPSetList) editPSetInfoList.push(createEditPSetInfo(pSet))
 
       makeList()
     }
 
     function makeList() {
       const container = document.getElementById('id-container')
-      for (const set of rawSetList) {
-        const rawInfo = createRawInfo(set)
-        const pList = calculatePList(rawInfo)
-        const linePList = []
-        makeLinePList(pList[0], linePList, szw, szh)
-        const w = rawInfo.column * szw
-        const h = rawInfo.row * szh
+      for (const set of placeEditPSetList) {
+        const placeInfo = createEditPPlaceInfo(set, editPSetInfoList)
+        for (const p of placeInfo.list) makeLine(p, rawSetList)
+        const calcSize = calculatePlaceInfoSize(placeInfo)
+        const w = calcSize.w
+        const h = calcSize.h
         const canvas = document.createElement('canvas')
         canvas.width = w + 20
         canvas.height = h + 20
         const ctx = canvas.getContext('2d')
-        const line = createLinePointFromOutlinePList(linePList)
-        drawLineInfo(ctx, line, 10, 10)
-        if (isDrawingIndex) {
-          let i = 0
-          for (const p of linePList) {
-            drawIndexCircle(ctx, i, p.x + 10, p.y + 10)
-            i++
-          }
+        for (const p of placeInfo.list) {
+          drawLineInfo(ctx, p.lineInfo, p.lineInfo.x + 10, p.lineInfo.y + 10)
         }
         const div = document.createElement('div')
         div.appendChild(canvas)
         const label = document.createElement('label')
-        label.innerText = rawInfo.uCode
+        label.innerText = placeInfo.uCode
         div.appendChild(label)
         container.appendChild(div)
 

@@ -1,3 +1,7 @@
+function createEditPStrSet(info) {
+  return `${info.uCode}/${info.rawUCode}/${info.szw}/${info.szh}/${info.color}/${info.lineColor}/${info.lineWidth}/${info.editType}/${info.iList.length}/${info.iList.join(',')}/${info.edgeTypeList.length}/${info.edgeTypeList.join(',')}`
+}
+
 // edit-p-set
 // uCode/raw uCode/szw/szh/color/lineColor/lineWidth/edit type/i num/i,i,i, ... list/edge type num/edge type,type ... list
 function createEditPSetInfo(set) {
@@ -53,4 +57,99 @@ function createLineInfoFromEditPSetInfo(info, rawInfoList) {
     lineInfo = createLinePointFromOutlinePList(ed, info.color, info.lineColor, info.lineWidth)
   }
   return lineInfo
+}
+
+// uCode/num/pSet uCode,x,y/pSet uCode,x,y/ ... list
+function createEditPPlaceStrSet(info) {
+  let str = `${info.uCode}/${info.list.length}`
+  for (const p of info.list) {
+    str += `/${p.pSetInfo.uCode},${p.x},${p.y}`
+  }
+  return str
+}
+
+function createEditPPlaceInfo(set, pSetInfoList) {
+  const split = set.split('/')
+  const uCode = split[0]
+  const num = Number(split[1])
+  const list = []
+  for (let i=2; i<split.length; i++) {
+    const str = split[i]
+    const strSplit = str.split(',')
+    const pSetUCode = strSplit[0]
+    const x = Number(strSplit[1])
+    const y = Number(strSplit[2])
+    const pSet = pSetInfoList.find(p => p.uCode === pSetUCode)
+    list.push({ x: x, y: y, pSetInfo: pSet, lineInfo: null })
+  }
+  return {
+    uCode: uCode,
+    list: list
+  }
+}
+
+function fitPlaceInfo(info) {
+  let minX = 100000
+  let minY = 100000
+  for (const p of info.list) {
+    const x = p.x
+    const y = p.y
+    minX = Math.min(minX, x)
+    minY = Math.min(minY, y)
+  }
+  const mx = 0 - minX
+  const my = 0 - minY
+  console.log(`mx: ${mx}, my: ${my}`)
+  if (mx !== 0 || my !== 0) {
+    for (const p of info.list) {
+      p.x += mx
+      p.y += my
+    }
+  }
+}
+
+function calculatePlaceInfoSize(info) {
+  let maxX = 0
+  let maxY = 0
+  for (const p of info.list) {
+    if (p.lineInfo) {
+      const x = p.lineInfo.x + p.lineInfo.w
+      const y = p.lineInfo.y + p.lineInfo.h
+      maxX = Math.max(maxX, x)
+      maxY = Math.max(maxY, y)
+    }
+  }
+  return { w: maxX, h: maxY }
+}
+
+function makeLine(placeInfo, rawSetList) {
+  const rawUCode = placeInfo.pSetInfo.rawUCode
+  const szw = placeInfo.pSetInfo.szw
+  const szh = placeInfo.pSetInfo.szh
+  const color = placeInfo.pSetInfo.color
+  const lineColor = placeInfo.pSetInfo.lineColor
+  const lineWidth = placeInfo.pSetInfo.lineWidth
+  const editType = placeInfo.pSetInfo.editType
+  const iList = placeInfo.pSetInfo.iList
+  const edgeList = placeInfo.pSetInfo.edgeTypeList
+  const rawSet = rawSetList.find(s => s.split('/')[0] === rawUCode)
+  const rawInfo = createRawInfo(rawSet)
+  const pList = calculatePList(rawInfo)
+  const linePList = []
+  makeLinePList(pList[0], linePList, szw, szh)
+  let line = createLinePointFromOutlinePList(linePList, color, lineColor, lineWidth)
+
+  if (editType === 'remove-p' && iList.length > 0) {
+    const editList = editOutPInfoList(linePList, szw, szh, iList, editType)
+    line = createLinePointFromOutlinePList(editList, color, lineColor, lineWidth)
+  }
+
+  if (editType !== 'none' && editType !== 'remove-p' && edgeList.length > 0) {
+    const editList = editPListEdgeInOutSide(linePList, szw, szh, 'target', editType, { iList: [], list: edgeList })
+    line = createLinePointFromOutlinePList(editList, color, lineColor, lineWidth)
+  }
+
+  line.x = placeInfo.x
+  line.y = placeInfo.y
+  placeInfo.lineInfo = line
 }
