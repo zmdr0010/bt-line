@@ -82,6 +82,7 @@
 
   <script type="text/javascript" src="fnc/fnc-outline.js"></script>
   <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edit-p-set.js"></script>
   <script type="text/javascript" src="fnc/fnc-save.js"></script>
   <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
   <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
@@ -143,19 +144,122 @@
     }
 
     function print() {
-      const rawInfo = rawDrawer.getRawInfo()
-      console.log(rawInfo)
-      if (!rawInfo) return
-      console.log(createRawStrSet(rawInfo))
-
+      // const rawInfo = rawDrawer.getRawInfo()
+      // console.log(rawInfo)
+      // if (!rawInfo) return
+      // console.log(createRawStrSet(rawInfo))
+      const editPlaceInfo = createResultInfo(false)
+      console.log(editPlaceInfo)
     }
 
     function save() {
-      const rawInfo = rawDrawer.getRawInfo()
-      if (!rawInfo) return
-      const str = createRawStrSet(rawInfo)
+      // const rawInfo = rawDrawer.getRawInfo()
+      // if (!rawInfo) return
+      // const str = createRawStrSet(rawInfo)
+      // console.log(str)
+      // saveString(rawInfo.uCode, str)
+
+      const editPlaceInfo = createResultInfo()
+      const str = createEditPPlaceStrSet(editPlaceInfo)
       console.log(str)
-      saveString(rawInfo.uCode, str)
+      saveString(editPlaceInfo.uCode, str)
+      for (const p of editPlaceInfo.list) {
+        const pSetStr = createEditPStrSet(p.pSetInfo)
+        console.log(pSetStr)
+        saveString(p.pSetInfo.uCode, pSetStr)
+      }
+    }
+
+    function createResultInfo(isSave=true) {
+      const rawList = []
+      let totalMinC = 1000000
+      let totalMinR = 1000000
+      const column = rawDrawer.column
+      const row = rawDrawer.row
+      for (const layer of layers) {
+        const raw = layer.rawInfo.raw
+        const rRaw = []
+        let minC = 1000000
+        let maxC = 0
+        let minR = 1000000
+        let maxR = 0
+        let rRawNum = 0
+        for (let i=0; i<raw.length; i++) {
+          const rw = raw[i]
+          const c = i % column
+          const r = Math.floor(i / column)
+          if (rw === 1) {
+            totalMinC = Math.min(totalMinC, c)
+            totalMinR = Math.min(totalMinR, r)
+            minC = Math.min(minC, c)
+            maxC = Math.max(maxC, c)
+            minR = Math.min(minR, r)
+            maxR = Math.max(maxR, r)
+            rRawNum++
+          }
+        }
+        const rColumn = maxC - minC + 1
+        const rRow = maxR - minR + 1
+        for (let i=minR; i<=maxR; i++) {
+          for (let j=minC; j<=maxC; j++) {
+            rRaw.push(raw[i * column + j])
+          }
+        }
+        rawList.push({
+          c: minC,
+          r: minR,
+          rawInfo: {
+            uCode: `raw-${getCurrentDateUCode()}-${rawList.length}`,
+            column: rColumn,
+            row: rRow,
+            rawNum: rRawNum,
+            raw: rRaw
+          }
+        })
+      }
+
+      const mc = 0 - totalMinC
+      const mr = 0 - totalMinR
+      if (mc !== 0 || mr !== 0) {
+        for (const rawP of rawList) {
+          rawP.c += mc
+          rawP.r += mr
+          console.log(`rawP c: ${rawP.c}, r: ${rawP.r}`)
+        }
+      }
+      console.log(rawList)
+      const uCode = `place-edit-p-set-${getCurrentDateUCode()}`
+
+      const editPlaceInfo = {
+        uCode: uCode,
+        list: []
+      }
+
+      for (const rawP of rawList) {
+        const rawSet = createRawStrSet(rawP.rawInfo)
+        if (isSave) saveString(rawP.rawInfo.uCode, rawSet)
+
+        const placeInfo = {
+          x: rawP.c * szw * 0.5,
+          y: rawP.r * szh * 0.5,
+          pSetInfo: {
+            uCode: `edit-p-set-${getCurrentDateUCode()}-${editPlaceInfo.list.length}`,
+            rawUCode: rawP.rawInfo.uCode,
+            szw: szw,
+            szh: szh,
+            color: 'white',
+            lineColor: 'black',
+            lineWidth: 1,
+            editType: 'none',
+            iList: [],
+            edgeTypeList: []
+          },
+          lineInfo: null
+        }
+
+        editPlaceInfo.list.push(placeInfo)
+      }
+      return editPlaceInfo
     }
 
     function drawRaw() {

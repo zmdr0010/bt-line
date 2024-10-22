@@ -158,7 +158,7 @@ function calculateLineInfoSize(info) {
   }
   // info.w = Math.abs(maxX - minX)
   // info.h = Math.abs(maxY - minY)
-  console.log(`minX: ${minX}, minY: ${minY}`)
+  // console.log(`minX: ${minX}, minY: ${minY}`)
   info.w = Math.abs(maxX - minX) + minX
   info.h = Math.abs(maxY - minY) + minY
 

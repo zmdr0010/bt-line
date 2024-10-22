@@ -98,8 +98,8 @@
         const w = calcSize.w
         const h = calcSize.h
         const canvas = document.createElement('canvas')
-        canvas.width = w + 20
-        canvas.height = h + 20
+        canvas.width = w + 20 + 20 * 2
+        canvas.height = h + 20 + 20 * 2
         const ctx = canvas.getContext('2d')
         for (const p of placeInfo.list) {
           drawLineInfo(ctx, p.lineInfo, p.lineInfo.x + 10, p.lineInfo.y + 10)
