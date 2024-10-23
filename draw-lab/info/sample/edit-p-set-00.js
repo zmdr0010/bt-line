@@ -21,5 +21,18 @@ const editPSet00List = [
   'edit-p-set-20241022182309-0/raw-20241022182309-0/20/20/white/black/1/none/0//0/',
   'edit-p-set-20241022182309-1/raw-20241022182309-1/20/20/white/black/1/none/0//0/',
   'edit-p-set-20241022182309-2/raw-20241022182309-2/20/20/white/black/1/none/0//0/',
+
+  // 'edit-p-set-20241023152955/raw-20241023151603/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241023152955/raw-20241023151603/20/20/Thistle/black/1/slice/1/0/4/left-top,right-top,left-bottom,right-bottom',
+  // 'edit-p-set-20241023153006/raw-20241023143855/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241023153006/raw-20241023143855/20/20/SteelBlue/black/1/slice/1/0/2/left-top,right-top',
+  // 'edit-p-set-20241023153013/raw-20241023143305/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241023153013/raw-20241023143305/20/20/SteelBlue/SteelBlue/1/slice/1/0/2/left-top,right-top',
+  // 'edit-p-set-20241023153022/raw-20241023144452/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241023153022/raw-20241023144452/20/20/Peru/black/1/slice/1/0/4/left-top,right-top,left-bottom,right-bottom',
+  'edit-p-set-20241023160501-0/raw-20241023143855/20/20/white/black/1/none/1/0/0/',
+  'edit-p-set-20241023160501-1/raw-20241023143305/20/20/white/black/1/none/1/0/0/',
+  'edit-p-set-20241023160501-2/raw-20241023151603/20/20/white/black/1/none/1/0/0/',
+  'edit-p-set-20241023160501-3/raw-20241023144452/20/20/white/black/1/none/1/0/0/',
   // '',
 ]

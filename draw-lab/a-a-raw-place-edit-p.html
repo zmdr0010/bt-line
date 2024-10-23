@@ -100,6 +100,8 @@
       // }
     ]
 
+    let saveMode = 'new' // update (override) / new
+
     function init() {
       const main = document.getElementById('id-main')
       canvas = document.getElementById('id-canvas')
@@ -133,7 +135,9 @@
         () => {
           const uCode = getInputValue('id-input-place-ucode')
           const placeSet = placeEditPSetList.find(p => p.split('/')[0] === uCode)
-          const placeInfo = createEditPPlaceInfo(placeSet, editPSetInfoList)
+          let isNew = false
+          if (saveMode === 'new') isNew = true
+          const placeInfo = createEditPPlaceInfo(placeSet, editPSetInfoList, isNew)
           placeList = placeInfo.list
           for (const p of placeList) makeLine(p, rawSetList)
           crntI = 0
