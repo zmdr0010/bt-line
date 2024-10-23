@@ -78,7 +78,6 @@ const CmpRawDrawer = {
       let maxC = 0
       let minR = 100000
       let maxR = 0
-      let rawNum = 0
       for (let i=0; i<length; i++) {
         const div = document.getElementById(`id-c-${i}`)
         let rw = 0
@@ -90,7 +89,6 @@ const CmpRawDrawer = {
           maxC = Math.max(maxC, c)
           minR = Math.min(minR, r)
           maxR = Math.max(maxR, r)
-          rawNum++
         }
         aList.push(rw)
       }
@@ -116,7 +114,7 @@ const CmpRawDrawer = {
         column: rColumn,
         row: rRow,
         raw: list,
-        rawNum: rawNum
+        rawNum: rColumn * rRow
       }
     }
 

@@ -52,7 +52,7 @@ function fitRawInfo(info) {
     uCode: `raw-${getCurrentDateUCode()}`,
     column: rColumn,
     row: rRow,
-    rawNum: info.rawNum,
+    rawNum: rColumn * rRow,
     raw: raw
   }
 }
