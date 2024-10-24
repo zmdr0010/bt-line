@@ -34,5 +34,35 @@ const editPSet00List = [
   'edit-p-set-20241023160501-1/raw-20241023143305/20/20/white/black/1/none/1/0/0/',
   'edit-p-set-20241023160501-2/raw-20241023151603/20/20/white/black/1/none/1/0/0/',
   'edit-p-set-20241023160501-3/raw-20241023144452/20/20/white/black/1/none/1/0/0/',
+
+  'edit-p-set-20241024121927-0/raw-20241021181435/20/20/OrangeRed/black/1/curve/1/0/1/left-top-inside',
+  'edit-p-set-20241024121927-1/raw-20241021181810/20/20/Green/black/1/add-p/1/0/2/left-top,right-top',
+  'edit-p-set-20241024121927-2/raw-20241021181507/20/20/MediumAquamarine/black/1/slice/1/0/2/left-bottom,right-bottom',
+
+  'edit-p-set-20241024125814-0/raw-20241022173619-0/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241024125814-1/raw-20241022173619-1/20/20/white/black/1/none/0//0/',
+
+  'edit-p-set-20241024125955-0/raw-20241022175107-0/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241024125955-1/raw-20241022175107-1/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241024125955-2/raw-20241022175107-2/20/20/white/black/1/none/0//0/',
+
+  'edit-p-set-20241024130234-0/raw-20241022181831-0/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241024130234-1/raw-20241022181831-1/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241024130234-2/raw-20241022181831-2/20/20/white/black/1/none/0//0/',
+
+  'edit-p-set-20241024130507-0/raw-20241022182309-0/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241024130507-1/raw-20241022182309-1/20/20/white/black/1/none/0//0/',
+  'edit-p-set-20241024130507-2/raw-20241022182309-2/20/20/white/black/1/none/0//0/',
+
+  'edit-p-set-20241024130757-0/raw-20241023143855/20/20/SteelBlue/black/1/slice/1/0/2/left-top,right-top',
+  'edit-p-set-20241024130757-1/raw-20241023143305/20/20/SteelBlue/SteelBlue/1/slice/1/0/2/left-top,right-top',
+  'edit-p-set-20241024130757-2/raw-20241023151603/20/20/Thistle/black/1/slice/1/0/4/left-top,right-top,left-bottom,right-bottom',
+  'edit-p-set-20241024130757-3/raw-20241023144452/20/17/Peru/black/1/slice/1/0/4/left-top,right-top,left-bottom,right-bottom',
+
+  'edit-p-set-20241024131318-0/raw-20241023143855/20/20/white/black/1/none/1/0/0/',
+  'edit-p-set-20241024131318-1/raw-20241023143305/20/20/white/black/1/none/1/0/0/',
+  'edit-p-set-20241024131318-2/raw-20241023151603/20/20/white/black/1/none/1/0/0/',
+  'edit-p-set-20241024131318-3/raw-20241023144452/20/20/white/black/1/none/1/0/0/',
+
   // '',
 ]

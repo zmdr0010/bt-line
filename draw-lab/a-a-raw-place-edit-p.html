@@ -69,8 +69,8 @@
     let ctx
     let szw = 20
     let szh = 20
-    let sx = 10
-    let sy = 10
+    let sx = 0
+    let sy = 0
     let crntI = -1
     let color = 'white'
     let lineColor = 'black'
@@ -150,7 +150,8 @@
       // list: [ { id: '', labelTxt: '', onClick: null } ]
       makeBtnGroup(container.content, [
         { id: 'id-btn-print', labelTxt: 'print', onClick: () => { print() } },
-        { id: 'id-btn-save', labelTxt: 'save', onClick: () => { save() } }
+        { id: 'id-btn-save', labelTxt: 'save', onClick: () => { save() } },
+        { id: 'id-btn-save-to-line', labelTxt: 'save to line', onClick: () => { saveToLine() } }
       ])
     }
 
@@ -317,6 +318,30 @@
       }
     }
 
+    function saveToLine() {
+      const uCode = `place-edit-p-set-${getCurrentDateUCode()}`
+      const info = {
+        uCode: uCode,
+        list: placeList
+      }
+      fitPlaceInfo(info)
+      placeList = info.list
+      const lineList = []
+      console.log(placeList)
+      for (const p of placeList) {
+        makeLine(p, rawSetList)
+        if (p.lineInfo) {
+          // p.lineInfo.x = p.x
+          // p.lineInfo.y = p.y
+          lineList.push(p.lineInfo)
+        }
+      }
+      const mgLine = mergeSpLineInfo(`line-${getCurrentDateUCode()}`, lineList)
+      const mgLineSet = createSimpleLineStrSet(mgLine)
+      saveString(mgLine.uCode, mgLineSet)
+      // drawLineInfo(ctx, mgLine, 300, 0)
+    }
+
     function addRaw() {
       const rawUCode = getInputValue('id-input-raw-ucode')
 
@@ -347,7 +372,7 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       for (const placeInfo of placeList) {
-        drawLineInfo(ctx, placeInfo.lineInfo, placeInfo.lineInfo.x, placeInfo.lineInfo.y)
+        drawLineInfo(ctx, placeInfo.lineInfo, sx, sx)
       }
 
     }

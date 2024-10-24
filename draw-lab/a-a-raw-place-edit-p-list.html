@@ -102,7 +102,7 @@
         canvas.height = h + 20 + 20 * 2
         const ctx = canvas.getContext('2d')
         for (const p of placeInfo.list) {
-          drawLineInfo(ctx, p.lineInfo, p.lineInfo.x + 10, p.lineInfo.y + 10)
+          drawLineInfo(ctx, p.lineInfo, 10, 10)
         }
         const div = document.createElement('div')
         div.appendChild(canvas)
