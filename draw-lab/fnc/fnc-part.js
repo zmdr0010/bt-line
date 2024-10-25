@@ -164,7 +164,6 @@ function createDvcPart(info, lineSetList) {
     if (lineSet) {
       const line = createSimpleLineInfo(lineSet)
       part.lineInfo = createLinePointFromLineInfo(line)
-      console.log(part)
     }
   }
   if (info.transInfo) {

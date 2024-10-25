@@ -46,6 +46,7 @@
 
   <script type="text/javascript" src="fnc/fnc-draw.js"></script>
   <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
   <script type="text/javascript" src="fnc/fnc-part.js"></script>
   <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
   <script type="text/javascript" src="fnc/fnc-save.js"></script>
@@ -196,7 +197,8 @@
 
       makeBtnGroup(container.content, [
         { id: 'id-btn-print', labelTxt: 'print', onClick: print },
-        { id: 'id-btn-save', labelTxt: 'save', onClick: save }
+        { id: 'id-btn-save', labelTxt: 'save', onClick: save },
+        { id: 'id-btn-save-to-line', labelTxt: 'save to line', onClick: saveToLine }
       ])
     }
 
@@ -444,6 +446,49 @@
       const bundleSet = createDvcSrtBundleStrSet(infoList)
       console.log(bundleSet)
       saveString(bundleSet.uCode, bundleSet.bundleSet)
+    }
+
+    function saveToLine() {
+      // console.log(infoList)
+      const info = getCurrentTCodeInfo()
+      const isCheckedScale = getChecked('id-input-check-scale')
+      const isCheckedRotate = getChecked('id-input-check-rotate')
+      const isCheckedP4 = getChecked('id-input-check-p4')
+      // console.log(`isChecked scale: ${isCheckedScale}, rotate: ${isCheckedRotate}`)
+      info.transInfo = null
+      if (isCheckedScale || isCheckedRotate || transInfo.sftRI.ri > 0 || isCheckedP4) {
+        info.transInfo = { list: [] }
+        if (isCheckedScale) info.transInfo.list.push(
+          { type: 'scale', scaleX: transInfo.scale.scaleX, scaleY: transInfo.scale.scaleY })
+        if (isCheckedRotate) info.transInfo.list.push(
+          { type: 'rotate', degree: transInfo.rotate.degree })
+        if (transInfo.sftRI.ri > 0) info.transInfo.list.push(
+          { type: 'sftRI', ri: transInfo.sftRI.ri })
+        if (isCheckedP4) info.transInfo.list.push(
+          { type: 'p4',
+            p4Info: {
+              lt: { scx: transInfo.p4.lt.scx, scy: transInfo.p4.lt.scy },
+              rt: { scx: transInfo.p4.rt.scx, scy: transInfo.p4.rt.scy },
+              lb: { scx: transInfo.p4.lb.scx, scy: transInfo.p4.lb.scy },
+              rb: { scx: transInfo.p4.rb.scx, scy: transInfo.p4.rb.scy }
+            }
+          })
+      }
+      const part = createDvcPart(info, lineSetList)
+      console.log(part)
+      if (part.child.length < 1) return
+      const list = []
+      for (const cPart of part.child) {
+        if (cPart.lineInfo) {
+          cPart.lineInfo.x = cPart.x
+          cPart.lineInfo.y = cPart.y
+          list.push(cPart.lineInfo)
+        }
+      }
+      if (list.length < 1) return
+      const mrgLine = mergeSpLineInfo(`line-${getCurrentDateUCode()}`, list)
+      const mrgLineSet = createSimpleLineStrSet(mrgLine)
+      saveString(mrgLine.uCode, mrgLineSet)
     }
 
     function getCurrentTCodeInfo() {
