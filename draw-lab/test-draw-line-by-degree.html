@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test draw line by degree</title>
+</head>
+<body onload="init()">
+  <div style="margin: 10px">
+    <canvas style="margin: 10px; border: solid 1px" id="id-canvas"></canvas>
+  </div>
+
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script>
+    function init() {
+      const canvas = document.getElementById('id-canvas')
+      canvas.width = window.innerWidth - 20 * 3
+      canvas.height = window.innerHeight - 20 * 4
+      const ctx = canvas.getContext('2d')
+
+      // -135     -90     -45
+      //
+      //  180     [p0]     0
+      //
+      //  135      90      45
+
+      const dList = [ 0, 45, 90, 90, 135, 180, -135, -90, -45 ]
+
+      const p0 = { x: 100, y: 100 }
+
+      const pList = createPList(p0, dList, 50)
+      drawPList(ctx, pList, 'gray')
+
+
+      const line00 = {
+        list: [{ x: 300, y: 100 }, { x: 400, y: 200 }]
+      }
+      drawPList(ctx, line00.list)
+      calcAndPrint(line00.list[0], line00.list[1], 'line00')
+      // 45
+
+      const list00 = [
+        line00.list[0],
+        createRotateP(line00.list[0], 20, 69)
+      ]
+      list00.push(createRotateP(list00[1], 65, 87))
+      drawPList(ctx, list00, 'gray')
+
+      const list01 = [
+        line00.list[0],
+        createRotateP(line00.list[0], 20, 50)
+      ]
+      list01.push(createRotateP(list01[1], 45, 60))
+      list01.push(createRotateP(list01[2], 65, 60))
+      drawPList(ctx, list01, 'Salmon')
+    }
+
+    function createRotateP(p, degree, size) {
+      const radian = degreeToRadian(degree)
+      const x = p.x + size
+      const y = p.y
+      return rotate(radian, x, y, p.x, p.y, 0, 0)
+    }
+
+    function createPList(p0, dList, size) {
+      const list = [p0]
+      for (const degree of dList) {
+        const prev = list[list.length-1]
+        const p = createRotateP(prev, degree, size)
+        list.push(p)
+      }
+      return list
+    }
+
+    function drawPList(ctx, pList, color='black') {
+      const first = pList[0]
+      const last = pList[pList.length-1]
+      ctx.beginPath()
+      ctx.strokeStyle = color
+      ctx.lineWidth = 1
+      ctx.moveTo(first.x, first.y)
+      for (const p of pList) {
+        if (p === first) {
+
+        } else {
+          ctx.lineTo(p.x, p.y)
+        }
+      }
+      ctx.stroke()
+    }
+
+    function calcBetweenRadian(p0, p1) {
+      return Math.atan2(p1.y - p0.y, p1.x - p0.x)
+    }
+
+    function calcBetweenDegree(p0, p1) {
+      return calcBetweenRadian(p0, p1) * 180 / Math.PI
+    }
+
+    function calcAndPrint(p0, p1, tag='') {
+      const degree = calcBetweenDegree(p0, p1)
+      console.log(`[ ${tag} ] degree: ${degree} (x0: ${p0.x}, y0: ${p0.y})-(x1: ${p1.x}, y1: ${p1.y})`)
+      return degree
+    }
+  </script>
+</body>
+</html>

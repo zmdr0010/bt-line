@@ -51,13 +51,15 @@
   <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
   <script type="text/javascript" src="fnc/fnc-save.js"></script>
   <script type="text/javascript" src="fnc/fnc-dvc-srt.js"></script>
-  <script type="text/javascript" src="info/sample/line-set-00.js"></script>
   <script type="text/javascript" src="cmp/cmp-common.js"></script>
   <script type="text/javascript" src="cmp/cmp-input.js"></script>
   <script type="text/javascript" src="cmp/cmp-select.js"></script>
   <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="info/sample/line-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/bundle-set-00.js"></script>
   <script>
     let lineSetList = []
+    let bundleSetList = []
 
     // child: bk, b2, br, b1, bl, c, b0, l
     // calcJrc: c, b1 <- bk, b0, b2, br, bl
@@ -139,6 +141,7 @@
       previewScale = previewCanvas.width / canvas.width * 1.5
 
       lineSetList = lineSetList00
+      bundleSetList = bundleSet00List
 
       // const infoList = createDvcSrtInfoListByTCodeSet(dvcTCodeStrSetList)
       // infoList.sort((a, b) => Number(a.type < b.type))
@@ -188,12 +191,12 @@
           console.log(result)
           initInfoList(result)
       })
-      // makeInputTextBtn('id-input-bundle-set', container.content, 'bundleSet: ',
-      //   'load', () => {
-      //     const set = getInputValue('id-input-bundle-set')
-      //     console.log(`load: ${set}`)
-      //     initInfoList(set)
-      // })
+      makeInputTextBtn('id-input-bundle-set-ucode', container.content, 'bundleSet uCode: ',
+        'load', () => {
+          const uCode = getInputValue('id-input-bundle-set-ucode')
+          const set = bundleSetList.find(s => s.split('\n')[0] === uCode)
+          initInfoList(set)
+      })
 
       makeBtnGroup(container.content, [
         { id: 'id-btn-print', labelTxt: 'print', onClick: print },

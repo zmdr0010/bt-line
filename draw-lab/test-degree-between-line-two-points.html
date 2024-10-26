@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test degree between line two points</title>
+</head>
+<body onload="init()">
+  <div style="margin: 10px">
+    <canvas style="margin: 10px; border: solid 1px" id="id-canvas"></canvas>
+  </div>
+
+  <script>
+    function init() {
+      const canvas = document.getElementById('id-canvas')
+      canvas.width = window.innerWidth - 20 * 3
+      canvas.height = window.innerHeight - 20 * 4
+      const ctx = canvas.getContext('2d')
+
+      const pList = [
+        { x: 110, y: 110 },
+        { x: 210, y: 110 },
+        { x: 210, y: 210 },
+        { x: 110, y: 210 },
+        { x: 10, y: 210 },
+        { x: 10, y: 110 },
+        { x: 10, y: 10 },
+        { x: 110, y: 10 },
+        { x: 210, y: 10 }
+      ]
+
+      const first = pList[0]
+      for (let i=1; i<pList.length; i++) {
+        const p = pList[i]
+        calcAndPrint(first, p)
+      }
+
+      // -135     -90     -45
+      //
+      //  180     [p0]     0
+      //
+      //  135      90      45
+
+
+      drawPList(ctx, pList)
+
+
+      const leftTopRVS = {
+        name: 'left-top-rvs',
+        list: [{ x: 350, y: 50 }, { x: 300, y: 50 }, { x: 300, y: 100 }]
+      }
+      drawLine(ctx, leftTopRVS)
+
+      const rightTopRVS = {
+        name: 'right-top-rvs',
+        list: [{ x: 450, y: 100 }, { x: 450, y: 50 }, { x: 400, y: 50 }]
+      }
+      drawLine(ctx, rightTopRVS)
+
+      const rightBottomRVS = {
+        name: 'right-bottom-rvs',
+        list: [{ x: 400, y: 200 }, { x: 450, y: 200 }, { x: 450, y: 150 }]
+      }
+      drawLine(ctx, rightBottomRVS)
+
+      const leftBottomRVS = {
+        name: 'left-bottom-rvs',
+        list: [{ x: 300, y: 150 }, { x: 300, y: 200 }, { x: 350, y: 200 }]
+      }
+      drawLine(ctx, leftBottomRVS)
+
+      const leftTop = {
+        name: 'left-top',
+        list: [{ x: 500, y: 100 }, { x: 500, y: 50 }, { x: 550, y: 50 }]
+      }
+      drawLine(ctx, leftTop)
+
+      const rightTop = {
+        name: 'right-top',
+        list: [{ x: 600, y: 50 }, { x: 650, y: 50 }, { x: 650, y: 100 }]
+      }
+      drawLine(ctx, rightTop)
+
+      const rightBottom = {
+        name: 'right-bottom',
+        list: [{ x: 650, y: 150 }, { x: 650, y: 200 }, { x: 600, y: 200 }]
+      }
+      drawLine(ctx, rightBottom)
+
+      const leftBottom = {
+        name: 'left-bottom',
+        list: [{ x: 550, y: 200 }, { x: 500, y: 200 }, { x: 500, y: 150 }]
+      }
+      drawLine(ctx, leftBottom)
+
+      const toRight = {
+        name: 'to-right',
+        list: [{ x: 700, y: 50 }, { x: 750, y: 50 }, { x: 800, y: 50 }]
+      }
+      drawLine(ctx, toRight)
+
+      const toLeft = {
+        name: 'to-left',
+        list: [{ x: 800, y: 150 }, { x: 750, y: 150 }, { x: 700, y: 150 }]
+      }
+      drawLine(ctx, toLeft)
+
+      const toBottom = {
+        name: 'to-bottom',
+        list: [{ x: 900, y: 50 }, { x: 900, y: 100 }, { x: 900, y: 150 }]
+      }
+      drawLine(ctx, toBottom)
+
+      const toTop = {
+        name: 'to-top',
+        list: [{ x: 1000, y: 150 }, { x: 1000, y: 100 }, { x: 1000, y: 50 }]
+      }
+      drawLine(ctx, toTop)
+    }
+
+    function calcAndPrint(p0, p1, tag='') {
+      const degree = calcBetweenDegree(p0, p1)
+      console.log(`[ ${tag} ] degree: ${degree} (x0: ${p0.x}, y0: ${p0.y})-(x1: ${p1.x}, y1: ${p1.y})`)
+      return degree
+    }
+
+    function calcBetweenDegree(p0, p1) {
+      return Math.atan2(p1.y - p0.y, p1.x - p0.x) * 180 / Math.PI
+    }
+
+    function drawPList(ctx, list) {
+      const first = list[0]
+      for (const p of list) {
+        if (first !== p) {
+          ctx.beginPath()
+          ctx.strokeStyle = 'gray'
+          ctx.moveTo(first.x, first.y)
+          ctx.lineTo(p.x, p.y)
+          ctx.stroke()
+        }
+      }
+      for (const p of list) {
+        ctx.beginPath()
+        if (first === p) {
+          ctx.fillStyle = 'red'
+        } else {
+          ctx.fillStyle = 'black'
+        }
+        ctx.moveTo(p.x, p.y)
+        ctx.fillRect(p.x - 10, p.y - 10, 20, 20)
+      }
+    }
+
+    function drawLine(ctx, line) {
+      const first = line.list[0]
+      const last = line.list[line.list.length-1]
+      let prev
+      for (const p of line.list) {
+        if (prev) {
+          const degree = calcAndPrint(prev, p, line.name)
+          ctx.beginPath()
+          ctx.strokeStyle = 'gray'
+          ctx.lineWidth = 1
+          ctx.moveTo(prev.x, prev.y)
+          ctx.lineTo(p.x, p.y)
+          ctx.stroke()
+        }
+        ctx.beginPath()
+        if (p === first) {
+          ctx.fillStyle = 'red'
+        } else if (p === last) {
+          ctx.fillStyle = 'blue'
+        } else {
+          ctx.fillStyle = 'gray'
+        }
+        ctx.moveTo(p.x, p.y)
+        ctx.fillRect(p.x - 10, p.y - 10, 20, 20)
+
+        prev = p
+      }
+    }
+  </script>
+</body>
+</html>
