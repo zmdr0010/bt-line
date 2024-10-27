@@ -102,6 +102,10 @@
     let infoList = []
 
     let transInfo = {
+      fit: {
+        w: 0,
+        h: 0
+      },
       scale: {
         scaleX: 1,
         scaleY: 1
@@ -267,6 +271,19 @@
           draw()
       })
 
+      makeInputBoxOnOff(container.content, 'id-input-check-fit', 'fit: ', [
+        { id: 'id-input-fit-w', labelTxt: 'w: ', onChange:
+            () => {
+              transInfo.fit.w = getInputValueNumber('id-input-fit-w')
+              draw()
+            }, value: 0, step: 1 },
+        { id: 'id-input-fit-h', labelTxt: 'h: ', onChange:
+            () => {
+              transInfo.fit.h = getInputValueNumber('id-input-fit-h')
+              draw()
+            }, value: 0, step: 1 }
+      ], draw)
+
       const changeScaleX = () => {
         transInfo.scale.scaleX = getInputValueNumber('id-input-scale-x')
         draw()
@@ -281,12 +298,12 @@
       }
 
       // list: [ { id: '', labelTxt: '', onChange: null, value: 0, step: 1 } ]
-      makeInputBoxOnOff(container.content, 'id-input-check-scale', 'scale', [
-        { id: 'id-input-scale-x', labelTxt: 'scaleX', onChange: changeScaleX, value: 1, step: 0.01 },
-        { id: 'id-input-scale-y', labelTxt: 'scaleY', onChange: changeScaleY, value: 1, step: 0.01 }
+      makeInputBoxOnOff(container.content, 'id-input-check-scale', 'scale: ', [
+        { id: 'id-input-scale-x', labelTxt: 'scaleX: ', onChange: changeScaleX, value: 1, step: 0.01 },
+        { id: 'id-input-scale-y', labelTxt: 'scaleY: ', onChange: changeScaleY, value: 1, step: 0.01 }
       ], draw)
-      makeInputBoxOnOff(container.content, 'id-input-check-rotate', 'rotate', [
-        { id: 'id-input-degree', labelTxt: 'degree', onChange: changeDegree, value: 0, step: 1 }
+      makeInputBoxOnOff(container.content, 'id-input-check-rotate', 'rotate: ', [
+        { id: 'id-input-degree', labelTxt: 'degree: ', onChange: changeDegree, value: 0, step: 1 }
       ], draw)
 
       makeSelect('id-select-sft-ri', container.content, 'sftRI: ', 'choose sftRI', () => {
@@ -295,43 +312,43 @@
       })
       initSelect('id-select-sft-ri', [0,1,2,3,4,5,6,7])
 
-      makeInputBoxOnOff(container.content, 'id-input-check-p4', 'p4', [
-        { id: 'id-input-p4-lt-scx', labelTxt: 'lt.scx',
+      makeInputBoxOnOff(container.content, 'id-input-check-p4', 'p4: ', [
+        { id: 'id-input-p4-lt-scx', labelTxt: 'lt.scx: ',
           onChange: () => {
             transInfo.p4.lt.scx = getInputValueNumber('id-input-p4-lt-scx')
             draw()
           }, value: 0.0, step: 0.01 },
-        { id: 'id-input-p4-lt-scy', labelTxt: 'lt.scy',
+        { id: 'id-input-p4-lt-scy', labelTxt: 'lt.scy: ',
           onChange: () => {
             transInfo.p4.lt.scy = getInputValueNumber('id-input-p4-lt-scy')
             draw()
           }, value: 0.0, step: 0.01 },
-        { id: 'id-input-p4-rt-scx', labelTxt: 'rt.scx',
+        { id: 'id-input-p4-rt-scx', labelTxt: 'rt.scx: ',
           onChange: () => {
             transInfo.p4.rt.scx = getInputValueNumber('id-input-p4-rt-scx')
             draw()
           }, value: 1.0, step: 0.01 },
-        { id: 'id-input-p4-rt-scy', labelTxt: 'rt.scy',
+        { id: 'id-input-p4-rt-scy', labelTxt: 'rt.scy: ',
           onChange: () => {
             transInfo.p4.rt.scy = getInputValueNumber('id-input-p4-rt-scy')
             draw()
           }, value: 0.0, step: 0.01 },
-        { id: 'id-input-p4-lb-scx', labelTxt: 'lb.scx',
+        { id: 'id-input-p4-lb-scx', labelTxt: 'lb.scx: ',
           onChange: () => {
             transInfo.p4.lb.scx = getInputValueNumber('id-input-p4-lb-scx')
             draw()
           }, value: 0.0, step: 0.01 },
-        { id: 'id-input-p4-lb-scy', labelTxt: 'lb.scy',
+        { id: 'id-input-p4-lb-scy', labelTxt: 'lb.scy: ',
           onChange: () => {
             transInfo.p4.lb.scy = getInputValueNumber('id-input-p4-lb-scy')
             draw()
           }, value: 1.0, step: 0.01 },
-        { id: 'id-input-p4-rb-scx', labelTxt: 'rb.scx',
+        { id: 'id-input-p4-rb-scx', labelTxt: 'rb.scx: ',
           onChange: () => {
             transInfo.p4.rb.scx = getInputValueNumber('id-input-p4-rb-scx')
             draw()
           }, value: 1.0, step: 0.01 },
-        { id: 'id-input-p4-rb-scy', labelTxt: 'rb.scy',
+        { id: 'id-input-p4-rb-scy', labelTxt: 'rb.scy: ',
           onChange: () => {
             transInfo.p4.rb.scy = getInputValueNumber('id-input-p4-rb-scy')
             draw()
@@ -506,13 +523,16 @@
       const isOnBound = getChecked('id-input-check-is-on-bound')
 
       const info = getCurrentTCodeInfo()
+      const isCheckedFit = getChecked('id-input-check-fit')
       const isCheckedScale = getChecked('id-input-check-scale')
       const isCheckedRotate = getChecked('id-input-check-rotate')
       const isCheckedP4 = getChecked('id-input-check-p4')
       console.log(`isChecked scale: ${isCheckedScale}, rotate: ${isCheckedRotate}`)
       info.transInfo = null
-      if (isCheckedScale || isCheckedRotate || transInfo.sftRI.ri > 0 || isCheckedP4) {
+      if (isCheckedFit || isCheckedScale || isCheckedRotate || transInfo.sftRI.ri > 0 || isCheckedP4) {
         info.transInfo = { list: [] }
+        if (isCheckedFit) info.transInfo.list.push(
+          { type: 'fit', w: transInfo.fit.w, h: transInfo.fit.h })
         if (isCheckedScale) info.transInfo.list.push(
           { type: 'scale', scaleX: transInfo.scale.scaleX, scaleY: transInfo.scale.scaleY })
         if (isCheckedRotate) info.transInfo.list.push(
