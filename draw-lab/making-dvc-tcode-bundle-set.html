@@ -396,12 +396,20 @@
 
     // info: current tCodeInfo
     function updateTransEdit(info) {
+      setChecked('id-input-check-fit', false)
       setChecked('id-input-check-scale', false)
       setChecked('id-input-check-rotate', false)
       changeInputValue('id-select-sft-ri', 0)
       setChecked('id-input-check-p4', false)
       if (info.transInfo) {
         for (const tr of info.transInfo.list) {
+          if (tr.type === 'fit') {
+            setChecked('id-input-check-fit', true)
+            changeInputValue('id-input-fit-w', tr.w)
+            changeInputValue('id-input-fit-h', tr.h)
+            transInfo.fit.w = tr.w
+            transInfo.fit.h = tr.h
+          }
           if (tr.type === 'scale') {
             setChecked('id-input-check-scale', true)
             changeInputValue('id-input-scale-x', tr.scaleX)
