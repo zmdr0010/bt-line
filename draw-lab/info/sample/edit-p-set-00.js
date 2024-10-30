@@ -64,5 +64,15 @@ const editPSet00List = [
   'edit-p-set-20241024131318-2/raw-20241023151603/20/20/white/black/1/none/1/0/0/',
   'edit-p-set-20241024131318-3/raw-20241023144452/20/20/white/black/1/none/1/0/0/',
 
+  'edit-p-set-20241029190058/raw-20241021181305/20/20/MediumSlateBlue/black/1/add-p/1/0/2/right-top,left-bottom',
+
+  'edit-p-set-20241030112653/raw-20241030112821/20/20/BlueViolet/black/1/none/1/0/0/',
+  'edit-p-set-20241030112704/raw-20241030113111/20/20/Peru/black/1/none/1/0/0/',
+  'edit-p-set-20241030112715/raw-20241030112927/20/20/RoyalBlue/black/1/none/1/0/0/',
+
+  'edit-p-set-20241030133452/raw-20241030133518/10/10/MediumTurquoise/black/1/slice/1/0/3/left-top,right-bottom,left-bottom',
+  'edit-p-set-20241030133811/raw-20241023180427/20/20/DarkSlateGrey/black/1/slice/1/0/1/left-top-inside',
+
+
   // '',
 ]

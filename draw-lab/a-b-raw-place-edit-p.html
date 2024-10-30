@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a b raw place edit p</title>
+  <style>
+    .menu-left {
+      height: 100%;
+      width: 30%;
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+    }
+    .main {
+      height: 100%;
+      width: calc(100% - 30% - 8px - 16px - 400px);
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+      left: calc(30%);
+    }
+    .menu-right {
+      width: 400px;
+      height: 100%;
+      /*background-color: lightgray;*/
+      position: fixed;
+      right: 0;
+      /*top: 0;*/
+      z-index: 1;
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div class="menu-left" id="id-menu-left">
+  </div>
+  <div class="main" id="id-main">
+  </div>
+  <div class="menu-right" id="id-menu-right"></div>
+
+  <script type="text/javascript" src="fnc/fnc-outline.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edge.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-point.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline-edit-p-set.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-divide-line.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-raw-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-raw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-raw-mtx.js"></script>
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-canvas.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="view/raw-place-edit-p/edt-current-place-info.js"></script>
+  <script type="text/javascript" src="view/raw-place-edit-p/edt-p-set-edit.js"></script>
+  <script type="text/javascript" src="view/raw-place-edit-p/edt-place-edit-p-ucode.js"></script>
+  <script type="text/javascript" src="view/raw-transform/edt-raw-place.js"></script>
+  <script type="text/javascript" src="view/raw-transform/edt-raw-expand.js"></script>
+  <script type="text/javascript" src="view/raw-transform/edt-raw-add-column.js"></script>
+  <script type="text/javascript" src="view/raw-transform/edt-raw-add-row.js"></script>
+  <script type="text/javascript" src="view/raw-transform/edt-raw-rotate-i.js"></script>
+  <script type="text/javascript" src="view/raw-transform/edt-raw-target-add-remove.js"></script>
+  <script type="text/javascript" src="info/sample/raw-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/edit-p-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/place-edit-p-set-00.js"></script>
+  <script>
+    let eInfo = {
+      placeEditPSetList: [],
+      saveMode: 'new', // update (override) / new
+      placeList: [],
+      rawSetList: [],
+      editPSetInfoList: [],
+      crntI: -1,
+      sx: 0,
+      sy: 0,
+      szw: 20,
+      szh: 20,
+      color: 'white',
+      lineColor: 'black',
+      lineWidth: 1,
+      editType: 'none',
+      editTypeList: ['none', 'add-p', 'remove-p', 'slice', 'curve'],
+      editRawList: []
+    }
+
+    let rawEdit = {
+      x: 10,
+      y: 10,
+      szw: 20,
+      szh: 20,
+      rawInfo: null,
+      transRawInfo: null,
+      expandInfo: {
+        isFit: true,
+        sn: 1
+      },
+      addColumnInfo: {
+        add: 0,
+        target: 0
+      },
+      addRowInfo: {
+        add: 0,
+        target: 0
+      },
+      rotateIInfo: {
+        i: 0
+      },
+      keyInfoMap: null
+    }
+
+    let currentPlaceEdt
+    let placeRaw
+
+    function init() {
+      eInfo.placeEditPSetList = placeEditPSet00List
+      eInfo.rawSetList = rawSet00List
+      for (const pSet of editPSet00List) eInfo.editPSetInfoList.push(createEditPSetInfo(pSet))
+
+      makeMenuLeft()
+    }
+
+    function makeMenuLeft() {
+      const main = document.getElementById('id-main')
+      const menuLeft = document.getElementById('id-menu-left')
+      makeEditPSet(main, menuLeft)
+      makeEditRaw(main, menuLeft)
+    }
+
+    function makeEditPSet(main, menu) {
+      const placeUCodeEdt = createEdtPlaceEditPUCode(menu, (placeInfo) => { // onAdd
+        const set = eInfo.rawSetList.find(s => s.split('/')[0] === placeInfo.pSetInfo.rawUCode)
+        rawEdit.rawInfo = createRawInfo(set)
+        rawEdit.transRawInfo = null
+        placeRaw.draw()
+      })
+      currentPlaceEdt = createEdtCurrentPlaceInfo(menu, (placeInfo) => { // onChange
+        const set = eInfo.rawSetList.find(s => s.split('/')[0] === placeInfo.pSetInfo.rawUCode)
+        rawEdit.rawInfo = createRawInfo(set)
+        rawEdit.transRawInfo = null
+        placeRaw.draw()
+      })
+      const pSetEdt = createEdtPSetEdit(menu)
+      placeUCodeEdt.info = eInfo
+      currentPlaceEdt.info = eInfo
+      pSetEdt.info = eInfo
+      pSetEdt.initEditTypeSelect()
+      const currentPlaceUpdateCrnt = currentPlaceEdt.updateCrnt
+      const pSetUpdateCrnt = pSetEdt.updateCrnt
+      const updateCrnt = () => {
+        currentPlaceUpdateCrnt()
+        pSetUpdateCrnt()
+        currentPlaceEdt.draw()
+      }
+      placeUCodeEdt.updateCrnt = updateCrnt
+      currentPlaceEdt.updateCrnt = updateCrnt
+      pSetEdt.updateCrnt = updateCrnt
+
+      const borderDiv = createBorderDiv()
+      const lineCanvas = createCanvas('id-canvas-line')
+      lineCanvas.canvas.width = main.offsetWidth - 20 - 3
+      lineCanvas.canvas.height = 500
+      // lineCanvas.canvas.style.backgroundColor = 'LightSkyBlue'
+      const lineDraw = () => {
+        lineCanvas.ctx.clearRect(0, 0, lineCanvas.canvas.width, lineCanvas.canvas.height)
+        for (const placeInfo of eInfo.placeList) {
+          drawLineInfo(lineCanvas.ctx, placeInfo.lineInfo, eInfo.sx, eInfo.sx)
+        }
+      }
+      currentPlaceEdt.draw = lineDraw
+      pSetEdt.draw = lineDraw
+
+      borderDiv.appendChild(lineCanvas.canvas)
+      main.appendChild(borderDiv)
+    }
+
+    function makeEditRaw(main, menu) {
+      placeRaw = createEdtRawPlace(menu, () => { // onEdit
+        updateEditRawList()
+        currentPlaceEdt.updateCrnt()
+      })
+      const borderDiv = createBorderDiv()
+      const rawCanvas = createCanvas('id-canvas-raw')
+      rawCanvas.canvas.width = main.offsetWidth - 20 - 3
+      rawCanvas.canvas.height = 500
+      placeRaw.rawEdit = rawEdit
+
+      const rawDraw = () => {
+        rawCanvas.ctx.clearRect(0, 0, rawCanvas.canvas.width, rawCanvas.canvas.height)
+        if (!rawEdit.rawInfo) return
+
+        const ctx = rawCanvas.ctx
+        const sx = placeRaw.info.sx
+        const sy = placeRaw.info.sy
+        let szw = rawEdit.szw
+        let szh = rawEdit.szh
+        if (rawEdit.transRawInfo) {
+          // if (rawEdit.expandInfo.sn > 1) {
+          //   if (rawEdit.expandInfo.isFit) {
+          //     szw = rawEdit.szw / rawEdit.expandInfo.sn
+          //     szh = rawEdit.szh / rawEdit.expandInfo.sn
+          //   }
+          // }
+          drawArea(ctx, rawEdit.transRawInfo.column * szw, rawEdit.transRawInfo.row * szh, sx, sy, 'lightgray')
+          drawRawSimple(ctx, rawEdit.transRawInfo, sx, sy, szw, szh)
+        } else {
+          drawArea(ctx, rawEdit.rawInfo.column * szw, rawEdit.rawInfo.row * szh, sx, sy, 'lightgray')
+          drawRawSimple(ctx, rawEdit.rawInfo, sx, sy, szw, szh)
+        }
+
+        const kEditor = placeRaw.info.kEditor
+        if (placeRaw.info.isKeyboardEditing && kEditor.c >= 0 && kEditor.r >= 0) {
+          const x = kEditor.c * szw + sx + szw * 0.5
+          const y = kEditor.r * szh + sy + szh * 0.5
+          drawCircle(ctx, x, y, kEditor.radius, kEditor.color)
+        }
+      }
+      placeRaw.draw = rawDraw
+
+      placeRaw.addKeyDown()
+      placeRaw.addMouseDown(rawCanvas.canvas)
+
+      borderDiv.appendChild(rawCanvas.canvas)
+      // main.prepend(borderDiv)
+      main.appendChild(borderDiv)
+
+      const expandRaw = createEdtRawExpand(menu, () => { // onExpand
+        if (rawEdit.expandInfo.sn > 1) {
+          if (rawEdit.expandInfo.isFit) {
+            const szw = rawEdit.szw / rawEdit.expandInfo.sn
+            const szh = rawEdit.szh / rawEdit.expandInfo.sn
+            rawEdit.szw = szw
+            rawEdit.szh = szh
+            const placeInfo = eInfo.placeList[eInfo.crntI]
+            placeInfo.pSetInfo.szw = szw
+            placeInfo.pSetInfo.szh = szh
+            currentPlaceEdt.updateCrnt()
+            placeRaw.updateSzWY()
+            placeRaw.updateRawSizeTxt()
+            placeRaw.updateMtxInfo()
+            placeRaw.updateKeyInfoMap()
+            // placeRaw.draw()
+          }
+        }
+        updateEditRawList()
+        currentPlaceEdt.updateCrnt()
+      })
+      expandRaw.rawEdit = rawEdit
+      expandRaw.draw = rawDraw
+      expandRaw.updateKeyInfoMap = placeRaw.updateKeyInfoMap
+
+      const addColumnRaw = createEdtRawAddColumn(menu, () => { // onAdd
+        updateEditRawList()
+        currentPlaceEdt.updateCrnt()
+      })
+      addColumnRaw.rawEdit = rawEdit
+      addColumnRaw.draw = rawDraw
+      addColumnRaw.updateKeyInfoMap = placeRaw.updateKeyInfoMap
+
+      const addRowRaw = createEdtRawAddRow(menu, () => { // onAdd
+        updateEditRawList()
+        currentPlaceEdt.updateCrnt()
+      })
+      addRowRaw.rawEdit = rawEdit
+      addRowRaw.draw = rawDraw
+      addRowRaw.updateKeyInfoMap = placeRaw.updateKeyInfoMap
+
+      const rotateIRaw = createEdtRawRotateI(menu, () => { // onRotate
+        updateEditRawList()
+        currentPlaceEdt.updateCrnt()
+      })
+      rotateIRaw.rawEdit = rawEdit
+      rotateIRaw.draw = rawDraw
+      rotateIRaw.updateKeyInfoMap = placeRaw.updateKeyInfoMap
+
+      const targetEdtRaw = createEdtRawTargetAddRemove(menu, () => { // onEdit
+        updateEditRawList()
+        currentPlaceEdt.updateCrnt()
+      })
+      targetEdtRaw.rawEdit = rawEdit
+      targetEdtRaw.draw = rawDraw
+      targetEdtRaw.updateKeyInfoMap = placeRaw.updateKeyInfoMap
+    }
+
+    function updateEditRawList() {
+      if (!rawEdit.transRawInfo) return
+      const placeInfo = eInfo.placeList[eInfo.crntI]
+      makeLineByRawInfo(placeInfo, rawEdit.transRawInfo)
+      currentPlaceEdt.draw()
+
+      let info = eInfo.editRawList.find(e => e.i === eInfo.crntI)
+      if (!info) {
+        info = { i: eInfo.crntI, rawInfo: null }
+        eInfo.editRawList.push(info)
+      }
+      info.rawInfo = rawEdit.transRawInfo
+      const rawSet = createRawStrSet(info.rawInfo)
+      const index = eInfo.rawSetList.findIndex(s => s.split('/')[0] === info.rawInfo.uCode)
+      if (index < 0) {
+        eInfo.rawSetList.push(rawSet)
+      } else {
+        eInfo.rawSetList[index] = rawSet
+      }
+    }
+  </script>
+</body>
+</html>
