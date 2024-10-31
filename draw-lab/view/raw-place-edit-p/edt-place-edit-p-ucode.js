@@ -41,7 +41,7 @@ function createEdtPlaceEditPUCode(pnt, onAdd, i=0) {
       for (const p of edt.info.placeList) makeLine(p, edt.info.rawSetList)
       edt.info.crntI = 0
       edt.updateCrnt()
-      if (onAdd) onAdd(edt.info.placeList[0])
+      if (onAdd) onAdd(edt.info.placeList[0], 'load')
     })
   makeInputTextBtn(idInputRawUCode, container.content, 'raw uCode: ', 'add',
     () => {
@@ -86,7 +86,7 @@ function createEdtPlaceEditPUCode(pnt, onAdd, i=0) {
       edt.info.crntI = edt.info.placeList.length - 1
       makeLine(placeInfo, edt.info.rawSetList)
       edt.updateCrnt()
-      if (onAdd) onAdd(placeInfo)
+      if (onAdd) onAdd(placeInfo, 'add')
     })
   // list: [ { id: '', labelTxt: '', onClick: null } ]
   makeBtnGroup(container.content, [
@@ -96,56 +96,56 @@ function createEdtPlaceEditPUCode(pnt, onAdd, i=0) {
   ])
 
   edt.print = () => {
-    console.log(edt.info.placeList)
+    console.log(edt.info)
   }
 
-  edt.save = () => {
-    const uCode = `place-edit-p-set-${getCurrentDateUCode()}`
-    const info = {
-      uCode: uCode,
-      list: edt.info.placeList
-    }
-    fitPlaceInfo(info)
-    edt.info.placeList = info.list
-    const str = createEditPPlaceStrSet(info)
-    console.log(str)
-    saveString(uCode, str)
-    for (const p of edt.info.placeList) {
-      const pSetStr = createEditPStrSet(p.pSetInfo)
-      console.log(pSetStr)
-      saveString(p.pSetInfo.uCode, pSetStr)
-    }
-
-    for (const raw of edt.info.editRawList) {
-      if (raw.rawInfo) {
-        const rawSet = createRawStrSet(raw.rawInfo)
-        saveString(raw.rawInfo.uCode, rawSet)
-      }
-    }
-  }
-
-  edt.saveToLine = () => {
-    const uCode = `place-edit-p-set-${getCurrentDateUCode()}`
-    const info = {
-      uCode: uCode,
-      list: edt.info.placeList
-    }
-    fitPlaceInfo(info)
-    edt.info.placeList = info.list
-    const lineList = []
-    console.log(edt.info.placeList)
-    for (const p of edt.info.placeList) {
-      makeLine(p, edt.info.rawSetList)
-      if (p.lineInfo) {
-        // p.lineInfo.x = p.x
-        // p.lineInfo.y = p.y
-        lineList.push(p.lineInfo)
-      }
-    }
-    const mgLine = mergeSpLineInfo(`line-${getCurrentDateUCode()}`, lineList)
-    const mgLineSet = createSimpleLineStrSet(mgLine)
-    saveString(mgLine.uCode, mgLineSet)
-  }
+  // edt.save = () => {
+  //   const uCode = `place-edit-p-set-${getCurrentDateUCode()}`
+  //   const info = {
+  //     uCode: uCode,
+  //     list: edt.info.placeList
+  //   }
+  //   fitPlaceInfo(info)
+  //   edt.info.placeList = info.list
+  //   const str = createEditPPlaceStrSet(info)
+  //   console.log(str)
+  //   saveString(uCode, str)
+  //   for (const p of edt.info.placeList) {
+  //     const pSetStr = createEditPStrSet(p.pSetInfo)
+  //     console.log(pSetStr)
+  //     saveString(p.pSetInfo.uCode, pSetStr)
+  //   }
+  //
+  //   for (const raw of edt.info.editRawList) {
+  //     if (raw.rawInfo) {
+  //       const rawSet = createRawStrSet(raw.rawInfo)
+  //       saveString(raw.rawInfo.uCode, rawSet)
+  //     }
+  //   }
+  // }
+  //
+  // edt.saveToLine = () => {
+  //   const uCode = `place-edit-p-set-${getCurrentDateUCode()}`
+  //   const info = {
+  //     uCode: uCode,
+  //     list: edt.info.placeList
+  //   }
+  //   fitPlaceInfo(info)
+  //   edt.info.placeList = info.list
+  //   const lineList = []
+  //   console.log(edt.info.placeList)
+  //   for (const p of edt.info.placeList) {
+  //     makeLine(p, edt.info.rawSetList)
+  //     if (p.lineInfo) {
+  //       // p.lineInfo.x = p.x
+  //       // p.lineInfo.y = p.y
+  //       lineList.push(p.lineInfo)
+  //     }
+  //   }
+  //   const mgLine = mergeSpLineInfo(`line-${getCurrentDateUCode()}`, lineList)
+  //   const mgLineSet = createSimpleLineStrSet(mgLine)
+  //   saveString(mgLine.uCode, mgLineSet)
+  // }
 
   return edt
 }

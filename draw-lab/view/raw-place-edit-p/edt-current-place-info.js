@@ -29,14 +29,14 @@ function createEdtCurrentPlaceInfo(pnt, onChange, i=0) {
         edt.info.crntI++
         if (edt.info.crntI >= edt.info.placeList.length) edt.info.crntI = 0
         edt.updateCrnt()
-        if (onChange) onChange(edt.getCrntPlace())
+        if (onChange) onChange(edt.getCrntPlace(), 'next')
       } },
     { id: idBtnPrev, labelTxt: 'prev',
       onClick: () => {
         edt.info.crntI--
         if (edt.info.crntI < 0) edt.info.crntI = edt.info.placeList.length - 1
         edt.updateCrnt()
-        if (onChange) onChange(edt.getCrntPlace())
+        if (onChange) onChange(edt.getCrntPlace(), 'prev')
       } },
     { id: idBtnFront, labelTxt: 'front',
       onClick: () => {
@@ -75,7 +75,7 @@ function createEdtCurrentPlaceInfo(pnt, onChange, i=0) {
           edt.info.crntI = 0
           edt.updateCrnt()
         }
-        if (onChange) onChange(edt.getCrntPlace())
+        if (onChange) onChange(edt.getCrntPlace(), 'remove')
       } },
   ])
   makeInputNum(idInputLineX, container.content, 'x: ', 0,

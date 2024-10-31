@@ -1,3 +1,6 @@
+// uCode/lineUCode/sftRI/scaleX,scaleY/degree/ltX,ltY,rtX,rtY,rbX,rbY,lbX,lbY
+// no p4 edit -> length 5
+// default: sftRI = 0, scaleX = 1, scaleY = 1, degree = 0 <- no transform
 const lineEditSetList00 = [
   'line-edit-20241030195044/line-20241016174433/3/0.91,1.1/-29',
   'line-edit-20241031090936/line-20241016174433/3/0.91,1.1/-29/0,77,195.01608614917484,-45,173,221,19,197.23208760972707',
@@ -6,5 +9,6 @@ const lineEditSetList00 = [
 
   'line-edit-20241031103706/line-20241016190832/0/1,1/43/20,20,232,0,170,162,-26,196',
   'line-edit-20241031104520/line-20241017104750/7/1,1/-1/44,-21,197,27,238,110,-16,95',
+
 
 ]

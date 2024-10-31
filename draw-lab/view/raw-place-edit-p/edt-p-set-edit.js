@@ -1,4 +1,4 @@
-function createEdtPSetEdit(pnt, i=0) {
+function createEdtPSetEdit(pnt, onChange, i=0) {
   const idTxtDivLineSize = `id-txt-div-line-size-${i}`
   const idInputChangeRawUCode = `id-input-change-raw-ucode-${i}`
   const idInputSzw = `id-input-szw-${i}`
@@ -93,6 +93,7 @@ function createEdtPSetEdit(pnt, i=0) {
     makeLine(crntPlace, edt.info.rawSetList)
     changeSimpleTxtDiv(idTxtDivLineSize, `lineInfo w: ${crntPlace.lineInfo.w}, h: ${crntPlace.lineInfo.h}`)
     edt.draw()
+    if (onChange) onChange()
   }
 
   edt.updateCrnt = () => {

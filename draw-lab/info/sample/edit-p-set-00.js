@@ -1,5 +1,9 @@
 // edit-p-set
 // uCode/raw uCode/szw/szh/color/lineColor/lineWidth/edit type/i num/i,i,i, ... list/edge type num/edge type,type ... list
+//
+// length > 12 : has line edit (line transform)
+//      /sftRI/scaleX,scaleY/degree/ltX,ltY,rtX,rtY,rbX,rbY,lbX,lbY
+//   no p4 edit -> length +3 (15)
 const editPSet00List = [
   // 'edit-p-set-00/raw-sample-00/40/40/white/black/1/remove-p/3/10,12,23/0/',
   // 'edit-p-set-01/raw-sample-00/40/40/white/black/1/add-p/0//4/left-top,right-bottom,right-bottom-inside,left-top-inside',
@@ -72,6 +76,13 @@ const editPSet00List = [
 
   'edit-p-set-20241030133452/raw-20241030133518/10/10/MediumTurquoise/black/1/slice/1/0/3/left-top,right-bottom,left-bottom',
   'edit-p-set-20241030133811/raw-20241023180427/20/20/DarkSlateGrey/black/1/slice/1/0/1/left-top-inside',
+
+
+  'edit-p-set-20241031181725/raw-20241021181559/20/20/DodgerBlue/black/1/none/0//0//0/1,1/0/26,40,182,-12,217,180,-17,183',
+  'edit-p-set-20241031181738/raw-20241023165805/20/20/LightCyan/black/1/none/0//0//4/1,1/18',
+
+  'edit-p-set-20241031182631/raw-20241023165623/20/20/IndianRed/black/1/none/0//0//3/1,1/0/25,20,160,1,170,234,-4,196',
+  'edit-p-set-20241031182650/raw-20241023144625/20/20/SlateBlue/black/1/none/0//0//3/1,1/38',
 
 
   // '',
