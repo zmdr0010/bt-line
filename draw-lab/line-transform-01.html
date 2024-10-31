@@ -142,6 +142,8 @@
             changeInputValue('id-input-p4-rb-y', editInfo.p4Info.rb.y)
             changeInputValue('id-input-p4-lb-x', editInfo.p4Info.lb.x)
             changeInputValue('id-input-p4-lb-y', editInfo.p4Info.lb.y)
+          } else {
+            calculateP4()
           }
           editByOrder(editInfo)
           draw()
@@ -283,28 +285,32 @@
         {
           id: 'id-btn-calc-p4', labelTxt: 'calculate p4',
           onClick: () => {
-            let lineInfo = editInfo.lineInfo
-            if (editInfo.transLine) lineInfo = editInfo.transLine
-            editInfo.p4Info.lt.x = 0
-            editInfo.p4Info.lt.y = 0
-            editInfo.p4Info.rt.x = lineInfo.w
-            editInfo.p4Info.rt.y = 0
-            editInfo.p4Info.rb.x = lineInfo.w
-            editInfo.p4Info.rb.y = lineInfo.h
-            editInfo.p4Info.lb.x = 0
-            editInfo.p4Info.lb.y = lineInfo.h
-            changeInputValue('id-input-p4-lt-x', editInfo.p4Info.lt.x)
-            changeInputValue('id-input-p4-lt-y', editInfo.p4Info.lt.y)
-            changeInputValue('id-input-p4-rt-x', editInfo.p4Info.rt.x)
-            changeInputValue('id-input-p4-rt-y', editInfo.p4Info.rt.y)
-            changeInputValue('id-input-p4-rb-x', editInfo.p4Info.rb.x)
-            changeInputValue('id-input-p4-rb-y', editInfo.p4Info.rb.y)
-            changeInputValue('id-input-p4-lb-x', editInfo.p4Info.lb.x)
-            changeInputValue('id-input-p4-lb-y', editInfo.p4Info.lb.y)
+            calculateP4()
             if (editInfo.p4Info.isOn) draw()
           }
         }
       ])
+    }
+
+    function calculateP4() {
+      let lineInfo = editInfo.lineInfo
+      if (editInfo.transLine) lineInfo = editInfo.transLine
+      editInfo.p4Info.lt.x = 0
+      editInfo.p4Info.lt.y = 0
+      editInfo.p4Info.rt.x = lineInfo.w
+      editInfo.p4Info.rt.y = 0
+      editInfo.p4Info.rb.x = lineInfo.w
+      editInfo.p4Info.rb.y = lineInfo.h
+      editInfo.p4Info.lb.x = 0
+      editInfo.p4Info.lb.y = lineInfo.h
+      changeInputValue('id-input-p4-lt-x', editInfo.p4Info.lt.x)
+      changeInputValue('id-input-p4-lt-y', editInfo.p4Info.lt.y)
+      changeInputValue('id-input-p4-rt-x', editInfo.p4Info.rt.x)
+      changeInputValue('id-input-p4-rt-y', editInfo.p4Info.rt.y)
+      changeInputValue('id-input-p4-rb-x', editInfo.p4Info.rb.x)
+      changeInputValue('id-input-p4-rb-y', editInfo.p4Info.rb.y)
+      changeInputValue('id-input-p4-lb-x', editInfo.p4Info.lb.x)
+      changeInputValue('id-input-p4-lb-y', editInfo.p4Info.lb.y)
     }
 
     // // edit order: 1.sftRI, 2.scale, 3.degree
@@ -323,6 +329,7 @@
       const uCode = getInputValue('id-input-line-ucode')
       const set = lineSetList.find(s => s.split('/')[0] === uCode)
       editInfo.lineInfo = createSimpleLineInfo(set)
+      calculateP4()
       draw()
     }
 
