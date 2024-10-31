@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test trans line p4</title>
+</head>
+<body onload="init()">
+  <div style="margin: 10px"><canvas style="margin: 10px; border: solid 1px" id="id-canvas"></canvas></div>
+
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="info/sample/line-set-00.js"></script>
+  <script>
+    let lineSetList = []
+
+    function init() {
+      const canvas = document.getElementById('id-canvas')
+      canvas.width = window.innerWidth - 20 * 3
+      canvas.height = window.innerHeight - 20 * 4
+      const ctx = canvas.getContext('2d')
+      lineSetList = lineSetList00
+      const uCode = 'line-20241026144519'
+      const set = lineSetList.find(s => s.split('/')[0] === uCode)
+      let line = createSimpleLineInfo(set)
+      line = createLinePointFromLineInfo(line)
+
+      let sx = 100
+      let sy = 100
+      drawLineInfo(ctx, line, sx, sy, true)
+
+      const pInfo = {
+        lt: {x: sx, y: sy}, rt: {x: sx + line.w, y: sy},
+        lb: {x: sx, y: sy + line.h}, rb: {x: sx + line.w, y: sy + line.h}
+      }
+
+      drawPInfo(ctx, pInfo)
+
+      const pInfo01 = {
+        lt: {x: 20, y: 20}, rt: {x: line.w - 10, y: 0},
+        lb: {x: 0, y: line.h}, rb: {x: line.w, y: line.h}
+      }
+      const line01 = transformPoints4V1(line, pInfo01)
+
+      sx = 400
+      drawLineInfo(ctx, line01, sx, sy, true)
+      drawPInfo(ctx, pInfo01, sx, sy)
+
+      const pInfo02 = {
+        lt: {x: -20, y: -20}, rt: {x: line.w + 10, y: 0},
+        lb: {x: 20, y: line.h + 10}, rb: {x: line.w - 10, y: line.h -5}
+      }
+      sx = 700
+      const line02 = transformPoints4V1(line, pInfo02)
+
+      drawLineInfo(ctx, line02, sx, sy, true)
+      drawPInfo(ctx, pInfo02, sx, sy)
+    }
+
+    function drawPInfo(ctx, info, sx=0, sy=0) {
+      drawCircle(ctx, info.lt.x + sx, info.lt.y + sy, 12, 'Brown')
+      drawCircle(ctx, info.rt.x + sx, info.rt.y + sy, 12, 'Brown')
+      drawCircle(ctx, info.lb.x + sx, info.lb.y + sy, 12, 'Brown')
+      drawCircle(ctx, info.rb.x + sx, info.rb.y + sy, 12, 'Brown')
+    }
+  </script>
+</body>
+</html>
