@@ -8,7 +8,8 @@ function createEdtLineTransform(pnt, onChange, i=0) {
   const idBtnReset = `id-btn-reset-${i}`
   const edt ={
     eInfo: null,
-    draw: () => {}
+    draw: () => {},
+    update: () => {}
   }
   const container = createContainer()
   pnt.appendChild(container.border)
@@ -79,5 +80,13 @@ function createEdtLineTransform(pnt, onChange, i=0) {
         }
       }
     ])
+  edt.update = () => {
+    const eInfo = edt.eInfo
+    const editInfo = eInfo.lineEditInfo.list[eInfo.crntI]
+    changeInputValue(idSelectSftRI, editInfo.sftRIInfo.i)
+    changeInputValue(idInputScaleX, editInfo.scaleInfo.scaleX)
+    changeInputValue(idInputScaleY, editInfo.scaleInfo.scaleY)
+    changeInputValue(idInputDegree, editInfo.rotateInfo.degree)
+  }
   return edt
 }
