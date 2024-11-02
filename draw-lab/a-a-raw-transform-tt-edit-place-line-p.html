@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a a raw transform tt edit place line p</title>
+  <style>
+    .menu-left {
+      height: 100%;
+      width: 30%;
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+    }
+    .main {
+      height: 100%;
+      width: calc(100% - 30% - 8px - 16px - 400px);
+      position: fixed;
+      z-index: 1;
+      overflow-x: hidden;
+      left: calc(30%);
+    }
+    .menu-right {
+      width: 400px;
+      height: 100%;
+      /*background-color: lightgray;*/
+      position: fixed;
+      right: 0;
+      /*top: 0;*/
+      z-index: 1;
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div class="menu-left" id="id-menu-left"></div>
+  <div class="main" id="id-main">
+  </div>
+  <div class="menu-right" id="id-menu-right"></div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-canvas.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-draw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-raw-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-transform-raw.js"></script>
+  <script type="text/javascript" src="fnc/fnc-raw-mtx.js"></script>
+  <script type="text/javascript" src="fnc/fnc-outline.js"></script>
+  <script type="text/javascript" src="fnc/fnc-line-info.js"></script>
+  <script type="text/javascript" src="fnc/fnc-merge-line-info.js"></script>
+  <script type="text/javascript" src="info/sample/raw-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/place-raw-set-00.js"></script>
+  <script>
+    let rawSetList = []
+    let placeSetList = []
+
+    let rawEditList = []
+
+    let rawCanvas
+    let lineCanvas
+    let pListCanvas
+    let size = 20
+    let rawEdit
+    let rawSx = 10
+    let rawSy = 10
+    let isMouseEditing = false
+    let isKeyboardEditing = false
+    let kEditor = {
+      c: -1,
+      r: -1,
+      color: 'red',
+      radius: 8,
+      keyLeft: 'b',
+      keyRight: 'm',
+      keyUp: 'h',
+      keyDown: 'n',
+      keyOnOff: 'd'
+    }
+    let color = 'white'
+    let lineColor = 'black'
+    let lineWidth = 1
+    let pSx = 10
+    let pSy = 10
+    let pSzw = 20
+    let pSzh = 20
+    let pSize = 16
+    let linePList = []
+
+    let crntI = -1
+
+    function init() {
+      const main = document.getElementById('id-main')
+      const rawBorderDiv = createBorderDiv()
+      rawCanvas = createCanvas('id-raw-canvas')
+      rawCanvas.canvas.width = main.offsetWidth - 20 * 3
+      rawCanvas.canvas.height = 400
+      rawBorderDiv.appendChild(rawCanvas.canvas)
+      main.appendChild(rawBorderDiv)
+
+      const lineBorderDiv = createBorderDiv()
+      lineCanvas = createCanvas('id-line-canvas')
+      lineCanvas.canvas.width = main.offsetWidth - 20 * 3
+      lineCanvas.canvas.height = 400
+      lineBorderDiv.appendChild(lineCanvas.canvas)
+      main.appendChild(lineBorderDiv)
+
+      const pListBorderDiv = createBorderDiv()
+      pListCanvas = createCanvas('id-p-list-canvas')
+      pListCanvas.canvas.width = main.offsetWidth - 20 * 3
+      pListCanvas.canvas.height = 400 * 3
+      pListBorderDiv.appendChild(pListCanvas.canvas)
+      main.appendChild(pListBorderDiv)
+
+      rawSetList = rawSet00List
+      placeSetList = placeRawSet00List
+      makeMenu()
+
+      // canvas.addEventListener('mousemove', (e) => {
+      //   // console.log(`client x: ${e.clientX}, y: ${e.clientY}`)
+      //   console.log(`offset x: ${e.offsetX}, y: ${e.offsetY}`)
+      // })
+      rawCanvas.canvas.addEventListener('mousedown', (e) => {
+        console.log(`mouse down offset x: ${e.offsetX}, y: ${e.offsetY}`)
+        const crntEdit = rawEditList[crntI]
+        let rawInfo = crntEdit.transRawInfo
+        if (!rawInfo) {
+          rawInfo = structuredClone(crntEdit.rawInfo)
+          crntEdit.transRawInfo = rawInfo
+          rawInfo.uCode = `raw-${getCurrentDateUCode()}`
+        }
+        const mouseX = e.offsetX
+        const mouseY = e.offsetY
+        const szw = crntEdit.szw
+        const szh = crntEdit.szh
+        const c = Math.floor((mouseX - rawSx) / szw)
+        const r = Math.floor((mouseY - rawSy) / szh)
+        const index = r * rawInfo.column + c
+        console.log(`c: ${c}, r: ${r}, index: ${index}`)
+        const str = `mouse down:  c: ${c}, r: ${r}, index: ${index} (x: ${e.offsetX}, y: ${e.offsetY})`
+        changeSimpleTxtDiv('id-txt-div-mouse-down', str)
+        if (isMouseEditing && !(c >= rawInfo.column || r >= rawInfo.row)) {
+          const oRw = rawInfo.raw[index]
+          let rw = 0
+          if (oRw === 0) rw = 1
+          rawInfo.raw[index] = rw
+          updateKeyInfoMap()
+          drawRaw()
+          drawPList()
+          drawLine()
+        }
+      })
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === kEditor.keyLeft) {
+          kEditor.c--
+          drawRaw()
+          drawPList()
+          drawLine()
+        }
+        if (e.key === kEditor.keyRight) {
+          kEditor.c++
+          drawRaw()
+          drawPList()
+          drawLine()
+        }
+        if (e.key === kEditor.keyUp) {
+          kEditor.r--
+          drawRaw()
+          drawPList()
+          drawLine()
+        }
+        if (e.key === kEditor.keyDown) {
+          kEditor.r++
+          drawRaw()
+          drawPList()
+          drawLine()
+        }
+        if (e.key === kEditor.keyOnOff) {
+          const crntEdit = rawEditList[crntI]
+          let rawInfo = crntEdit.transRawInfo
+          if (!rawInfo) {
+            rawInfo = structuredClone(crntEdit.rawInfo)
+            crntEdit.transRawInfo = rawInfo
+            rawInfo.uCode = `raw-${getCurrentDateUCode()}`
+          }
+          const c = kEditor.c
+          const r = kEditor.r
+          if (c < 0 || c >= rawInfo.column) return
+          if (r < 0 || r >= rawInfo.row) return
+          const index = r * rawInfo.column + c
+          const oRw = rawInfo.raw[index]
+          let rw = 0
+          if (oRw === 0) rw = 1
+          rawInfo.raw[index] = rw
+          updateKeyInfoMap()
+          drawRaw()
+          drawPList()
+          drawLine()
+        }
+      })
+
+      pListCanvas.canvas.addEventListener('mousedown', (e) => {
+        console.log(`pList mouse down offset x: ${e.offsetX}, y: ${e.offsetY}`)
+        const crntEdit = rawEditList[crntI]
+        const linePList = crntEdit.linePList
+
+        const mouseX = e.offsetX
+        const mouseY = e.offsetY
+        const szw = pSzw
+        const szh = pSzh
+
+        for (const p of linePList) {
+          const sz = pSize * 0.5
+          const lx = p.x - sz + pSx
+          const rx = p.x + sz + pSx
+          const ty = p.y - sz + pSy
+          const by = p.y + sz + pSy
+          if (mouseX >= lx && mouseX <= rx && mouseY >= ty && mouseY <= by) {
+            const index = linePList.indexOf(p)
+            const str = `mouse down p: [ ${index} ] x: ${p.x}, y: ${p.y}`
+            changeSimpleTxtDiv('id-txt-div-p-list-mouse-info', str)
+            p.isOn = !p.isOn
+            drawPList()
+            break
+          }
+        }
+      })
+    }
+
+    function makeMenu() {
+      const menuLeft = document.getElementById('id-menu-left')
+      makeMenuLeft(menuLeft)
+      const menuRight = document.getElementById('id-menu-right')
+      makeMenuRight(menuRight)
+    }
+
+    function makeMenuLeft(menu) {
+      makeInputRawUCode(menu)
+      makeRawPlaceEdit(menu)
+      makeEditExpand(menu)
+      makeEditAddColumn(menu)
+      makeEditAddRow(menu)
+      makeEditRotateI(menu)
+      makeEditRemoveRaw(menu)
+      makeEditMtx(menu)
+    }
+
+    function makeMenuRight(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeBtnGroup(container.content, [
+        { id: 'id-btn-save-line', labelTxt: 'save line', onClick: () => { saveLine() } },
+        { id: 'id-btn-draw-line', labelTxt: 'draw line',
+          onClick: () => {
+            drawPList()
+            drawLine()
+          } }
+      ])
+      makeSimpleTxtDiv('id-txt-div-p-list-mouse-info', container.content, 'pList mouse down info')
+
+      // let color = 'white'
+      // let lineColor = 'black'
+      // let lineWidth = 1
+      // let pSx = 10
+      // let pSy = 10
+      // let pSzw = 20
+      // let pSzh = 20
+      // let pSize = 16
+      makeInputNum('id-input-p-sx', container.content, 'pSx: ', pSx,
+        () => { pSx = getInputValueNumber('id-input-p-sx') })
+      makeInputNum('id-input-p-sy', container.content, 'pSy: ', pSy,
+        () => { pSy = getInputValueNumber('id-input-p-sy') })
+      makeInputNum('id-input-p-szw', container.content, 'pSzw: ', pSzw,
+        () => {
+          pSzw = getInputValueNumber('id-input-p-szw')
+          linePList = []
+        })
+      makeInputNum('id-input-p-szh', container.content, 'pSzh: ', pSzh,
+        () => {
+          pSzh = getInputValueNumber('id-input-p-szh')
+          linePList = []
+        })
+      makeInputNum('id-input-p-size', container.content, 'pSize: ', pSize,
+        () => { pSize = getInputValueNumber('id-input-p-size') })
+      makeInputText('id-input-line-color', container.content, 'color: ',
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.color = getInputValue('id-input-line-color')
+        })
+      changeInputValue('id-input-line-color', color)
+      makeInputText('id-input-line-line-color', container.content, 'lineColor: ',
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.lineColor = getInputValue('id-input-line-line-color')
+        })
+      changeInputValue('id-input-line-line-color', lineColor)
+      makeInputNum('id-input-line-line-width', container.content, 'lineWidth: ', lineWidth,
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.lineWidth = getInputValueNumber('id-input-line-line-width')
+        })
+    }
+
+    function makeInputRawUCode(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeInputTextBtn('id-input-raw-ucode', container.content, 'raw uCode: ', 'add',
+        () => {
+          addRaw()
+        })
+      // list: [ { id: '', labelTxt: '', onClick: null } ]
+      makeBtnGroup(container.content, [
+        { id: 'id-btn-print', labelTxt: 'print', onClick: () => { print() } },
+        { id: 'id-btn-save', labelTxt: 'save', onClick: () => { saveRaw() } }
+      ])
+    }
+
+    function makeRawPlaceEdit(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeSimpleTxtDiv('id-txt-div-raw-place', container.content, `[${crntI}]`)
+      makeSimpleTxtDiv('id-txt-div-raw-size', container.content, 'raw size')
+      makeSimpleTxtDiv('id-txt-div-mouse-down', container.content, 'mouse down info')
+      makeInputCheckBox(container.content, 'id-checkbox-is-mouse-editing', 'isMouseEditing', isMouseEditing,
+        () => { isMouseEditing = getChecked('id-checkbox-is-mouse-editing') })
+      makeInputCheckBox(container.content, 'id-checkbox-is-keyboard-editing', 'isKeyboardEditing', isKeyboardEditing,
+        () => {
+          isKeyboardEditing = getChecked('id-checkbox-is-keyboard-editing')
+          drawRaw()
+          drawPList()
+          drawLine()
+      })
+      makeBtnGroup(container.content, [
+        { id: 'id-btn-next', labelTxt: 'next',
+          onClick: () => {
+            crntI++
+            if (crntI >= rawEditList.length) crntI = 0
+            updateCrnt()
+          } },
+        { id: 'id-btn-prev', labelTxt: 'prev',
+          onClick: () => {
+            crntI--
+            if (crntI < 0) crntI = rawEditList.length - 1
+            updateCrnt()
+          } },
+        { id: 'id-btn-front', labelTxt: 'front',
+          onClick: () => {
+            if (rawEditList.length < 0) return
+            let next = crntI + 1
+            if (next >= rawEditList.length) next = rawEditList.length - 1
+            if (crntI === next) return
+            const nLine = rawEditList[next]
+            const crnt = rawEditList[crntI]
+            rawEditList[crntI] = nLine
+            rawEditList[next] = crnt
+            crntI = next
+            updateCrnt()
+          } },
+        { id: 'id-btn-back', labelTxt: 'back',
+          onClick: () => {
+            if (rawEditList.length < 0) return
+            let prev = crntI - 1
+            if (prev < 0) prev = 0
+            if (crntI === prev) return
+            const pLine = rawEditList[prev]
+            const crnt = rawEditList[crntI]
+            rawEditList[prev] = crnt
+            rawEditList[crntI] = pLine
+            crntI = prev
+            updateCrnt()
+          } },
+        { id: 'id-btn-reset', labelTxt: 'reset',
+          onClick: () => {
+            resetTransInfo()
+          } }
+      ])
+      makeInputNum('id-input-raw-x', container.content, 'x: ', 0,
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.x = getInputValueNumber('id-input-raw-x')
+          drawRaw()
+          drawPList()
+          drawLine()
+        })
+      makeInputNum('id-input-raw-y', container.content, 'y: ', 0,
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.y = getInputValueNumber('id-input-raw-y')
+          drawRaw()
+          drawPList()
+          drawLine()
+        })
+      makeInputNum('id-input-raw-szw', container.content, 'szw: ', 0,
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.szw = getInputValueNumber('id-input-raw-szw')
+          makePList(crntEdit)
+          drawRaw()
+          drawPList()
+          drawLine()
+        })
+      makeInputNum('id-input-raw-szh', container.content, 'szy: ', 0,
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.szh = getInputValueNumber('id-input-raw-szh')
+          makePList(crntEdit)
+          drawRaw()
+          drawPList()
+          drawLine()
+        })
+    }
+
+    function makeEditExpand(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeInputCheckBox(container.content, 'id-checkbox-expand-fit', 'fit expand', true,
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.expandInfo.isFit = getChecked('id-checkbox-expand-fit')
+        })
+      makeInputNumBtn('id-input-expand-sn', container.content, 'expand sn: ', 'expand',
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.expandInfo.sn = getInputValueNumber('id-input-expand-sn')
+
+          if (crntEdit.expandInfo.sn > 1) {
+            if (crntEdit.expandInfo.isFit) {
+              const szw = crntEdit.szw / crntEdit.expandInfo.sn
+              const szh = crntEdit.szh / crntEdit.expandInfo.sn
+              crntEdit.szw = szw
+              crntEdit.szh = szh
+              changeInputValue('id-input-raw-szw', szw)
+              changeInputValue('id-input-raw-szh', szh)
+            }
+
+            if (crntEdit.transRawInfo) {
+              crntEdit.transRawInfo = expandRawSimple(crntEdit.transRawInfo, crntEdit.expandInfo.sn)
+            } else {
+              crntEdit.transRawInfo = expandRawSimple(crntEdit.rawInfo, crntEdit.expandInfo.sn)
+            }
+            updateKeyInfoMap()
+          }
+          makePList(crntEdit)
+          drawRaw()
+          drawPList()
+          drawLine()
+        })
+    }
+
+    function makeEditAddColumn(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeInputNum('id-input-add-column-c', container.content, 'add column c: ', 0,
+        () => {
+          if (rawEdit) rawEdit.addColumnInfo.target = getInputValueNumber('id-input-add-column-c')
+        })
+      makeInputNumBtn('id-input-add-column', container.content, 'add: ', 'add c',
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.addColumnInfo.add = getInputValueNumber('id-input-add-column')
+          if (crntEdit.addColumnInfo.add !== 0) {
+            let rawInfo = crntEdit.rawInfo
+            if (crntEdit.transRawInfo) rawInfo = crntEdit.transRawInfo
+            if (crntEdit.addColumnInfo.add > 0) {
+              crntEdit.transRawInfo = addColumn(rawInfo, crntEdit.addColumnInfo.target, crntEdit.addColumnInfo.add)
+            } else {
+              crntEdit.transRawInfo = removeColumn(rawInfo, crntEdit.addColumnInfo.target, crntEdit.addColumnInfo.add)
+            }
+            updateKeyInfoMap()
+          }
+          makePList(crntEdit)
+          drawRaw()
+          drawPList()
+          drawLine()
+        }, 0)
+    }
+
+    function makeEditAddRow(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeInputNum('id-input-add-row-r', container.content, 'add row r: ', 0,
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.addRowInfo.target = getInputValueNumber('id-input-add-row-r')
+        })
+      makeInputNumBtn('id-input-add-row', container.content, 'add: ', 'add r',
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.addRowInfo.add = getInputValueNumber('id-input-add-row')
+          if (crntEdit.addRowInfo.add !== 0) {
+            let rawInfo = crntEdit.rawInfo
+            if (crntEdit.transRawInfo) rawInfo = crntEdit.transRawInfo
+            if (crntEdit.addRowInfo.add > 0) {
+              crntEdit.transRawInfo = addRow(rawInfo, crntEdit.addRowInfo.target, crntEdit.addRowInfo.add)
+            } else {
+              crntEdit.transRawInfo = removeRow(rawInfo, crntEdit.addRowInfo.target, crntEdit.addRowInfo.add)
+            }
+            updateKeyInfoMap()
+          }
+          makePList(crntEdit)
+          drawRaw()
+          drawPList()
+          drawLine()
+        }, 0)
+    }
+
+    function makeEditRotateI(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeSelect('id-select-rotate-i', container.content, 'rotateI: ', 'choose rotateI',
+        () => {
+          const crntEdit = rawEditList[crntI]
+          crntEdit.rotateIInfo.i = getInputValueNumber('id-select-rotate-i')
+        }, [0,1,2,3,4,5,6,7])
+      makeBtnGroup(container.content, [{ id: 'id-btn-rotate-i', labelTxt: 'rotateI',
+        onClick: () => {
+          const crntEdit = rawEditList[crntI]
+          if (crntEdit.rotateIInfo.i > 0) {
+            let rawInfo = crntEdit.rawInfo
+            if (crntEdit.transRawInfo) rawInfo = crntEdit.transRawInfo
+            crntEdit.transRawInfo = shiftByRotateI(rawInfo, crntEdit.rotateIInfo.i)
+            updateKeyInfoMap()
+            makePList(crntEdit)
+            drawRaw()
+            drawPList()
+            drawLine()
+          }
+        }}])
+    }
+
+    function makeEditMtx(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeSimpleTxtDiv('id-txt-div-mtx-info', container.content, 'mtx info')
+    }
+
+    function makeEditRemoveRaw(menu) {
+      const container = createContainer()
+      menu.appendChild(container.border)
+      makeInputTextBtn('id-input-remove-raw-i-list', container.content, 'raw iList: ', 'remove',
+        () => { removeRawIList() })
+      makeInputTextBtn('id-input-add-raw-i-list', container.content, 'raw iList: ', 'add',
+        () => { addRawIList() })
+    }
+
+    function print() {
+      console.log(rawEditList)
+    }
+
+    // 1. save each transRawInfo set (hasn't : rawInfo set)
+    // 2. save place set
+    function saveRaw() {
+      // if (!rawEdit || !rawEdit.transRawInfo) return
+      // let uCode = rawEdit.transRawInfo.uCode
+      // const transStr = createRawStrSet(rawEdit.transRawInfo)
+      // saveString(uCode, transStr)
+
+      const placeUCode = `place-raw-${getCurrentDateUCode()}`
+      let svStr = `${placeUCode}/${rawEditList.length}`
+      for (const edit of rawEditList) {
+        let uCode = edit.rawInfo.uCode
+        const x = edit.x
+        const y = edit.y
+        let szw = edit.szw
+        let szh = edit.szh
+        if (edit.transRawInfo) {
+          uCode = edit.transRawInfo.uCode
+          // if (edit.expandInfo.sn > 1) {
+          //   if (edit.expandInfo.isFit) {
+          //     szw = edit.szw / edit.expandInfo.sn
+          //     szh = edit.szh / edit.expandInfo.sn
+          //   }
+          // }
+          const transStr = createRawStrSet(edit.transRawInfo)
+          saveString(uCode, transStr)
+        }
+        svStr += `/${uCode},${x},${y},${szw},${szh}`
+      }
+      saveString(placeUCode, svStr)
+    }
+
+    function addRaw() {
+      const uCode = getInputValue('id-input-raw-ucode')
+      const set = rawSetList.find(s => s.split('/')[0] === uCode)
+      const rawInfo = createRawInfo(set)
+      const rawEdit = {
+        x: 0,
+        y: 0,
+        szw: size,
+        szh: size,
+        rawInfo: rawInfo,
+        transRawInfo: null,
+        expandInfo: {
+          isFit: true,
+          sn: 1
+        },
+        addColumnInfo: {
+          add: 0,
+          target: 0
+        },
+        addRowInfo: {
+          add: 0,
+          target: 0
+        },
+        rotateIInfo: {
+          i: 0
+        },
+        keyInfoMap: null,
+        linePList: [],
+        color: 'white',
+        lineColor: 'black',
+        lineWidth: 1
+      }
+      const map = createKeyInfoMap(rawInfo)
+      console.log(map)
+      rawEdit.keyInfoMap = map
+      crntI = rawEditList.length
+      rawEditList.push(rawEdit)
+      updateMtxInfo()
+      makePList(rawEdit)
+      updateCrnt()
+      updateRawSizeTxt()
+    }
+
+    function drawRaw() {
+      const canvas = rawCanvas.canvas
+      const ctx = rawCanvas.ctx
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      const crntEdit = rawEditList[crntI]
+      let szw = crntEdit.szw
+      let szh = crntEdit.szh
+      if (crntEdit.transRawInfo) {
+        drawArea(ctx, crntEdit.transRawInfo.column * szw, crntEdit.transRawInfo.row * szh, rawSx, rawSy, 'lightgray')
+        drawRawSimple(ctx, crntEdit.transRawInfo, rawSx, rawSy, szw, szh)
+      } else {
+        drawArea(ctx, crntEdit.rawInfo.column * szw, crntEdit.rawInfo.row * szh, rawSx, rawSy, 'lightgray')
+        drawRawSimple(ctx, crntEdit.rawInfo, rawSx, rawSy, szw, szh)
+      }
+
+      if (isKeyboardEditing && kEditor.c >= 0 && kEditor.r >= 0) {
+        const x = kEditor.c * szw + rawSx + szw * 0.5
+        const y = kEditor.r * szh + rawSy + szh * 0.5
+        drawCircle(ctx, x, y, kEditor.radius, kEditor.color)
+      }
+
+      // init linePList
+      // linePList = []
+      // makePList(crntEdit)
+    }
+
+    function updateCrnt() {
+      const crntEdit = rawEditList[crntI]
+      changeSimpleTxtDiv('id-txt-div-raw-place', `[${crntI}]`)
+      changeInputValue('id-input-raw-x', crntEdit.x)
+      changeInputValue('id-input-raw-y', crntEdit.y)
+      changeInputValue('id-input-raw-szw', crntEdit.szw)
+      changeInputValue('id-input-raw-szh', crntEdit.szh)
+      setChecked('id-checkbox-expand-fit', crntEdit.expandInfo.isFit)
+      changeInputValue('id-input-expand-sn', crntEdit.expandInfo.sn)
+      changeInputValue('id-input-add-column-c', crntEdit.addColumnInfo.target)
+      changeInputValue('id-input-add-column', crntEdit.addColumnInfo.add)
+      changeInputValue('id-input-add-row-r', crntEdit.addRowInfo.target)
+      changeInputValue('id-input-add-row', crntEdit.addRowInfo.add)
+      changeInputValue('id-select-rotate-i', crntEdit.rotateIInfo.i)
+      changeInputValue('id-input-line-color', crntEdit.color)
+      changeInputValue('id-input-line-line-color', crntEdit.lineColor)
+      changeInputValue('id-input-line-line-width', crntEdit.lineWidth)
+      drawRaw()
+      drawPList()
+      drawLine()
+    }
+
+    function resetTransInfo() {
+      rawEdit.transRawInfo = null
+      changeInputValue('id-input-expand-sn', 1)
+      changeInputValue('id-input-add-column-c', 0)
+      changeInputValue('id-input-add-column', 0)
+      changeInputValue('id-input-add-row-r', 0)
+      changeInputValue('id-input-add-row', 0)
+      changeInputValue('id-select-rotate-i', 0)
+      updateKeyInfoMap()
+      drawRaw()
+      drawPList()
+      drawLine()
+    }
+
+    function updateMtxInfo() {
+      const crntEdit = rawEditList[crntI]
+      const keyList = getKeyList()
+      let str = ''
+      for (const key of keyList) {
+        const keyInfo = crntEdit.keyInfoMap.get(key)
+        if (keyInfo) {
+          str += `${key}: [ `
+          for (const i of keyInfo.iList) {
+            str += `${i}, `
+          }
+          str = str.slice(0, str.length-2)
+          str += ' ]\n\n'
+        }
+      }
+      changeSimpleTxtDiv('id-txt-div-mtx-info', str)
+    }
+
+    function updateKeyInfoMap() {
+      const crntEdit = rawEditList[crntI]
+      let rawInfo = crntEdit.rawInfo
+      if (crntEdit.transRawInfo) rawInfo = crntEdit.transRawInfo
+      const map = createKeyInfoMap(rawInfo)
+      console.log(map)
+      crntEdit.keyInfoMap = map
+      updateMtxInfo()
+      updateRawSizeTxt()
+    }
+
+    function updateRawSizeTxt() {
+      const crntEdit = rawEditList[crntI]
+      let rawInfo = crntEdit.rawInfo
+      if (crntEdit.transRawInfo) rawInfo = crntEdit.transRawInfo
+      // update raw size txt
+      changeSimpleTxtDiv('id-txt-div-raw-size', `column: ${rawInfo.column}, row: ${rawInfo.row}`)
+    }
+
+    function removeRawIList() {
+      const crntEdit = rawEditList[crntI]
+      if (!crntEdit.transRawInfo) crntEdit.transRawInfo = structuredClone(crntEdit.rawInfo)
+      const str = getInputValue('id-input-remove-raw-i-list')
+      const split = str.split(',')
+      for (const iStr of split) {
+        const i = Number(iStr)
+        crntEdit.transRawInfo.raw[i] = 0
+      }
+      updateKeyInfoMap()
+      drawRaw()
+      drawPList()
+      drawLine()
+    }
+
+    function addRawIList() {
+      const crntEdit = rawEditList[crntI]
+      if (!crntEdit.transRawInfo) crntEdit.transRawInfo = structuredClone(crntEdit.rawInfo)
+      const str = getInputValue('id-input-add-raw-i-list')
+      const split = str.split(',')
+      for (const iStr of split) {
+        const i = Number(iStr)
+        crntEdit.transRawInfo.raw[i] = 1
+      }
+      updateKeyInfoMap()
+      drawRaw()
+      drawPList()
+      drawLine()
+    }
+
+    function saveLine() {
+      const lineList = []
+      for (const editInfo of rawEditList) {
+        let rawInfo = editInfo.rawInfo
+        if (editInfo.transRawInfo) rawInfo = editInfo.transRawInfo
+        const pList = calculatePList(rawInfo)
+        let lPList = []
+        makeLinePList(pList[0], lPList, editInfo.szw, editInfo.szh)
+        let list = []
+        for (let i=0; i<lPList.length-1; i++) {
+          const p = lPList[i]
+          const lineP = editInfo.linePList[i]
+          if (lineP.isOn) list.push(p)
+        }
+        const firstP = list[0]
+        list.push({ x: firstP.x, y: firstP.y })
+        const line = createLinePointFromOutlinePList(list, editInfo.color, editInfo.lineColor, editInfo.lineWidth)
+        line.x = editInfo.x
+        line.y = editInfo.y
+        lineList.push(line)
+      }
+      const mUCode = `line-${getCurrentDateUCode()}`
+      const mLine = mergeSpLineInfo(mUCode, lineList)
+      const set = createSimpleLineStrSet(mLine)
+      saveString(mUCode, set)
+    }
+
+    function drawLine() {
+      const canvas = lineCanvas.canvas
+      const ctx = lineCanvas.ctx
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      for (const editInfo of rawEditList) {
+        const linePList = editInfo.linePList
+        let rawInfo = editInfo.rawInfo
+        if (editInfo.transRawInfo) rawInfo = editInfo.transRawInfo
+        const pList = calculatePList(rawInfo)
+
+        let lPList = []
+        makeLinePList(pList[0], lPList, editInfo.szw, editInfo.szh)
+        let list = []
+        for (let i=0; i<lPList.length-1; i++) {
+          const p = lPList[i]
+          const lineP = linePList[i]
+          if (lineP.isOn) list.push(p)
+        }
+        const firstP = list[0]
+        list.push({ x: firstP.x, y: firstP.y })
+        const line = createLinePointFromOutlinePList(list, editInfo.color, editInfo.lineColor, editInfo.lineWidth)
+        line.x = editInfo.x
+        line.y = editInfo.y
+        drawLineInfo(ctx, line, 0, 0)
+      }
+    }
+
+    function drawPList() {
+      const crntEdit = rawEditList[crntI]
+      const linePList = crntEdit.linePList
+      // if (linePList.length < 1) {
+      //   let rawInfo = crntEdit.rawInfo
+      //   if (crntEdit.transRawInfo) rawInfo = crntEdit.transRawInfo
+      //   const pList = calculatePList(rawInfo)
+      //   // const linePList = []
+      //   makeLinePList(pList[0], linePList, pSzw, pSzh)
+      //   for (const p of linePList) p.isOn = true
+      //   linePList = linePList.splice(0, linePList.length-1)
+      //   console.log(linePList)
+      // }
+
+      const canvas = pListCanvas.canvas
+      const ctx = pListCanvas.ctx
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      const firstP = linePList[0]
+      ctx.beginPath()
+      ctx.fillStyle = 'white'
+      let isFirst = true
+      for (const p of linePList) {
+        if (isFirst) {
+          isFirst = false
+          ctx.moveTo(p.x + pSx, p.y + pSy)
+        } else {
+          ctx.lineTo(p.x + pSx, p.y + pSy)
+        }
+      }
+      ctx.lineTo(firstP.x + pSx, firstP.y + pSy)
+      ctx.fill()
+
+      ctx.strokeStyle = 'black'
+      ctx.lineWidth = 1
+      isFirst = true
+      for (const p of linePList) {
+        if (isFirst) {
+          isFirst = false
+          ctx.moveTo(p.x + pSx, p.y + pSy)
+        } else {
+          ctx.lineTo(p.x + pSx, p.y + pSy)
+        }
+      }
+      ctx.lineTo(firstP.x + pSx, firstP.y + pSy)
+      ctx.stroke()
+
+      // ctx.strokeStyle = 'red'
+      ctx.lineWidth = 1
+      for (const p of linePList) {
+        if (p.isOn) {
+          ctx.strokeStyle = 'red'
+        } else {
+          ctx.strokeStyle = 'blue'
+        }
+        ctx.strokeRect(p.x - (pSize * 0.5) + pSx, p.y + pSy - (pSize * 0.5), pSize, pSize)
+      }
+    }
+
+    function makePList(editInfo) {
+      let rawInfo = editInfo.rawInfo
+      if (editInfo.transRawInfo) rawInfo = editInfo.transRawInfo
+      const pList = calculatePList(rawInfo)
+      let linePList = []
+      makeLinePList(pList[0], linePList, editInfo.szw, editInfo.szh)
+      for (const p of linePList) p.isOn = true
+      linePList = linePList.splice(0, linePList.length-1)
+      editInfo.linePList = linePList
+    }
+  </script>
+</body>
+</html>
