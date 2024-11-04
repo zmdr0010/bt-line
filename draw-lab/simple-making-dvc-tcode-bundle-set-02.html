@@ -19,12 +19,9 @@
   <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
   <script type="text/javascript" src="cmp/cmp-select.js"></script>
   <script>
-    // dvc: device
-    let dvcTCodeStrSetList = []
-    // tCode (with child) list
-    let dvcList = []
-    let dvcInfoList = []
+    // let dvcInfoList = []
 
+    // sample
     // has child -> dvc
     // not -> part
     let dvcTCodeSetInfoList = [
@@ -308,66 +305,66 @@
       saveString(bundleSet.uCode, bundleSet.bundleSet)
     }
 
-    function updateDvcEdit() {
-      const dvcContainer = document.getElementById('id-container-dvc-edit')
-      dvcContainer.innerHTML = ''
-      const tCode = getInputValue('id-select-dvc-tcode')
-      console.log(`update dvc tCode: ${tCode}`)
-
-      const dvc = dvcInfoList.find(d => d.tCode === tCode)
-      for (const cDvc of dvc.child) {
-        makeInputTextBtn(`id-input-line-ucode-${cDvc.tCode}`, dvcContainer, `[ ${cDvc.tCode} ] line uCode: `, 'change',
-          () => {
-            cDvc.lineUCode = getInputValue(`id-input-line-ucode-${cDvc.tCode}`)
-          })
-        const fitInfo = cDvc.transInfo.list.find(t => t.type === 'fit')
-        makeInputNum(`id-input-fit-w-${cDvc.tCode}`, dvcContainer, `[ ${cDvc.tCode} ] fit w: `, fitInfo.w,
-          () => {
-            fitInfo.w = getInputValueNumber(`id-input-fit-w-${cDvc.tCode}`)
-          })
-        makeInputNum(`id-input-fit-h-${cDvc.tCode}`, dvcContainer, `[ ${cDvc.tCode} ] fit h: `, fitInfo.h,
-          () => {
-            fitInfo.h = getInputValueNumber(`id-input-fit-h-${cDvc.tCode}`)
-          })
-
-        const jrcList = cDvc.jrcInfo.list
-        for (const jrc of jrcList) {
-          makeInputNum(`id-input-${jrc.target}-${jrc.key}-jrc-x`, dvcContainer, `${jrc.key}-${jrc.jrcType}-x: `, jrc.x,
-            () => {
-              jrc.x = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-x`)
-            })
-          makeInputNum(`id-input-${jrc.target}-${jrc.key}-jrc-y`, dvcContainer, `${jrc.key}-${jrc.jrcType}-y: `, jrc.y,
-            () => {
-              jrc.y = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-y`)
-            })
-          makeInputNumBtn(`id-input-${jrc.target}-${jrc.key}-jrc-scx`, dvcContainer, `scx: `, 'change',
-            () => {
-              const w = getInputValueNumber(`id-input-fit-w-${cDvc.tCode}`)
-              if (w > 0) {
-                const scx = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-scx`)
-                changeInputValue(`id-input-${jrc.target}-${jrc.key}-jrc-x`, w * scx)
-                jrc.x = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-x`)
-              }
-            }, 1)
-          makeInputNumBtn(`id-input-${jrc.target}-${jrc.key}-jrc-scy`, dvcContainer, `scy: `, 'change',
-            () => {
-              const h = getInputValueNumber(`id-input-fit-h-${cDvc.tCode}`)
-              if (h > 0) {
-                const scy = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-scy`)
-                changeInputValue(`id-input-${jrc.target}-${jrc.key}-jrc-y`, h * scy)
-                jrc.y = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-y`)
-              }
-            }, 1)
-        }
-
-        makeBtnGroup(dvcContainer, [
-          { id: `id-btn-change-dvc-${cDvc.tCode}`, labelTxt: `${cDvc.tCode} change`,
-            onClick: () => {
-
-            } }
-        ])
-      }
-    }
+    // function updateDvcEdit() {
+    //   const dvcContainer = document.getElementById('id-container-dvc-edit')
+    //   dvcContainer.innerHTML = ''
+    //   const tCode = getInputValue('id-select-dvc-tcode')
+    //   console.log(`update dvc tCode: ${tCode}`)
+    //
+    //   const dvc = dvcInfoList.find(d => d.tCode === tCode)
+    //   for (const cDvc of dvc.child) {
+    //     makeInputTextBtn(`id-input-line-ucode-${cDvc.tCode}`, dvcContainer, `[ ${cDvc.tCode} ] line uCode: `, 'change',
+    //       () => {
+    //         cDvc.lineUCode = getInputValue(`id-input-line-ucode-${cDvc.tCode}`)
+    //       })
+    //     const fitInfo = cDvc.transInfo.list.find(t => t.type === 'fit')
+    //     makeInputNum(`id-input-fit-w-${cDvc.tCode}`, dvcContainer, `[ ${cDvc.tCode} ] fit w: `, fitInfo.w,
+    //       () => {
+    //         fitInfo.w = getInputValueNumber(`id-input-fit-w-${cDvc.tCode}`)
+    //       })
+    //     makeInputNum(`id-input-fit-h-${cDvc.tCode}`, dvcContainer, `[ ${cDvc.tCode} ] fit h: `, fitInfo.h,
+    //       () => {
+    //         fitInfo.h = getInputValueNumber(`id-input-fit-h-${cDvc.tCode}`)
+    //       })
+    //
+    //     const jrcList = cDvc.jrcInfo.list
+    //     for (const jrc of jrcList) {
+    //       makeInputNum(`id-input-${jrc.target}-${jrc.key}-jrc-x`, dvcContainer, `${jrc.key}-${jrc.jrcType}-x: `, jrc.x,
+    //         () => {
+    //           jrc.x = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-x`)
+    //         })
+    //       makeInputNum(`id-input-${jrc.target}-${jrc.key}-jrc-y`, dvcContainer, `${jrc.key}-${jrc.jrcType}-y: `, jrc.y,
+    //         () => {
+    //           jrc.y = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-y`)
+    //         })
+    //       makeInputNumBtn(`id-input-${jrc.target}-${jrc.key}-jrc-scx`, dvcContainer, `scx: `, 'change',
+    //         () => {
+    //           const w = getInputValueNumber(`id-input-fit-w-${cDvc.tCode}`)
+    //           if (w > 0) {
+    //             const scx = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-scx`)
+    //             changeInputValue(`id-input-${jrc.target}-${jrc.key}-jrc-x`, w * scx)
+    //             jrc.x = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-x`)
+    //           }
+    //         }, 1)
+    //       makeInputNumBtn(`id-input-${jrc.target}-${jrc.key}-jrc-scy`, dvcContainer, `scy: `, 'change',
+    //         () => {
+    //           const h = getInputValueNumber(`id-input-fit-h-${cDvc.tCode}`)
+    //           if (h > 0) {
+    //             const scy = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-scy`)
+    //             changeInputValue(`id-input-${jrc.target}-${jrc.key}-jrc-y`, h * scy)
+    //             jrc.y = getInputValueNumber(`id-input-${jrc.target}-${jrc.key}-jrc-y`)
+    //           }
+    //         }, 1)
+    //     }
+    //
+    //     makeBtnGroup(dvcContainer, [
+    //       { id: `id-btn-change-dvc-${cDvc.tCode}`, labelTxt: `${cDvc.tCode} change`,
+    //         onClick: () => {
+    //
+    //         } }
+    //     ])
+    //   }
+    // }
 
     // info: dvcTCodeSetInfo
     function checkHasTCode(tCode, info) {
