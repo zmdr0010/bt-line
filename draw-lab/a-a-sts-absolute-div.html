@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a a sts absolute div</title>
+</head>
+<body onload="init()">
+  <div id="id-main"></div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-dvc-srt.js"></script>
+  <script type="text/javascript" src="info/sample/bundle-set-00.js"></script>
+  <script>
+    // uCode/num/stsCode,value/stsCode,... list
+    // type: normal/add/rate (ex. add: 1, -2, rate: 0.5, -0.2) <- deprecated
+    // direct to code: atk-add, atk-rate
+    const stsSetList = [
+      // drb, spd, atk, atk-ara
+    ]
+
+    // shtr: fusi(intv), sht-intv, rld
+    //   add(rate)-sts, tn-route, fusi-route
+
+    // tn
+    //   type: normal(non-target)/target/homing
+    //   hit-type: one/ara/cnt
+    //   bomb-type: immediately/timer/in-ara
+
+    // srn(uCode)/tCode/mdn/stsNum/stsCode,value/stsCode, list by stsNum
+    const dvcSetList = []
+
+    // shtrInfo extends dvcInfo ?
+    // tCodeBundle set -> part.dvcInfo -> dvcInfo list
+
+    // cr-dvc, shtr-lnk, lwr-dvc, bk-dvc, shtr-00 ~ 99, mag-00 ~ 99
+
+    // shtr - mag -> shtr : mag = 1 : 3 (max)
+    // shtr.child <- mag
+
+    // shtr-lnk - shtr -> shtr-lnk : shtr = 1 : 4 (max: right 2, left 2)
+    // shtr-lnk.child <- shtr
+
+    // unitPart.child <- cr-dvc, shtr-lnk, lwr-dvc, bk-dvc
+
+    // part.armPart.dvcInfo
+
+    // manage srn on service(project): like factory(company)
+    // mdn: model full name (series)
+    // srn: [model series code]-[model version]-[tCode]-[making number]
+
+
+    const shtrDvcInfoSample = {
+      tCode: 'shtr-00', // shtr tCode mngr: check to have shtr in tCode
+      srn: '', // serial number (uCode)
+      mdn: '', // model name
+      stsInfo: null,
+      slot: 1, // child num limit
+      maxSlot: 3, // upgrade max num
+      child: []
+    }
+
+    const shtrLnkDvcInfoSample = {
+      tCode: 'shtr-lnk',
+      srn: '',
+      mdn: '',
+      stsInfo: null,
+      slot: 2,
+      maxSlot: 4,
+      child: []
+    }
+
+    // dvc upgrade set/table
+
+    const stsInfoSample = {
+      uCode: 'sts-000',
+      // order: ['drb', 'atk'], // set to mngr to control
+      list: [
+        {
+          stsCode: 'drb',
+          value: 100
+        },
+        {
+          stsCode: 'atk',
+          value: 2
+        }
+      ],
+      addList: [
+        {
+          stsCode: 'spd-add',
+          value: -1
+        },
+        {
+          stsCode: 'atk-ara-rate',
+          value: 0.1
+        }
+      ]
+    }
+
+    // upgSet
+    // uCode/srn/list num/... lv/list num/stsCode,value/stsCode, ...
+    // uCode - srn: matching only one -> uCode = upg-set-[srn]
+
+    // upg cost set: searching dvc by srn, lv
+
+    const upgInfoSample = {
+      srn: '', // target dvc srn
+      list: [ // order is upg step/lv/rnk
+        {
+          lv: 1,
+          list: [ // sts list
+            {
+              stsCode: 'atk-add',
+              value: 1
+            }
+          ]
+        },
+        {
+          lv: 2,
+          list: [
+            {
+              stsCode: 'atk-add',
+              value: 2
+            },
+            {
+              stsCode: 'spd-add',
+              value: 1
+            }
+          ]
+        }
+      ]
+    }
+
+    function init() {
+      // document.body.style.backgroundColor = 'green'
+      const main = document.getElementById('id-main')
+      // const container00 = createContainer()
+      // container00.border.style.width = '210px'
+      // container00.border.style.height = `${30 + 46}px`
+      // container00.border.style.position = 'absolute'
+      // container00.border.style.top = '100px'
+      // container00.border.style.left = '100px'
+      // container00.border.style.borderRadius = '20px'
+      // main.appendChild(container00.border)
+      //
+      // const idTxtDiv = `id-txt-div`
+      // makeSimpleTxtDiv(idTxtDiv, container00.content, 'cr-dvc-000000001')
+      //
+      // const idInputDrb = 'id-input-sts-drb'
+      // makeInputNum(idInputDrb, container00.content, 'drb: ', 100, ()=> {})
+      // const inputDrb = document.getElementById(idInputDrb)
+      // inputDrb.style.width = '120px'
+      // inputDrb.disabled = true
+
+      // add-drb, rate-drb
+
+      const list = [
+        { stsCode: 'drb', value: 100, onChange: () => {} },
+        { stsCode: 'atk', value: 3, onChange: () => {} },
+        { stsCode: 'spd', value: 1, onChange: () => {} }
+      ]
+      makeStsBorder(0, 'cr-dvc-0000001', list, 50, 50, main, 10)
+
+      makeTxtBorder(0, 'cr-dvc', 400, 100, main)
+      makeTxtBorder(0, 'drb', 400, 200, main, 20)
+
+      const cnt00 = createContainer()
+      main.appendChild(cnt00.border)
+      cnt00.border.style.position = 'absolute'
+      cnt00.border.style.left = '700px'
+      cnt00.border.style.top = '50px'
+      cnt00.border.style.width = '500px'
+      cnt00.border.style.height = '500px'
+      makeStsBorder(1, 'cr-dvc-0000001', list, 50, 50, cnt00.content, 10)
+
+      const bndSet00 = bundleSet00List[bundleSet00List.length-2]
+      const bndSet01 = bundleSet00List[bundleSet00List.length-1]
+      const infoList00 = createDvcSrtInfoListByTCodeBundleSet(bndSet00)
+      const infoList01 = createDvcSrtInfoListByTCodeBundleSet(bndSet01)
+      console.log(infoList00)
+      console.log(infoList01)
+
+      const tCodeFrame00 = createTCodeFrameInfo(infoList00[infoList00.length-1])
+      const tCodeFrame01 = createTCodeFrameInfo(infoList01[infoList01.length-1])
+      console.log(tCodeFrame00)
+      console.log(tCodeFrame01)
+
+      let sx = 50
+      let sy = 500
+      let count = 2
+      makeTxtBorder(count, tCodeFrame00.tCode, sx, sy, main, 10)
+      sx += 50
+      sy += 50
+      count++
+      for (const c of tCodeFrame00.child) {
+        makeTxtBorder(count, c.tCode, sx, sy, main, 10)
+        sy += 50
+        count++
+      }
+
+      sx = 50
+      sy += 60
+      makeTxtBorder(count, tCodeFrame01.tCode, sx, sy, main)
+      sx += 50
+      sy += 50
+      count++
+      for (const c of tCodeFrame01.child) {
+        makeTxtBorder(count, c.tCode, sx, sy, main)
+        count++
+        for (const cc of c.child) {
+          sx += 100
+          makeTxtBorder(count, cc.tCode, sx, sy, main)
+          count++
+          sx -= 100
+        }
+        sy += 50
+      }
+    }
+
+    // dvcTCodeFrameInfo: { tCode: '', child: [] }
+    // list: dvcSrtInfo
+    function createTCodeFrameInfo(info) {
+      const result = { tCode: info.tCode, child: [] }
+
+      for (const c of info.child) {
+        const cInfo = createTCodeFrameInfo(c)
+        result.child.push(cInfo)
+      }
+
+      return result
+    }
+
+    // list: [ { stsCode: '', value: 0, onChange: () => {} } ]
+    function makeStsBorder(i, name, list, x, y, parent, bR=0, disabled=true) {
+      const container = createContainer()
+      container.border.style.width = '210px'
+      container.border.style.height = `${30 + 38 * list.length + 10}px`
+      container.border.style.position = 'absolute'
+      container.border.style.left = `${x}px`
+      container.border.style.top = `${y}px`
+      if (bR > 0) container.border.style.borderRadius = `${bR}px`
+      parent.appendChild(container.border)
+
+      const idTxtDiv = `id-txt-div-${i}`
+      makeSimpleTxtDiv(idTxtDiv, container.content, 'cr-dvc-000000001')
+
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      ctx.font = '16px Arial'
+      let maxW = 0
+      for (const sts of list) {
+        const mW = ctx.measureText(sts.stsCode)
+        let w = Math.ceil(mW.width)
+        maxW = Math.max(maxW, w)
+        const idInputDrb = `id-input-sts-${sts.stsCode}-${i}`
+        makeInputNum(idInputDrb, container.content, `${sts.stsCode}: `, sts.value, sts.onChange)
+        const inputDrb = document.getElementById(idInputDrb)
+        inputDrb.style.width = '120px'
+        inputDrb.disabled = disabled
+      }
+      container.border.style.width = `${maxW + 180}px`
+    }
+
+    function makeTxtBorder(i, txt, x, y, parent, bR=0) {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      ctx.font = '16px Arial'
+      const mTxt = ctx.measureText(txt)
+      const txtW = Math.ceil(mTxt.width)
+      console.log(`txtW: ${txtW}`)
+      const container = createContainer()
+      container.border.style.width = `${txtW + 38}px`
+      container.border.style.height = `${36}px`
+      container.border.style.position = 'absolute'
+      container.border.style.left = `${x}px`
+      container.border.style.top = `${y}px`
+      if (bR > 0) container.border.style.borderRadius = `${bR}px`
+      const idTxtDiv = `id-txt-div-${i}`
+      makeSimpleTxtDiv(idTxtDiv, container.content, txt)
+      container.content.style.width = `${txtW + 20}px`
+      parent.appendChild(container.border)
+    }
+  </script>
+</body>
+</html>

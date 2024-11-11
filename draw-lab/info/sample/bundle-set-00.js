@@ -207,5 +207,18 @@ const bundleSet00List = [
   'dvc-srt-part-20241026160357/bl/part/line-20241029091131/0//0/1/bl,b_bl,m,59,44/1/fit,160,200\n' +
   'dvc-srt-device-20241026160357/tp001/device//5/br,j,b,c,bl/8/c,c_j,g,0,0/j,c_j,m,0,0/j,j_b,g,0,0/b,j_b,m,0,0/b,b_br,g,0,0/br,b_br,m,0,0/b,b_bl,g,0,0/bl,b_bl,m,0,0/0/0',
 
+
+  'dvc-srt-tcode-bundle-20241106200622\n' +
+  'tCode\n' +
+  'u-t-00/4/cr-dvc,shtr-lnk,lwr-dvc,bk-dvc/0/',
+
+  'dvc-srt-tcode-bundle-20241106201114\n' +
+  'tCode\n' +
+  'mag-2/1/mag-2-tn/0/\n' +
+  'mag-1/1/mag-1-tn/0/\n' +
+  'mag-0/1/mag-0-tn/0/\n' +
+  'shtr/3/mag-0,mag-1,mag-2/0/',
+
+
   // '',
 ]

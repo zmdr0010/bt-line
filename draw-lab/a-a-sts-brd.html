@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a a sts brd</title>
+
+<!--  <style>-->
+<!--    body {-->
+<!--      background-image: radial-gradient(circle, lightgrey 10%, transparent 11%);-->
+<!--      background-size: 20px 20px;-->
+<!--      opacity: 1;-->
+<!--    }-->
+<!--  </style>-->
+</head>
+<body onload="init()">
+  <div id="id-main"></div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-raw-drawer.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-dvc-srt.js"></script>
+  <script type="text/javascript" src="fnc/fnc-sts.js"></script>
+  <script type="text/javascript" src="vw/dvc-sts-edit-v-prt.js"></script>
+  <script type="text/javascript" src="info/sample/bundle-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/dvc-sts-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/dvc-upg-set-00.js"></script>
+  <script>
+    // manage srn on service(project): like factory(company)
+    // mdn: model full name (series)
+    // srn: [model series code]-[model version]-[tCode]-[making number]
+
+    // srn(uCode)/tCode/mdn/stsNum/stsCode,value/stsCode, list by stsNum
+    let dvcStsSetList = []
+
+    // upgSet
+    // uCode/srn/list num/... step/sts list num/stsCode,value/stsCode, ...
+    // uCode - srn: matching only one -> uCode = upg-set-[srn]
+    let upgSetList = []
+
+    // upg cost set: searching dvc by srn, step
+    // uCode/upgSetUCode/list num/... step/mtrl list num/mtrl code,num/mtrl code, ...
+    // list matching upgSet.list
+    const upgCostSetList = []
+
+    function init() {
+      dvcStsSetList = dvcStsSetList00
+      upgSetList = dvcUpgSetList00
+      const main = document.getElementById('id-main')
+      const dvcStsEdit = dvcStsEditVPrt()
+      dvcStsEdit.createMenu(dvcStsSetList, upgSetList, main)
+      // dvcStsEdit.move(300,200)
+    }
+
+  </script>
+</body>
+</html>
