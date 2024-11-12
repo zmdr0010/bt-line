@@ -35,7 +35,11 @@ const codeSetList = [
   'upg/upgrade',
   'lv/level',
   'rnk/rank',
-  'ece/energy conversion efficiency'
+  'ece/energy conversion efficiency',
+  'srs/series',
+  'mnft/manufacture',
+  'ftr/feature',
+  'brd/board'
 
   // infinity
   // finite, limited

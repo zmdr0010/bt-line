@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a b mdn code add</title>
+
+<!--  <style>-->
+<!--    body {-->
+<!--      background-image: radial-gradient(circle, lightgrey 10%, transparent 11%);-->
+<!--      background-size: 20px 20px;-->
+<!--      opacity: 1;-->
+<!--    }-->
+<!--  </style>-->
+</head>
+<body onload="init()">
+  <div id="id-main"></div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="info/sample/mdn-code-set-00.js"></script>
+  <script>
+    let mdnCodeMapInfo = {
+      uCode: '',
+      map: new Map(),
+      nameList: []
+    }
+
+    let sx = 10
+    let sy = 10
+
+    function init() {
+      mdnCodeMapInfo = createMdnCodeMapInfo(mdnCodeSet00)
+      console.log(mdnCodeMapInfo)
+      const main = document.getElementById('id-main')
+      makeMdnCodeMenu(main)
+    }
+
+    function makeMdnCodeMenu(main) {
+      const cntr = createContainer()
+      main.appendChild(cntr.border)
+      cntr.border.style.width = '500px'
+      cntr.border.style.position = 'absolute'
+      cntr.border.style.left = `${sx}px`
+      cntr.border.style.top = `${sy}px`
+      makeMdnCodeAdd(cntr.content)
+    }
+
+    function makeMdnCodeAdd(menu) {
+      const cntr = createContainer()
+      menu.appendChild(cntr.border)
+      const idInputCode = 'id-input-code'
+      const idInputName = 'id-input-name'
+      const idTxtDivResult = ' id-txt-div-result'
+      makeInputText(idInputCode, cntr.content, 'mdn code: ', () => {})
+      makeInputText(idInputName, cntr.content, 'name: ', () => {})
+      makeBtnGroup(cntr.content, [
+        { id: 'id-btn-add-mdn-code', labelTxt: 'add mdn code',
+          onClick: () => {
+            const code = getInputValue(idInputCode)
+            const name = getInputValue(idInputName)
+            if (code.length < 1 || name.length < 1) {
+              changeSimpleTxtDiv(idTxtDivResult, 'input code or name')
+              return
+            }
+            if (mdnCodeMapInfo.map.has(code)) {
+              changeSimpleTxtDiv(idTxtDivResult, 'already has code')
+              return
+            }
+            const i = mdnCodeMapInfo.nameList.indexOf(name)
+            if (i >= 0) {
+              changeSimpleTxtDiv(idTxtDivResult, 'already has name')
+              return
+            }
+            mdnCodeMapInfo.map.set(code, name)
+            mdnCodeMapInfo.nameList.push(name)
+            const strSet = createMdnCodeSet(mdnCodeMapInfo)
+            console.log(strSet)
+            changeSimpleTxtDiv(idTxtDivResult, `added code: ${code}, name: ${name}`)
+          } }
+      ])
+      makeSimpleTxtDiv(idTxtDivResult, cntr.content, 'result')
+    }
+
+    // uCode/num/code,name/code,name/ ... list
+    function createMdnCodeMapInfo(set) {
+      const split = set.split('/')
+      const uCode = split[0]
+      const num = Number(split[1])
+      const info = {
+        uCode: uCode,
+        map: new Map(),
+        nameList: []
+      }
+      for (let i=2; i<split.length; i++) {
+        const str = split[i]
+        const strSplit = str.split(',')
+        const code = strSplit[0]
+        const name = strSplit[1]
+        info.map.set(code, name)
+        info.nameList.push(name)
+      }
+      // info.nameList = Array.from(info.map.values())
+      return info
+    }
+
+    function createMdnCodeSet(info) {
+      let str = `${info.uCode}/${info.map.size}`
+      info.map.forEach((value, key) => {
+        str += `/${key},${value}`
+      })
+      return str
+    }
+  </script>
+</body>
+</html>

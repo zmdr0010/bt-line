@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a b mdn code list</title>
+
+<!--  <style>-->
+<!--    body {-->
+<!--      background-image: radial-gradient(circle, lightgrey 10%, transparent 11%);-->
+<!--      background-size: 20px 20px;-->
+<!--      opacity: 1;-->
+<!--    }-->
+<!--  </style>-->
+  <style>
+    #snackbar {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 2px;
+      padding: 16px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+    }
+    #snackbar.show {
+      visibility: visible;
+      -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+      animation: fadein 0.5s, fadeout 0.5s 2.5s
+    }
+    @-webkit-keyframes fadein {
+      from {bottom: 0; opacity: 0}
+      to {bottom: 30px; opacity: 1}
+    }
+    @keyframes fadein {
+      from {bottom: 0; opacity: 0}
+      to {bottom: 30px; opacity: 1}
+    }
+    @-webkit-keyframes fadeout {
+      from {bottom: 30px; opacity: 1}
+      to {bottom: 0; opacity: 0}
+    }
+    @keyframes fadeout {
+      from {bottom: 30px; opacity: 1}
+      to {bottom: 0; opacity: 0}
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div id="id-main"></div>
+  <div id="snackbar">Some text some message...</div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-mdn.js"></script>
+  <script type="text/javascript" src="info/sample/mdn-code-set-00.js"></script>
+  <script>
+    let mdnCodeMapInfo = {
+      uCode: '',
+      map: new Map(),
+      nameList: []
+    }
+
+    let sx = 10
+    let sy = 10
+
+    function init() {
+      mdnCodeMapInfo = createMdnCodeMapInfo(mdnCodeSet00)
+      console.log(mdnCodeMapInfo)
+      const main = document.getElementById('id-main')
+      makeMdnCodeMenu(main)
+    }
+
+    function makeMdnCodeMenu(main) {
+      const cntr = createContainer()
+      main.appendChild(cntr.border)
+      const w = 700
+      cntr.border.style.width = `${w}px`
+      cntr.border.style.position = 'absolute'
+      cntr.border.style.left = `${sx}px`
+      cntr.border.style.top = `${sy}px`
+      makeList(cntr.content, w - 20, 10, 0)
+    }
+
+    function makeList(menu, maxX, sx, sy) {
+      const div = createContentDiv()
+      // div.style.backgroundColor = 'blue'
+      menu.appendChild(div)
+      const cw = 200
+      const margin = 10
+      const h = 100
+      let x = sx
+      let y = sy
+      let i = 0
+      mdnCodeMapInfo.map.forEach((value, key) => {
+        const cCntr = createContainer()
+        div.appendChild(cCntr.border)
+        makeSimpleTxtDiv(`id-txt-div-${i}`, cCntr.content, `[${key}] ${value}`)
+        cCntr.border.style.position = 'absolute'
+        cCntr.border.style.width = `${cw}px`
+        cCntr.border.style.left = `${x}px`
+        cCntr.border.style.top = `${y}px`
+        cCntr.border.addEventListener('click', () => {
+          navigator.clipboard.writeText(`${key}`)
+
+          const snackbar = document.getElementById('snackbar')
+          snackbar.innerText = `copied: ${key}`
+          snackbar.className = 'show'
+          setTimeout(() => { snackbar.className = snackbar.className.replace('show', '') }, 3000)
+        })
+        i++
+        x += cw + margin + sx
+        console.log(`x: ${x}, maxX: ${maxX}`)
+        if (x >= maxX) {
+          x = sx
+          y += h
+        }
+      })
+      div.style.height = `${y + h}px`
+    }
+
+  </script>
+</body>
+</html>
