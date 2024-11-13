@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a c mng md code set</title>
+</head>
+<body onload="init()">
+  <div id="id-main"></div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-md.js"></script>
+  <script type="text/javascript" src="info/sample/md-code-set-00.js"></script>
+  <script>
+    let mdCodeSet
+    let mdCodeInfo
+
+    let sx = 50
+    let sy = 50
+    let menuW = 500
+
+    function init() {
+      mdCodeSet = mdCodeSet00
+      mdCodeInfo = createMdCodeInfo(mdCodeSet)
+      console.log(mdCodeSet)
+      console.log(mdCodeInfo)
+
+      const main = document.getElementById('id-main')
+      makeMenu(main)
+    }
+
+    function makeMenu(main) {
+      const cntr = createContainer()
+      main.appendChild(cntr.border)
+      cntr.border.style.position = 'absolute'
+      cntr.border.style.width = `${menuW}px`
+      cntr.border.style.left = `${sx}px`
+      cntr.border.style.top = `${sy}px`
+      makeCodeAdd(cntr.content)
+    }
+
+    function makeCodeAdd(menu) {
+      const cntr = createContainer()
+      menu.appendChild(cntr.border)
+      const idSelectCodeType = 'id-select-code-type'
+      const idInputCode = 'id-input-code'
+      const idInputName = 'id-input-name'
+      const idTxtDivResult = 'id-txt-div-code-add-result'
+      makeSelect(idSelectCodeType, cntr.content, 'type: ', 'choose type', () => {}, ['mdn','ftr'])
+      makeInputText(idInputCode, cntr.content, 'code: ', () => {})
+      makeInputText(idInputName, cntr.content, 'name: ', () => {})
+      makeBtnGroup(cntr.content, [
+        { id: 'id-btn-add-code', labelTxt: 'add',
+          onClick: () => {
+            const code = getInputValue(idInputCode)
+            const name = getInputValue(idInputName)
+            if (code.length < 1 || name.length < 1) {
+              changeSimpleTxtDiv(idTxtDivResult, 'input code or name')
+              return
+            }
+            const type = getInputValue(idSelectCodeType)
+            if (type === 'mdn') {
+              if (mdCodeInfo.mdnMap.has(code)) {
+                changeSimpleTxtDiv(idTxtDivResult, 'already has code')
+                return
+              }
+              mdCodeInfo.mdnMap.set(code, name)
+            }
+            if (type === 'ftr') {
+              if (mdCodeInfo.ftrMap.has(code)) {
+                changeSimpleTxtDiv(idTxtDivResult, 'already has code')
+                return
+              }
+              mdCodeInfo.ftrMap.set(code, name)
+            }
+
+            const strSet = createMdCodeSet(mdCodeInfo)
+            console.log(strSet)
+            changeSimpleTxtDiv(idTxtDivResult, `added code: ${code}, name: ${name}`)
+          } }
+      ])
+      makeSimpleTxtDiv(idTxtDivResult, cntr.content, 'result')
+    }
+
+    // // uCode/num/code,name,type/code,name,type/ ... list
+    // // type: mdn (mdn code) / ftr (ftr code)
+    // function createMdCodeInfo(set) {
+    //   const split = set.split('/')
+    //   const uCode = split[0]
+    //   const num = Number(split[1])
+    //   const mdnMap = new Map()
+    //   const ftrMap = new Map()
+    //   for (let i=2; i<split.length; i++) {
+    //     const str = split[i]
+    //     const strSplit = str.split(',')
+    //     const code = strSplit[0]
+    //     const name = strSplit[1]
+    //     const type = strSplit[2]
+    //     if (type === 'mdn') mdnMap.set(code, name)
+    //     if (type === 'ftr') ftrMap.set(code, name)
+    //   }
+    //   return {
+    //     uCode: uCode,
+    //     mdnMap: mdnMap,
+    //     ftrMap: ftrMap
+    //   }
+    // }
+    //
+    // function createMdCodeSet(info) {
+    //   let str = `${info.uCode}/${info.mdnMap.size + info.ftrMap.size}`
+    //   info.mdnMap.forEach((value, key) => {
+    //     str += `/${key},${value},mdn`
+    //   })
+    //   info.ftrMap.forEach((value, key) => {
+    //     str += `/${key},${value},ftr`
+    //   })
+    //   return str
+    // }
+  </script>
+</body>
+</html>
