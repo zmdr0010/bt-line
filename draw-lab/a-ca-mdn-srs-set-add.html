@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a ca mdn srs set add</title>
+</head>
+<body onload="init()">
+  <div id="id-main"></div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc/fnc-md.js"></script>
+  <script type="text/javascript" src="info/sample/md-code-set-00.js"></script>
+  <script type="text/javascript" src="info/sample/mdn-srs-set-00.js"></script>
+  <script>
+    let mdCodeSet
+    let mdCodeInfo
+
+    let sx = 50
+    let sy = 50
+    let menuW = 500
+
+    // uCode/mdn code/mdn name/tCode/srs version/(srs)nick name/mnft year/ftr code/ftr
+    let mdnSrsInfo = {
+      uCode: `mdn-srs-${getCurrentDateUCode()}`,
+      mdnCode: '',
+      mdnName: '',
+      tCode: '',
+      srsVersion: 0,
+      srsNickName: '',
+      mnftYear: '',
+      ftrCode: '',
+      ftr: ''
+    }
+    let mdnSrsSetList = []
+    let mdnListInfo
+
+    function init() {
+      mdCodeSet = mdCodeSet00
+      mdCodeInfo = createMdCodeInfo(mdCodeSet)
+      console.log(mdCodeSet)
+      console.log(mdCodeInfo)
+      mdnSrsSetList = mdnSrsSetList00
+      mdnListInfo = createMdnSrsListInfo(mdnSrsSetList)
+      console.log(mdnListInfo)
+
+      const main = document.getElementById('id-main')
+      makeMenu(main)
+    }
+
+    function makeMenu(main) {
+      const cntr = createContainer()
+      main.appendChild(cntr.border)
+      cntr.border.style.position = 'absolute'
+      cntr.border.style.width = `${menuW}px`
+      cntr.border.style.left = `${sx}px`
+      cntr.border.style.top = `${sy}px`
+      makeCodeAdd(cntr.content)
+    }
+
+    // uCode/mdn code/mdn name/tCode/srs version/(srs)nick name/mnft year/ftr code/ftr
+    function makeCodeAdd(menu) {
+      const cntr = createContainer()
+      menu.appendChild(cntr.border)
+      const idSelectMdn = 'id-select-mdn'
+      const idInputCode = 'id-input-mdn-code'
+      const idInputName = 'id-input-mdn-name'
+      const idInputTCode = 'id-input-tcode'
+      // const idTxtDivResult = 'id-txt-div-code-add-result'
+      const idSelectSrs = 'id-select-srs'
+      const idInputSrsNickName = 'id-input-srs-nickname'
+      const idSelectMnftYear = 'id-select-mnft-year'
+      const idInputMnftYear = 'id-input-mnft-year'
+      const idSelectFtr = 'id-select-ftr'
+      const idInputFtrCode = 'id-input-ftr-code'
+      const idInputFtr = 'id-input-ftr'
+      const mdnNameList = ['none']
+      for (const srs of mdnListInfo.list) mdnNameList.push(srs.mdnName)
+      let selectedMdn
+      let selectedSrs
+      let selectedMnftYear
+      let selectedFtr
+      makeSelect(idSelectMdn, cntr.content, 'select mdn: ', 'choose mdn',
+        () => {
+          const mdn = getInputValue(idSelectMdn)
+          if (mdn === 'none') {
+            changeInputValue(idInputCode, '')
+            changeInputValue(idInputName, '')
+            changeInputValue(idInputTCode, '')
+            selectedMdn = null
+            selectedSrs = null
+            initSelect(idSelectSrs, [])
+            selectedMnftYear = null
+            initSelect(idSelectMnftYear, [])
+            selectedFtr = null
+            initSelect(idSelectFtr, [])
+          } else {
+            selectedMdn = mdnListInfo.list.find(o => o.mdnName === mdn)
+            changeInputValue(idInputCode, selectedMdn.mdnCode)
+            changeInputValue(idInputName, selectedMdn.mdnName)
+            changeInputValue(idInputTCode, selectedMdn.tCode)
+            const srsNickList = ['none']
+            for (const srs of selectedMdn.list) srsNickList.push(srs.srsNickName)
+            initSelect(idSelectSrs, srsNickList)
+          }
+          changeInputValue(idInputSrsNickName, '')
+          changeInputValue(idInputMnftYear, '')
+          changeInputValue(idInputFtrCode, '')
+          changeInputValue(idInputFtr, '')
+        }, mdnNameList)
+      makeInputText(idInputCode, cntr.content, 'mdn code: ', () => {})
+      makeInputText(idInputName, cntr.content, 'mdn name: ', () => {})
+      makeInputText(idInputTCode, cntr.content, 'tCode: ', () => {})
+      // makeBtnGroup(cntr.content, [
+      //   { id: 'id-btn-add-code', labelTxt: 'change',
+      //     onClick: () => {
+      //       const code = getInputValue(idInputCode)
+      //       const name = getInputValue(idInputName)
+      //       if (code.length < 1 || name.length < 1) {
+      //         changeSimpleTxtDiv(idTxtDivResult, 'input code or name')
+      //         return
+      //       }
+      //       if (mdCodeInfo.mdnMap.has(code)) {
+      //
+      //       } else {
+      //
+      //       }
+      //       mdnSrsInfo.mdnCode = code
+      //       mdnSrsInfo.mdnName = name
+      //
+      //       changeSimpleTxtDiv(idTxtDivResult, `changed code: ${code}, name: ${name}`)
+      //     } }
+      // ])
+      // makeSimpleTxtDiv(idTxtDivResult, cntr.content, 'result')
+      makeSelect(idSelectSrs, cntr.content, 'select srs: ', '',
+        () => {
+          const srs = getInputValue(idSelectSrs)
+          if (srs === 'none') {
+            changeInputValue(idInputSrsNickName, '')
+            selectedSrs = null
+            selectedMnftYear = null
+            initSelect(idSelectMnftYear, [])
+            selectedFtr = null
+            initSelect(idSelectFtr, [])
+          } else {
+            selectedSrs = selectedMdn.list.find(o => o.srsNickName === srs)
+            changeInputValue(idInputSrsNickName, srs)
+            const mnftYearList = ['none']
+            for (const y of selectedSrs.list) mnftYearList.push(y.mnftYear)
+            initSelect(idSelectMnftYear, mnftYearList)
+          }
+          changeInputValue(idInputMnftYear, '')
+          changeInputValue(idInputFtrCode, '')
+          changeInputValue(idInputFtr, '')
+        })
+      makeInputText(idInputSrsNickName, cntr.content, 'srs nickname: ', () => {})
+      makeSelect(idSelectMnftYear, cntr.content, 'select mnftYear: ', '',
+        () => {
+          const mnftYear = getInputValue(idSelectMnftYear)
+          if (mnftYear === 'none') {
+            selectedFtr = null
+            changeInputValue(idInputMnftYear, '')
+          } else {
+            selectedMnftYear = selectedSrs.list.find(o => o.mnftYear === mnftYear)
+            changeInputValue(idInputMnftYear, mnftYear)
+            const ftrList = ['none']
+            for (const ftr of selectedMnftYear.list) ftrList.push(ftr.ftr)
+            initSelect(idSelectFtr, ftrList)
+          }
+          changeInputValue(idInputFtrCode, '')
+          changeInputValue(idInputFtr, '')
+        })
+      makeInputText(idInputMnftYear, cntr.content, 'mnftYear: ', () => {})
+      makeSelect(idSelectFtr, cntr.content, 'select ftr: ', '',
+        () => {
+          const ftr = getInputValue(idSelectFtr)
+          if (ftr === 'none') {
+            changeInputValue(idInputFtrCode, '')
+            changeInputValue(idInputFtr, '')
+          } else {
+            selectedFtr = selectedMnftYear.list.find(o => o.ftr === ftr)
+            changeInputValue(idInputFtrCode, selectedFtr.ftrCode)
+            changeInputValue(idInputFtr, selectedFtr.ftr)
+          }
+        })
+      makeInputText(idInputFtrCode, cntr.content, 'ftr code: ', () => {})
+      makeInputText(idInputFtr, cntr.content, 'ftr: ', () => {})
+
+      makeBtnGroup(cntr.content, [
+        { id: 'id-btn-add-mdn-srs', labelTxt: 'add',
+          onClick: () => {
+            const mdnCode = getInputValue(idInputCode)
+            const mdnName = getInputValue(idInputName)
+            const tCode = getInputValue(idInputTCode)
+            const srsNickName = getInputValue(idInputSrsNickName)
+            const mnftYear = getInputValue(idInputMnftYear)
+            const ftrCode = getInputValue(idInputFtrCode)
+            const ftr = getInputValue(idInputFtr)
+            if (mdnCode.length < 1 || mdnName.length < 1 || tCode.length < 1
+              || srsNickName.length < 1 || mnftYear.length < 1 || ftrCode.length < 1
+              || ftr.length < 1) {
+              console.log('has empty input')
+              return
+            }
+            const info = mdnListInfo.mdnSrsInfoList.find(o => o.mdnCode === mdnCode
+              && o.mdnName === mdnName && o.tCode === tCode
+              && o.srsNickName === srsNickName && o.mnftYear === mnftYear
+              && o.ftrCode === ftrCode && o.ftr === ftr)
+            if (info) {
+              console.log('already has mdnSrsInfo')
+              return
+            }
+            let version = 0
+            if (selectedMdn) {
+              for (const srs of selectedMdn.list) version = Math.max(version, srs.srsVersion)
+            }
+            version++
+            const mdnSrsInfo = {
+              uCode: `mdn-srs-${getCurrentDateUCode()}`,
+              mdnCode: mdnCode,
+              mdnName: mdnName,
+              tCode: tCode,
+              srsVersion: version,
+              srsNickName: srsNickName,
+              mnftYear: mnftYear,
+              ftrCode: ftrCode,
+              ftr: ftr
+            }
+            console.log(mdnSrsInfo)
+            const set = createMdnSrsInfo(mdnSrsInfo)
+            console.log(set)
+          } },
+        { id: 'id-btn-mnft-mdn-srs', labelTxt: 'mnft',
+          onClick: () => {
+            // generate mnft-no
+          } }
+      ])
+    }
+
+    // uCode/mdn code/mdn name/tCode/srs version/(srs)nick name/mnft year/ftr code/ftr
+    function createMdnSrsListInfo(list) {
+      const srsList = []
+      for (const set of list) srsList.push(createMdnSrsInfo(set))
+      const infoList = []
+      for (const srs of srsList) {
+        let md = infoList.find(o => o.mdnCode === srs.mdnCode)
+        if (!md) {
+          md = {
+            mdnCode: srs.mdnCode,
+            mdnName: srs.mdnName,
+            tCode: srs.tCode,
+            list: []
+          }
+          infoList.push(md)
+        }
+        let mdSrs = md.list.find(o => o.srsVersion === srs.srsVersion)
+        if (!mdSrs) {
+          mdSrs = {
+            srsVersion: srs.srsVersion,
+            srsNickName: srs.srsNickName,
+            list: []
+          }
+          md.list.push(mdSrs)
+        }
+        let srsYear = mdSrs.list.find(o => o.mnftYear === srs.mnftYear)
+        if (!srsYear) {
+          srsYear = {
+            mnftYear: srs.mnftYear,
+            list: []
+          }
+        }
+        mdSrs.list.push(srsYear)
+        let yearFtr = srsYear.list.find(o => o.ftrCode === srs.ftrCode)
+        if (!yearFtr) {
+          yearFtr = {
+            ftrCode: srs.ftrCode,
+            ftr: srs.ftr
+          }
+        }
+        srsYear.list.push(yearFtr)
+      }
+      return {
+        mdnSrsInfoList: srsList,
+        list: infoList
+      }
+    }
+
+    // uCode/mdn code/mdn name/tCode/srs version/(srs)nick name/mnft year/ftr code/ftr
+    function createMdnSrsInfo(set) {
+      const split = set.split('/')
+      const uCode = split[0]
+      const mdnCode = split[1]
+      const mdnName = split[2]
+      const tCode = split[3]
+      const srsVersion = Number(split[4])
+      const srsNickName = split[5]
+      const mnftYear = split[6]
+      const ftrCode = split[7]
+      const ftr = split[8]
+      return {
+        uCode: uCode,
+        mdnCode: mdnCode,
+        mdnName: mdnName,
+        tCode: tCode,
+        srsVersion: srsVersion,
+        srsNickName: srsNickName,
+        mnftYear: mnftYear,
+        ftrCode: ftrCode,
+        ftr: ftr
+      }
+    }
+
+    function createMdnSrsStrSet(info) {
+      return `${info.uCode}/${info.mdnCode}/${info.mdnName}/${info.tCode}/${info.srsVersion}/${info.srsNickName}/${info.mnftYear}/${info.ftrCode}/${info.ftr}`
+    }
+  </script>
+</body>
+</html>
