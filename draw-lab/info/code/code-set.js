@@ -39,7 +39,13 @@ const codeSetList = [
   'srs/series',
   'mnft/manufacture',
   'ftr/feature',
-  'brd/board'
+  'brd/board',
+  'skl/skill',
+  'invncbl/invincible',
+  'psh-pwr/push power',
+  'bnc/bounce',
+  'rpr/repair',
+  'brkn/broken'
 
   // infinity
   // finite, limited
@@ -48,4 +54,5 @@ const codeSetList = [
   // delay
   // dg/dodge
   // cr/critical
+  // wax / wane
 ]

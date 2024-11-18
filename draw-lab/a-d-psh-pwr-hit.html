@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>a d psh pwr hit</title>
+</head>
+<body onload="init()">
+  <div id="id-main"></div>
+
+  <script type="text/javascript" src="cmp/cmp-btn.js"></script>
+  <script type="text/javascript" src="cmp/cmp-common.js"></script>
+  <script type="text/javascript" src="cmp/cmp-input.js"></script>
+  <script type="text/javascript" src="cmp/cmp-select.js"></script>
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="info/sample/sts-upg-set-00.js"></script>
+  <script>
+    let stsUpgSetList = []
+
+    let sx = 50
+    let sy = 50
+    let menuW = 330
+
+    let stsUpgInfoList = []
+
+    function init() {
+      stsUpgSetList = stsUpgSetList00
+      for (const set of stsUpgSetList) {
+        const info = createStsUpgInfo(set)
+        console.log(info)
+        stsUpgInfoList.push(info)
+      }
+
+      const main = document.getElementById('id-main')
+      for (const info of stsUpgInfoList) {
+        makeDvcStsBrd(main, menuW, sx, sy, info)
+        sx += menuW + 30
+      }
+    }
+
+    // info: stsUpgInfo
+    function makeDvcStsBrd(main, w, x, y, info) {
+      const cntr = createContainer()
+      main.appendChild(cntr.border)
+      cntr.border.style.position = 'absolute'
+      cntr.border.style.width = `${w}px`
+      cntr.border.style.left = `${x}px`
+      cntr.border.style.top = `${y}px`
+      makeSimpleTxtDiv(`id-txt-div-${info.uCode}`, cntr.content, `[mdn code]: ${info.mdnCode}`)
+      let i = 0
+      for (const sts of info.stsList) {
+        let txt = `${sts.tCode} [${sts.code}]: ${sts.value}`
+        if (sts.type === 'rate') txt += ` rate of [${sts.rateTCode}]: ${sts.rateStsCode}`
+        makeSimpleTxtDiv(`id-txt-div-${info.uCode}-${i}`, cntr.content, txt)
+        i++
+      }
+    }
+
+    // uCode/mdn code/sts num/sts code,tCode,value/... list
+    //    sts code,tCode,value -> length: 3 -> add type
+    //    sts code,tCode,value,rate sts code,rate tCode -> length: 5 -> rate type
+    // /upg num/step/sts num/sts code,tCode,.../sts code,tCode, ... sts list(sts num)/step/sts num/ ... upg list(upg num)
+    function createStsUpgInfo(set) {
+      const split = set.split('/')
+      const uCode = split[0]
+      const mdnCode = split[1]
+      const stsNum = Number(split[2])
+      let next = 3
+      const stsList = []
+      for (let i=0; i<stsNum; i++) {
+        const str = split[next++]
+        const strSplit = str.split(',')
+        let type = 'add'
+        const code = strSplit[0]
+        const tCode = strSplit[1]
+        const value = Number(strSplit[2])
+        let rateStsCode = ''
+        let rateTCode = ''
+        if (strSplit.length > 3) {
+          type = 'rate'
+          rateStsCode = strSplit[3]
+          rateTCode = strSplit[4]
+        }
+        stsList.push({
+          type: type,
+          code: code,
+          tCode: tCode,
+          value: value,
+          rateStsCode: rateStsCode,
+          rateTCode: rateTCode
+        })
+      }
+      next += stsNum
+      const upgNum = Number(split[next++])
+      const upgList = []
+      if (upgNum > 0) {
+        for (let i=0; i<upgNum; i++) {
+          const step = Number(split[next++])
+          const stStsNum = Number(split[next++])
+          const upg = {
+            step: step,
+            list: []
+          }
+          upgList.push(upg)
+          for (let j=0; j<stStsNum; j++) {
+            const stStr = split[next++]
+            const stStrSplit = stStr.split(',')
+            let type = 'add'
+            const code = stStrSplit[0]
+            const tCode = stStrSplit[1]
+            const value = Number(stStrSplit[2])
+            let rateStsCode = ''
+            let rateTCode = ''
+            if (stStrSplit.length > 3) {
+              type = 'rate'
+              rateStsCode = stStrSplit[3]
+              rateTCode = stStrSplit[4]
+            }
+            upg.list.push({
+              type: type,
+              code: code,
+              tCode: tCode,
+              value: value,
+              rateStsCode: rateStsCode,
+              rateTCode: rateTCode
+            })
+          }
+        }
+      }
+      return {
+        uCode: uCode,
+        mdnCode: mdnCode,
+        stsList: stsList,
+        upgList: upgList
+      }
+    }
+  </script>
+</body>
+</html>

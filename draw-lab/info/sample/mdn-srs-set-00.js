@@ -1,7 +1,7 @@
 // uCode/mdn code/mdn name/tCode/srs version/(srs)nick name/mnft year/ftr code/ftr
 // mnft year: YYmm (ex. 2411: 2024.11.)
 // mdn full name: [mdn name] [(srs)nick name] [mnft year] [ftr]
-// filter -> mdn code -> srs list
+// filter -> mdn code -> srs list -> srs version -> mnft year list -> year -> ftr list
 const mdnSrsSetList00 = [
   'mdn-srs-prt-00-00/md-prt-00/proto 00/prt/1/base/2211/ftr-base/base',
   'mdn-srs-prt-00-01/md-prt-00/proto 00/prt/2/alpha/2308/ftr-base/base',
