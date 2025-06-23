@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image viewer</title>
+
+  <style>
+    canvas {
+      /*width: 100%;*/
+      /*height: 100%;*/
+      border: 1px solid #000000;
+      /*background-color: beige;*/
+      /*background-color: gray;*/
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div style="margin: 8px">
+    <input type="file" id="id-input" multiple />
+  </div>
+  <div style="margin: 8px">
+    sx: <input type="number" id="id-input-sx" value="10" />
+    sy: <input type="number" id="id-input-sy" value="10">
+    sw: <input type="number" id="id-input-sw" value="150">
+    sh: <input type="number" id="id-input-sh" value="150">
+  </div>
+  <div style="margin: 8px">
+    dx: <input type="number" id="id-input-dx" value="10" />
+    dy: <input type="number" id="id-input-dy" value="10">
+    dw: <input type="number" id="id-input-dw" value="150">
+    dh: <input type="number" id="id-input-dh" value="150">
+  </div>
+  <div style="margin: 8px">
+    <button onclick="drawUploadedImg()">draw img</button>
+  </div>
+  <canvas id="id-canvas"></canvas>
+
+  <script>
+    let uploadedImg
+    let canvas
+    let ctx
+
+    let sx = 10
+    let sy = 10
+    let sw = 150
+    let sh = 150
+    let dx = 10
+    let dy = 10
+    let dw = 150
+    let dh = 150
+
+    function init() {
+      let canvasW = window.innerWidth - 8 * 2
+      let canvasH = window.innerHeight - 8 * 2
+      canvas = document.getElementById('id-canvas')
+      ctx = canvas.getContext('2d')
+      canvas.width = canvasW
+      canvas.height = canvasH
+
+      const input = document.getElementById('id-input')
+      input.addEventListener('change', onChangeInputFiles)
+    }
+
+    function onChangeInputFiles() {
+      const input = document.getElementById('id-input')
+      const files = input.files
+      console.log(input.files.length)
+      if (!files.length) {
+        console.log('No files selected')
+        return
+      }
+
+      for (const file of files) {
+        console.log(file.type)
+        if (!file.type.startsWith('image/')) continue
+
+        uploadedImg = document.createElement('img')
+        uploadedImg.src = URL.createObjectURL(file)
+        uploadedImg.addEventListener('load', (e) => {
+          drawUploadedImg()
+        })
+      }
+    }
+
+    function drawUploadedImg() {
+      updateImgInfo()
+
+      clear()
+      // ctx.drawImage(uploadedImg, 10, 10, 150, 150, 10, 10, 150, 150)
+      ctx.drawImage(uploadedImg, sx, sy, sw, sh, dx, dy, dw, dh)
+    }
+
+    function clear() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+
+    function updateImgInfo() {
+      const inputSx = document.getElementById('id-input-sx')
+      const inputSy = document.getElementById('id-input-sy')
+      const inputSw = document.getElementById('id-input-sw')
+      const inputSh = document.getElementById('id-input-sh')
+      const inputDx = document.getElementById('id-input-dx')
+      const inputDy = document.getElementById('id-input-dy')
+      const inputDw = document.getElementById('id-input-dw')
+      const inputDh = document.getElementById('id-input-dh')
+      sx = Number(inputSx.value)
+      sy = Number(inputSy.value)
+      sw = Number(inputSw.value)
+      sh = Number(inputSh.value)
+      dx = Number(inputDx.value)
+      dy = Number(inputDy.value)
+      dw = Number(inputDw.value)
+      dh = Number(inputDh.value)
+    }
+  </script>
+</body>
+</html>
