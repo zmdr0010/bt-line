@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>act route act eft edit easing mask 01 textarea</title>
+
+  <style>
+    canvas {
+      /*width: 100%;*/
+      /*height: 100%;*/
+      border: 1px solid #000000;
+      /*background-color: beige;*/
+      /*background-color: gray;*/
+    }
+    .edit-board {
+      position: fixed;
+      overflow-y: scroll;
+      bottom: 0px;
+      left: 0px;
+      width: 100%;
+      height: 20%;
+      background-color: lightgrey;
+    }
+    .edit-board-landscape {
+      position: fixed;
+      overflow-y: scroll;
+      top: 0px;
+      right: 0px;
+      width: 50%;
+      height: 100%;
+      background-color: lightgrey;
+    }
+    .item-div {
+      margin: 8px;
+    }
+    .set-input {
+      width: 100%;
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div style="position: fixed; top: 30px; right: 30px" id="id-label-fps"></div>
+  <div class="edit-board" id="id-edit-board">
+    <div class="item-div">
+      <input type="file" id="id-input-file" accept=".txt" />
+    </div>
+    <div class="item-div"><button onclick="onClickSave()">save</button></div>
+    <div class="item-div">draw route: <input id="id-checkbox-draw-route" type="checkbox" checked onchange="redraw()" /></div>
+    <div class="item-div">route-circle-on: <input id="id-checkbox-route-circle-on" type="checkbox" checked onchange="redraw()" /></div>
+    <div class="item-div">
+      <button onclick="onClickDraw()">draw</button>
+      <button onclick="onClickPlay()">play</button>
+      <button onclick="onClickStop()">stop</button>
+    </div>
+    <div class="item-diva">
+      <textarea id="id-textarea" rows="50" cols="120"></textarea>
+    </div>
+  </div>
+
+  <canvas id="id-canvas"></canvas>
+
+  <script type="text/javascript" src="fnc-calc-easing.js"></script>
+  <script type="text/javascript" src="fnc-route.js"></script>
+  <script type="text/javascript" src="fnc-route-draw.js"></script>
+  <script type="text/javascript" src="fnc-save.js"></script>
+  <script type="text/javascript" src="fnc-trans-p.js"></script>
+  <script type="text/javascript" src="fnc-line-set.js"></script>
+  <script>
+    // act-eft changing shape-ani + mv + hit + sts
+
+    let lastTime = performance.now()
+    let frameCount = 0
+    let fps = 0
+    let lastFrameTimeMs = 0
+    const desiredFps = 30
+    const msPerFrame = 1000 / desiredFps
+
+    let ctx
+    let canvas
+
+    const baseW = 720
+    const baseH = 1280
+    let bw = baseW
+    let bh = baseH
+    const baseX = 50
+    const baseY = 30
+
+    const unit = {
+      x: 0, y: 0,
+      sx: 0, sy: 0,
+      routeRotateI: 0, // order: rotateI, degree
+      routeDegree: 0,
+      currentRoute: -1,
+      currentP: -1,
+      routeList: []
+    }
+
+    // {
+    //   rotateI: 0,
+    //   degree: 0,
+    //   sx: unit.x, sy: unit.y,
+    //   pieceSet: '',
+    //   maskSet: '',
+    //   pList: []
+    // }
+    let selectedRoute
+
+    let isPlaying = false
+
+    function init() {
+      let canvasW = window.innerWidth - 8 * 2
+      let canvasH = window.innerHeight - 8 * 2
+      canvas = document.getElementById('id-canvas')
+      ctx = canvas.getContext('2d')
+      canvas.width = canvasW
+      canvas.height = canvasH
+      if (canvasW > canvasH) {
+        const editBoard = document.getElementById('id-edit-board')
+        editBoard.className = 'edit-board-landscape'
+      }
+      const fileInput = document.getElementById('id-input-file')
+      fileInput.addEventListener('change', onChangeInputFiles)
+      // base
+      // 720 x 1280
+      // const baseW = 720
+      // const baseH = 1280
+      // let scale = 1.0
+
+      // 360 x 640
+      let scale = 0.5
+      bw = baseW * scale
+      bh = baseH * scale
+
+      // 'none',
+      //  'quadratic-in','quadratic-out', 'quadratic-in-out',
+      //  'cubic-in', 'cubic-out', 'cubic-in-out',
+      //  'quartic-in', 'quartic-out', 'quartic-in-out',
+      //  'quintic-in', 'quintic-out', 'quintic-in-out',
+      //  'sinusoidal-in', 'sinusoidal-out', 'sinusoidal-in-out',
+      //  'exponential-in', 'exponential-out', 'exponential-in-out',
+      //  'circular-in', 'circular-out', 'circular-in-out'
+
+      // mv-piece-route-set
+      // ucode/num/n,mv-piece-str,size-w,size-h/...
+      let pieceSet = 'route-piece-set-sample-00/4/3,036,90,90/3,036,90,90/3,036,90,90/3,036,90,90'
+      // route-line-easing-mask-set
+      // by order of list
+      // ucode/num/frame,easing-type/ ...
+      let maskSet00 = 'route-mask-set-sample-00-3s/8/' +
+        '13,quadratic-in/12,quadratic-out/13,quadratic-in/12,quadratic-out/' +
+        '13,quadratic-in/12,quadratic-out/13,quadratic-in/12,quadratic-out'
+      let maskSet01 = 'route-mask-set-sample-00-4s/8/' +
+        '17,quadratic-in/17,quadratic-in/17,quadratic-in/17,quadratic-in/' +
+        '17,quadratic-in/16,quadratic-in/16,quadratic-in/16,quadratic-in'
+      let maskSet02 = 'route-mask-set-sample-00-5s/8/' +
+        '21,quadratic-in/21,quadratic-in/21,quadratic-in/21,quadratic-in/' +
+        '21,quadratic-in/21,quadratic-in/21,quadratic-in/20,quadratic-in'
+
+
+
+      redraw()
+    }
+
+    function updateFPS() {
+      const now = performance.now()
+      const delta = now - lastTime
+      frameCount++
+      if (delta >= 1000) { // 1s
+        fps = Math.round((frameCount * 1000) / delta)
+        lastTime = now
+        frameCount = 0
+        document.getElementById('id-label-fps').innerText = `${fps} FPS / (${desiredFps}) ::: ms: ${msPerFrame}`
+      }
+    }
+
+    function aniFrame(timestamp) {
+      if (!isPlaying) return
+
+      // Request the next frame as early as possible
+      requestAnimationFrame(aniFrame)
+      if (desiredFps > 1) {
+        if (timestamp < lastFrameTimeMs + msPerFrame) return
+      }
+      lastFrameTimeMs = timestamp
+
+      updateFPS()
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      drawViewport()
+      drawRoute()
+
+      updateUnit()
+      drawUnit()
+
+      // requestAnimationFrame(aniFrame)
+    }
+
+    function startAni() {
+      requestAnimationFrame(aniFrame)
+    }
+
+    function drawViewport() {
+      ctx.beginPath()
+      ctx.strokeStyle = 'gray'
+      ctx.moveTo(baseX, baseY)
+      ctx.strokeRect(baseX, baseY, bw, bh)
+    }
+
+    function updateUnit() {
+      if (unit.routeList.length < 1) return
+      const route = selectedRoute
+      if (!route) return
+      if (unit.currentP < 0) unit.currentP = 0
+      if (unit.currentP >= route.pList.length) {
+        unit.currentP = route.pList.length-1
+        isPlaying = false
+        return
+      }
+      const p = route.pList[unit.currentP]
+      unit.x = p.x + baseX + unit.sx
+      unit.y = p.y + baseY + unit.sy
+      unit.currentP++
+    }
+
+    function moveUnit(x, y) {
+      // const label = document.getElementById('id-label-unit-pos')
+      // const inputX = document.getElementById('id-input-unit-x')
+      // const inputY = document.getElementById('id-input-unit-y')
+      unit.sx = x
+      unit.sy = y
+      unit.x = unit.sx + baseX
+      unit.y = unit.sy + baseY
+      // inputX.value = x
+      // inputY.value = y
+      // label.innerText = `unit pos: (${x}, ${y}) (dx, dy from baseX, baseY)`
+    }
+
+    function updateSelectedRoute() {
+      const route = unit.routeList[unit.currentRoute]
+      let pList = route.pList
+      const bound = calcPListBound(pList)
+      pList = movePListByRotateI(pList, route.rotateI, bound.w, bound.h)
+      pList = rotatePList(pList, route.degree)
+
+      selectedRoute = {
+        rotateI: route.rotateI,
+        degree: route.degree,
+        sx: unit.sx, sy: unit.sy,
+        pieceSet: route.pieceSet,
+        maskSet: route.maskSet,
+        pList: pList
+      }
+    }
+
+    // function edit() {
+    //   const pieceInput = document.getElementById('id-input-mv-piece-route-set')
+    //   const maskInput = document.getElementById('id-input-easing-mask-set')
+    //   const pieceSet = pieceInput.value
+    //   const maskSet = maskInput.value
+    //   const pList = makePListFromEasingMaskSet(pieceSet, maskSet)
+    //
+    //   const route = unit.routeList.find(rt => rt.pieceSet.split('/')[0] === pieceSet.split('/')[0])
+    //   if (route) {
+    //     route.pieceSet = pieceSet
+    //     route.maskSet = maskSet
+    //     route.pList = makePListFromEasingMaskSet(pieceSet, maskSet)
+    //   } else {
+    //     unit.routeList.push({
+    //       rotateI: 0,
+    //       degree: 0,
+    //       pieceSet: pieceSet,
+    //       maskSet: maskSet,
+    //       pList: pList
+    //     })
+    //   }
+    // }
+
+    function drawUnit() {
+      ctx.beginPath()
+      ctx.fillStyle = 'red'
+      ctx.fillRect(unit.x - 10, unit.y - 10, 20, 20)
+    }
+
+    function drawRoute() {
+      const checkBox = document.getElementById('id-checkbox-draw-route')
+      console.log(checkBox.checked)
+      if (!checkBox.checked || !selectedRoute) return
+      const checkCircle = document.getElementById('id-checkbox-route-circle-on')
+      drawPList(ctx, selectedRoute.pList, selectedRoute.sx + baseX, selectedRoute.sy + baseY, 'gray', checkCircle.checked)
+    }
+
+    function redraw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      drawViewport()
+      drawRoute()
+      drawUnit()
+    }
+
+    function draw() {
+      const txtArea = document.getElementById('id-textarea')
+      console.log(txtArea.value)
+      const split = txtArea.value.split('\n')
+      const first = split[0]
+      const firstSplit = first.split(',')
+      const currentRoute = Number(firstSplit[2])
+      moveUnit(Number(firstSplit[0]), Number(firstSplit[1]))
+      let txt = ''
+      for (let i=1; i<split.length; i++) {
+        txt += `${split[i]}\n`
+      }
+      txt = txt.slice(0, txt.length-1)
+
+      unit.routeList = []
+      loadRouteBundle(txt)
+      unit.currentRoute = currentRoute
+      updateSelectedRoute()
+      redraw()
+    }
+
+    function save() {
+      // atan2 : rotate route to target
+
+      // route-list
+      //   route: rotateI, degree, pieceSet, maskSet
+      // text
+      //   ucode/num\n  (first-line) ?? file-name is ucode ??
+      //   rotateI\n
+      //   degree\n
+      //   pieceSet\n
+      //   maskSet\n
+      //   ... (per 4 lines)
+
+      // if (unit.routeList.length < 1) return
+      // let result = ''
+      // for (const route of unit.routeList) {
+      //   result += `${route.rotateI}\n`
+      //   result += `${route.degree}\n`
+      //   result += `${route.pieceSet}\n`
+      //   result += `${route.maskSet}\n`
+      // }
+      // console.log(result)
+      // saveString(`route-bundle-${getDateUCode(new Date())}`, result)
+
+      const txtArea = document.getElementById('id-textarea')
+      // console.log(txtArea.value)
+      navigator.clipboard.writeText(txtArea.value)
+    }
+
+    function loadRouteBundle(str) {
+      const strSplit = str.split('\n')
+      console.log(strSplit)
+      for (let i=0; i<strSplit.length; i+=4) {
+        const rotateI = Number(strSplit[i])
+        const degree = Number(strSplit[i+1])
+        const pieceSet = strSplit[i+2]
+        const maskSet = strSplit[i+3]
+        unit.routeList.push({
+          rotateI: rotateI,
+          degree: degree,
+          pieceSet: pieceSet,
+          maskSet: maskSet,
+          pList: makePListFromEasingMaskSet(pieceSet, maskSet, true)
+        })
+      }
+    }
+
+    function onClickSave() {
+      save()
+    }
+
+    function onClickPlay() {
+      unit.currentP = -1
+      if (isPlaying) return
+      isPlaying = true
+      if (unit.currentRoute < 0) return
+      startAni()
+    }
+
+    function onClickStop() {
+      isPlaying = false
+    }
+
+    function onChangeInputFiles() {
+      const input = document.getElementById('id-input-file')
+      const files = input.files
+      console.log(input.files.length)
+      if (!files.length) {
+        console.log('No files selected')
+        return
+      }
+      const f = files[0]
+      const reader = new FileReader()
+      reader.addEventListener('load', () => {
+        loadRouteBundle(reader.result)
+      })
+      reader.readAsText(f)
+    }
+
+    function onClickDraw() {
+      draw()
+    }
+  </script>
+</body>
+</html>
