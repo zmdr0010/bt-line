@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mv-piece 3x3</title>
+
+  <style>
+    canvas {
+      /*width: 100%;*/
+      /*height: 100%;*/
+      border: 1px solid #000000;
+      /*background-color: beige;*/
+      /*background-color: gray;*/
+      margin: 4px;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: repeat(3, 200px);
+      /*background-color: dodgerblue;*/
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div class="container" id="id-container"></div>
+
+  <script type="text/javascript" src="mv-piece-set-00.js"></script>
+  <script>
+    // 0 - 1
+    //   /
+    // 2 - 3
+    const smp2x2_00 = '0123'
+    // 0 - 1 - 2
+    //         |
+    // 3   4   5
+    //         |
+    // 6   7   8
+    const smp3x3_00 = '01258'
+
+    function init() {
+      const ww = window.innerWidth
+      const wh = window.innerHeight
+      console.log(`${ww} x ${wh}`)
+      const column = Math.floor(ww / 200)
+      console.log(`${column}`)
+      const container = document.getElementById('id-container')
+      container.style.gridTemplateColumns = `repeat(${column}, 200px)`
+      for (const piece of mvPiece3x3OnlyOrderList) {
+        const div = document.createElement('div')
+        // div.style.width = '200px'
+        div.style.height = '200px'
+        // div.style.backgroundColor = 'gray'
+        div.style.margin = '4px'
+        div.innerText = piece
+        container.appendChild(div)
+        const canvas = document.createElement('canvas')
+        canvas.width = 170
+        canvas.height = 170
+        div.appendChild(canvas)
+
+        const ctx = canvas.getContext('2d')
+        ctx.font = '20px serif'
+
+        const n = 3
+        const sx = 25
+        const sy = 25
+        const pSize = 60
+        const pieceSplit = piece.split('')
+        let prevP = { x: 0, y: 0 }
+        for (const pStr of pieceSplit) {
+          const i = Number(pStr)
+          const c = i % n
+          const r = Math.floor(i / n)
+          const x = c * pSize + sx
+          const y = r * pSize + sy
+
+          if (prevP.x === 0 && prevP.y === 0) {
+            prevP.x = x
+            prevP.y = y
+            ctx.beginPath()
+            ctx.fillStyle = 'lightgray'
+            ctx.fillRect(x-15, y-15, 30, 30)
+          } else {
+            ctx.beginPath()
+            ctx.strokeStyle = 'gray'
+
+            const dx = x - prevP.x
+            const dy = y - prevP.y
+            const mgX = dx * 0.25
+            const mgY = dy * 0.25
+            const mvX = prevP.x + mgX
+            const mvY = prevP.y + mgY
+            const lx = x - mgX
+            const ly = y - mgY
+
+            ctx.moveTo(mvX, mvY)
+            ctx.lineTo(lx, ly)
+            ctx.stroke()
+            prevP.x = x
+            prevP.y = y
+          }
+
+          ctx.beginPath()
+          ctx.strokeStyle = 'black'
+          ctx.fillStyle = 'black'
+          ctx.strokeRect(x-15, y-15, 30, 30)
+          ctx.fillText(pStr, x-4, y+6)
+        }
+      }
+    }
+  </script>
+</body>
+</html>
