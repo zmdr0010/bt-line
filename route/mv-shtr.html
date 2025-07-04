@@ -432,7 +432,7 @@
 
   function updateShtrMv() {
     if (shtrInfo.type !== 'mv') return
-    if (shtrInfo.mvRoute.frame >= shtrInfo.mvRoute.pList.length) return
+    if (shtrInfo.mvRoute.frame > shtrInfo.mvRoute.pList.length) return
 
     // startFrame
     // mvRoute: {
@@ -462,10 +462,12 @@
     }
 
     const p = mvRoute.pList[mvRoute.frame]
-    unit.x = p.x + mvRoute.sx
-    unit.y = p.y + mvRoute.sy
-    shtrInfo.sx = unit.x + shtrInfo.dx
-    shtrInfo.sy = unit.y + shtrInfo.dy
+    if (p) {
+      unit.x = p.x + mvRoute.sx
+      unit.y = p.y + mvRoute.sy
+      shtrInfo.sx = unit.x + shtrInfo.dx
+      shtrInfo.sy = unit.y + shtrInfo.dy
+    }
 
     mvRoute.frame++
   }
