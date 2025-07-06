@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>unit</title>
+
+  <style>
+    canvas {
+      /*width: 100%;*/
+      /*height: 100%;*/
+      border: 1px solid #000000;
+      /*background-color: beige;*/
+      /*background-color: gray;*/
+    }
+    .edit-board {
+      position: fixed;
+      overflow-y: scroll;
+      bottom: 0px;
+      left: 0px;
+      width: 100%;
+      height: 20%;
+      background-color: lightgrey;
+    }
+    .edit-board-landscape {
+      position: fixed;
+      overflow-y: scroll;
+      top: 0px;
+      right: 0px;
+      width: 50%;
+      height: 100%;
+      background-color: lightgrey;
+    }
+    .item-div {
+      margin: 8px;
+    }
+    .set-input {
+      width: 100%;
+    }
+  </style>
+</head>
+<body onload="init()">
+<div style="position: fixed; top: 30px; right: 30px" id="id-label-fps"></div>
+<div class="edit-board" id="id-edit-board">
+  <div class="item-div">
+    <input type="file" id="id-input-file" accept=".txt" />
+  </div>
+  <div class="item-div"><button onclick="onClickSave()">save</button></div>
+  <div class="item-div">draw route: <input id="id-checkbox-draw-route" type="checkbox" checked onchange="redraw()" /></div>
+  <div class="item-div">route-circle-on: <input id="id-checkbox-route-circle-on" type="checkbox" checked onchange="redraw()" /></div>
+  <div class="item-div">
+    <button onclick="onClickAddUnit()">add-unit</button>
+    <button onclick="onClickOutUnit()">out-unit</button>
+    <button onclick="onClickPlay()">play</button>
+    <button onclick="onClickStop()">stop</button>
+  </div>
+  <div class="item-diva">
+    <textarea id="id-textarea" rows="50" cols="120"></textarea>
+  </div>
+</div>
+
+<canvas id="id-canvas"></canvas>
+
+<script type="text/javascript" src="fnc-calc-easing.js"></script>
+<script type="text/javascript" src="fnc-route.js"></script>
+<script type="text/javascript" src="fnc-route-draw.js"></script>
+<script type="text/javascript" src="fnc-save.js"></script>
+<script type="text/javascript" src="fnc-trans-p.js"></script>
+<script type="text/javascript" src="fnc-line-set.js"></script>
+<script type="text/javascript" src="proto/ani-frame.js"></script>
+<script type="text/javascript" src="proto/shtr-mngr.js"></script>
+<script type="text/javascript" src="proto/tan-mngr.js"></script>
+<script type="text/javascript" src="proto/unit.js"></script>
+<script type="text/javascript" src="proto/act-mngr.js"></script>
+<script type="text/javascript" src="proto/fnc-p-list.js"></script>
+<script>
+
+  // unit-00/-50,-50/30,10,6,5/red,20,20      // unit-ucode/sx, sy (from base)/hp,atk,dfc,spd/color,size-w,size-h
+  // ===                      (separator)
+  // start/mv-end/0,0,0,none,0,0/-1/2     // condition-code/type(state)/routeI,rotateI,degree (+= rotateI, degree),target,dx,dy/shtrI/next-cndtn-i
+  // end/mv-end/2,0,0,none,0,0/-1/-1
+  // cdtn-00/mv-end/1,0,0,none,0,0/0/3
+  // cdtn-01/mv-end/1,3,0,none,0,0/-1/2
+  // ===                  // unit-route-list
+  // 0,0                  // rotateI, degree
+  // mv-pc-rt-00/2/3,01257436,90,90/2,023,90,90
+  // e-mask-set-00/6/20,1/24,2/18,4/22,5/16,7/18,8
+  // 0,0
+  // mv-pc-rt-01/4/2,03,90,90/2,012,90,90/3,01436758,90,90/3,01458,90,90
+  // e-mask-set-00/6/20,1/24,2/18,4/22,5/16,7/18,8
+  // 0,0
+  // route-piece-set-sample-00/4/3,036,90,90/3,036,90,90/3,036,90,90/3,036,90,90
+  // route-mask-set-sample-00-3s/8/13,1/12,2/13,4/12,5/13,7/12,8/13,10/12,11
+  // ===                // shtr-bundle-set
+  // 1 (shtr num: remainder === list)   // mv (mv-act-skl) (sht next line has route-set)
+  // ===            // mv-route-set + target-set (target-type (target / none),dx,dy)
+  // 10,10,mv,0     // shtr dx, dy, shtr-type (normal / mv / fix), sht-start-frame (-1: last, 0: first, n)
+  // 2              // tan-info num
+  // 3,blue,10,10   // tan: atk, color, sizeW, sizeH
+  // 5,green,13,13  // tan: atk, color, sizeW, sizeH
+  // 0,0                                                    // tanRoute: rotateI, degree
+  // pc-00/1/3,031546,30,150,20,40,30,130,40,60,10,110      //           piece-set
+  // msk-00/5/10,1/4,2/8,2/4,5/6,6                          //           mask-set
+  // 0,0
+  // pc-01/1/3,154037,30,150,20,40,-30,-130,10,60,-16,110
+  // msk-01/5/10,1/4,2/8,2/4,5/6,6
+  // tan-intv-00/3/10/3/0/1/0                // tan-intv: ucode/num/frame/i-list-num/i/i/...
+  // sht-00/3/40/5/30/target,50,50/3/0/1/0   // sht: ucode/num/intv-frame/reload-num/reload-frame/target(target/none: none is no target),dx,dy/route-i-list-num/i/i/...
+  // 0,0        // skl-mv-route
+  // mv-skl-pc-00/1/3,031546,90,90,40,40,30,60,50,50,40,40
+  // mv-skl-msk-00/6/14,1/14,2/16,4/14,5/16,7/12,8
+  // target,0,0
+
+  let ctx
+  let canvas
+
+  const baseW = 720
+  const baseH = 1280
+  let bw = baseW
+  let bh = baseH
+  const baseX = 50
+  const baseY = 30
+
+  const target = {
+    x: 200, y: 400,
+    sx: 200, sy: 400
+  }
+
+  let aniFrame
+  // let unit
+  let actMngr
+  let unitMngr = {
+    list: []
+  }
+
+  function init() {
+    let canvasW = window.innerWidth - 8 * 2
+    let canvasH = window.innerHeight - 8 * 2
+    canvas = document.getElementById('id-canvas')
+    ctx = canvas.getContext('2d')
+    canvas.width = canvasW
+    canvas.height = canvasH
+    if (canvasW > canvasH) {
+      const editBoard = document.getElementById('id-edit-board')
+      editBoard.className = 'edit-board-landscape'
+    }
+    const fileInput = document.getElementById('id-input-file')
+    fileInput.addEventListener('change', onChangeInputFiles)
+    // base
+    // 720 x 1280
+    // const baseW = 720
+    // const baseH = 1280
+    // let scale = 1.0
+
+    // 360 x 640
+    let scale = 0.5
+    bw = baseW * scale
+    bh = baseH * scale
+
+    // 'none',
+    //  'quadratic-in','quadratic-out', 'quadratic-in-out',
+    //  'cubic-in', 'cubic-out', 'cubic-in-out',
+    //  'quartic-in', 'quartic-out', 'quartic-in-out',
+    //  'quintic-in', 'quintic-out', 'quintic-in-out',
+    //  'sinusoidal-in', 'sinusoidal-out', 'sinusoidal-in-out',
+    //  'exponential-in', 'exponential-out', 'exponential-in-out',
+    //  'circular-in', 'circular-out', 'circular-in-out'
+
+    actMngr = FrHdBtActMngr.create()
+
+    redraw()
+
+    aniFrame = FrHdBtAniFrame.create(() => { // update
+      actMngr.update()
+    }, () => { // draw
+      const fpsInfo = aniFrame.getFpsInfo()
+      document.getElementById('id-label-fps').innerText = `${fpsInfo.fps} FPS / (${fpsInfo.dFps}) ::: ms: ${fpsInfo.msPerFrame}`
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      drawViewport()
+      drawTarget()
+
+      for (const unit of unitMngr.list) unit.draw(ctx)
+    })
+  }
+
+  function startAni() {
+    aniFrame.start()
+    for (const unit of unitMngr.list) unit.start(actMngr)
+  }
+
+  function drawViewport() {
+    ctx.beginPath()
+    ctx.strokeStyle = 'gray'
+    ctx.moveTo(baseX, baseY)
+    ctx.strokeRect(baseX, baseY, bw, bh)
+  }
+
+  function moveTarget(x, y) {
+    target.sx = x
+    target.sy = y
+    target.x = target.sx + baseX
+    target.y = target.sy + baseY
+  }
+
+  function drawTarget() {
+    ctx.beginPath()
+    ctx.fillStyle = 'blue'
+    ctx.fillRect(target.x - 10, target.y - 10, 20, 20)
+  }
+
+  function redraw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    drawViewport()
+    drawTarget()
+
+    for (const unit of unitMngr.list) unit.draw(ctx)
+  }
+
+  function addUnit() {
+    const txtArea = document.getElementById('id-textarea')
+    console.log(txtArea.value)
+
+    const unit = FrHdBtUnit.create(unitMngr, target)
+    // const x = getRandomNum(50, 300)
+    // const y = getRandomNum(50, 300)
+    // unit.createUnitFromBundleSet(txtArea.value, baseX, baseY, { x: x, y: y })
+    unit.createUnitFromBundleSet(txtArea.value, baseX, baseY)
+    unitMngr.list.push(unit)
+    console.log(`add unit (${x}, ${y})`)
+
+    if (aniFrame.getIsPlaying()) unit.start(actMngr)
+
+    // redraw()
+  }
+
+  function outUnit() {
+    for (const unit of unitMngr.list) unit.out()
+  }
+
+  function save() {
+
+  }
+
+  function getRandomNum(min, max) {
+    return Math.random() * (max - min) + min
+  }
+
+  function onClickSave() {
+    save()
+  }
+
+  function onClickPlay() {
+    startAni()
+  }
+
+  function onClickStop() {
+    aniFrame.stop()
+  }
+
+  function onChangeInputFiles() {
+    const input = document.getElementById('id-input-file')
+    const files = input.files
+    console.log(input.files.length)
+    if (!files.length) {
+      console.log('No files selected')
+      return
+    }
+    const f = files[0]
+    const reader = new FileReader()
+    reader.addEventListener('load', () => {
+      // loadRouteBundle(reader.result)
+    })
+    reader.readAsText(f)
+  }
+
+  function onClickAddUnit() {
+    addUnit()
+  }
+
+  function onClickOutUnit() {
+    outUnit()
+  }
+</script>
+</body>
+</html>
