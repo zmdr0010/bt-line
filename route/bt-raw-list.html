@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>new bt raw 00 list</title>
+
+  <style>
+    canvas {
+      /*width: 100%;*/
+      /*height: 100%;*/
+      border: 1px solid #000000;
+      /*background-color: beige;*/
+      /*background-color: gray;*/
+    }
+    .edit-board {
+      position: fixed;
+      overflow-y: scroll;
+      bottom: 0px;
+      left: 0px;
+      width: 100%;
+      height: 20%;
+      background-color: lightgrey;
+    }
+    .edit-board-landscape {
+      position: fixed;
+      overflow-y: scroll;
+      top: 0px;
+      right: 0px;
+      width: 50%;
+      height: 100%;
+      background-color: lightgrey;
+    }
+    .item-div {
+      margin: 8px;
+    }
+  </style>
+</head>
+<body onload="init()">
+  <div class="edit-board" id="id-edit-board">
+    <div class="item-div">
+      size: <input type="number" id="id-input-size" value="10" />
+    </div>
+    <div class="item-div"><button onclick="onClickChange()">change</button></div>
+    <div class="item-div">
+      sx: <input type="number" id="id-input-sx" value="10" />
+      sy: <input type="number" id="id-input-sy" value="10">
+    </div>
+    <div class="item-div"><button onclick="onClickMove()">move</button></div>
+    <div class="item-div"><button onclick="onClickSave()">save</button></div>
+    <div class="item-div">
+      <button onclick="onClickDraw()">draw</button>
+    </div>
+    <div class="item-diva">
+      <textarea id="id-textarea" rows="50" cols="120"></textarea>
+    </div>
+  </div>
+  <canvas id="id-canvas"></canvas>
+
+  <script type="text/javascript" src="lib/fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="lib/proto/fnc-raw-info.js"></script>
+  <script type="text/javascript" src="lib/proto/fnc-draw-raw.js"></script>
+  <script>
+    let canvas
+    let ctx
+
+    // ucode/base-i-list (0,1,...)/new-set,new-set,...(c-r-n-001100)
+    let strSet = 'new-bt-raw-00/0,1/0-0-6-011110111111111111011110111111010010,0-1-6-010010010010'
+    let rawInfo
+
+    let size = 10
+    let rawSx = 10
+    let rawSy = 10
+    const colorList = [
+      [88,47,14], [127,79,36], [147,102,57], [166,138,100], [182,173,144], [194,197,170],
+      [164,172,134], [101,109,74], [65,72,51], [51,61,29], [0,8,20], [252,246,189], [0,53,102], [208,244,222],
+      [255,95,0], [255,214,10], [255,153,200], [0,29,61], [169,222,249], [228,193,249],
+    ]
+
+    let rawInfoList = []
+
+    function init() {
+      let canvasW = window.innerWidth - 8 * 2
+      let canvasH = window.innerHeight - 8 * 2
+      canvas = document.getElementById('id-canvas')
+      ctx = canvas.getContext('2d')
+      canvas.width = canvasW
+      canvas.height = canvasH
+      if (canvasW > canvasH) {
+        const editBoard = document.getElementById('id-edit-board')
+        editBoard.className = 'edit-board-landscape'
+      }
+      // rawInfo = createRawInfo(strSet)
+      // console.log(rawInfo)
+      // drawRawInfo(ctx, rawInfo, rawSx, rawSy, size, colorList)
+      // drawRawInfoLayers(ctx, rawInfo, rawSx+150, rawSy, size, colorList)
+    }
+
+    function clear() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+    }
+
+    function draw() {
+      clear()
+      // if (rawInfo) {
+      //   drawRawInfo(ctx, rawInfo, rawSx, rawSy, size, colorList)
+      //   drawRawInfo(ctx, rawInfo, rawSx, rawSy, size, colorList)
+      //   drawRawInfoLayers(ctx, rawInfo, rawSx+150, rawSy, size, colorList)
+      // }
+      let clm = 5
+      let asz = 100
+      let i = 0
+      for (const info of rawInfoList) {
+        const c = i % clm
+        const r = Math.floor(i / clm)
+        const x = c * asz + rawSx
+        const y = r * asz + rawSy
+        drawRawInfo(ctx, info, x, y, size, colorList)
+        i++
+      }
+    }
+
+    function onClickSave() {
+      const txtArea = document.getElementById('id-textarea')
+      const txtSplit = txtArea.value.split('\n')
+      saveString(`list-${txtSplit[0]}`, txtArea.value)
+    }
+
+    function onClickDraw() {
+      rawInfoList = []
+      const txtArea = document.getElementById('id-textarea')
+      console.log(txtArea.value)
+      const listTxtSplit = txtArea.value.split('===\n')
+      for (const txt of listTxtSplit) {
+        const txtSplit = txt.split('\n')
+        let str = `${txtSplit[0]}/${txtSplit[1]}/`
+        for (let i=2; i<txtSplit.length; i++) {
+          // console.log(`txtSplit[${i}].length: ${txtSplit[i].length}`)
+          if(txtSplit[i].length > 0) str += `${txtSplit[i]},`
+        }
+        str = str.slice(0, str.length-1)
+        console.log(str)
+        const rawInfo = createRawInfo(str)
+        rawInfoList.push(rawInfo)
+      }
+      draw()
+    }
+
+    function onClickMove() {
+      const inputSx = document.getElementById('id-input-sx')
+      const inputSy = document.getElementById('id-input-sy')
+      rawSx = Number(inputSx.value)
+      rawSy = Number(inputSy.value)
+      draw()
+    }
+
+    function onClickChange() {
+      const inputSize = document.getElementById('id-input-size')
+      size = Number(inputSize.value)
+      draw()
+    }
+  </script>
+</body>
+</html>
