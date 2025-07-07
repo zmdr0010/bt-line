@@ -13,10 +13,21 @@
 // }
 function drawRawInfo(ctx, info, x, y, size, colorList) {
   let index = 0
+  let colorType = 'rgb'
+  let clrList = colorList
+  if (info.colorInfo) {
+    clrList = info.colorInfo.list
+    colorType = info.colorInfo.type
+  }
   for (const rwInfo of info.list) {
-    const color = colorList[index % colorList.length]
+    const color = clrList[index % clrList.length]
     ctx.beginPath()
-    ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`
+    if (colorType === "rgb") {
+      ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`
+    } else { // name
+      ctx.fillStyle = color
+    }
+
     let i = -1
     for (const rw of rwInfo.raw) {
       i++
@@ -34,11 +45,21 @@ function drawRawInfo(ctx, info, x, y, size, colorList) {
 
 function drawRawInfoLayers(ctx, info, x, y, size, colorList) {
   let ttr = 0
+  let colorType = 'rgb'
+  let clrList = colorList
+  if (info.colorInfo) {
+    clrList = info.colorInfo.list
+    colorType = info.colorInfo.type
+  }
   for (let i=0; i<info.list.length; i++) {
     const rwInfo = info.list[i]
-    const color = colorList[i % colorList.length]
+    const color = clrList[i % clrList.length]
     ctx.beginPath()
-    ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`
+    if (colorType === "rgb") {
+      ctx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`
+    } else { // name
+      ctx.fillStyle = color
+    }
     let prevR = -1
     let count = 0
     for (let j=0; j<rwInfo.raw.length; j++) {

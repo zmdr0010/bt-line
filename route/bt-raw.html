@@ -101,7 +101,6 @@
       clear()
       if (rawInfo) {
         drawRawInfo(ctx, rawInfo, rawSx, rawSy, size, colorList)
-        drawRawInfo(ctx, rawInfo, rawSx, rawSy, size, colorList)
         drawRawInfoLayers(ctx, rawInfo, rawSx+150, rawSy, size, colorList)
       }
     }
@@ -117,13 +116,21 @@
       console.log(txtArea.value)
       const txtSplit = txtArea.value.split('\n')
       let str = `${txtSplit[0]}/${txtSplit[1]}/`
+      let colorInfo
       for (let i=2; i<txtSplit.length; i++) {
-        str += `${txtSplit[i]},`
+        const tx = txtSplit[i]
+        const txCode = tx.split('/')[0]
+        if (txCode === 'color') {
+          colorInfo = createColorInfo(tx)
+        } else {
+          str += `${tx},`
+        }
       }
       str = str.slice(0, str.length-1)
       console.log(str)
       strSet = str
       rawInfo = createRawInfo(strSet)
+      rawInfo.colorInfo = colorInfo
       console.log(rawInfo)
       draw()
     }
