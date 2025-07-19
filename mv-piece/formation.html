@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>act route formation</title>
+
+  <style>
+    canvas {
+      /*width: 100%;*/
+      /*height: 100%;*/
+      border: 1px solid #000000;
+      /*background-color: beige;*/
+      /*background-color: gray;*/
+    }
+  </style>
+</head>
+<body onload="init()">
+  <canvas id="id-canvas"></canvas>
+  
+  <script type="text/javascript" src="formation-set-00.js"></script>
+  <script>
+
+    function init() {
+      let canvasW = window.innerWidth - 8 * 2
+      let canvasH = window.innerHeight - 8 * 2 + 6000
+      const canvas = document.getElementById('id-canvas')
+      const ctx = canvas.getContext('2d')
+      canvas.width = canvasW
+      canvas.height = canvasH
+
+      console.log(formationSetList00.length)
+      // let fStr00 = formationSetList00[13]
+      // let pList00 = makePListFromFormationSet(fStr00, 20, 20)
+      // drawPList(ctx, pList00, 30, 30, 'gray')
+
+      const pw = 20
+      const ph = 20
+      const column = 10
+      const mw = 150
+      const mh = 150
+      const sx = 30
+      const sy = 30
+      for (let i=0; i<formationSetList00.length; i++) {
+        const c = i % column
+        const r = Math.floor(i / column)
+        const x = mw * c + sx
+        const y = mh * r + sy
+        let str = formationSetList00[i]
+        let list = makePListFromFormationSet(str, pw, ph)
+        drawPList(ctx, list, x, y, 'gray')
+      }
+    }
+
+    // cw/rh/i/i/i ...
+    function makePListFromFormationSet(str, w, h) {
+      const strSplit = str.split('/')
+      const cw = Number(strSplit[0])
+      const ch = Number(strSplit[1])
+      const list = []
+      for (let i=2; i<strSplit.length; i++) {
+        const index = Number(strSplit[i])
+        const c = index % cw
+        const r = Math.floor(index / cw)
+        list.push({ x: c * w, y: r * h })
+      }
+      return list
+    }
+
+    function drawPList(ctx, list, sx, sy, color='blue') {
+      // ctx.beginPath()
+      // ctx.strokeStyle = 'gray'
+      // let i = 0
+      // for (const p of list) {
+      //   const x = p.x + sx
+      //   const y = p.y + sy
+      //   if (i === 0) {
+      //     ctx.moveTo(x, y)
+      //   } else {
+      //     ctx.lineTo(x, y)
+      //   }
+      //   i++
+      // }
+      // ctx.stroke()
+
+      ctx.beginPath()
+      for (const p of list) {
+        const x = p.x + sx
+        const y = p.y + sy
+        ctx.strokeStyle = color
+        // ctx.strokeRect(x, y, size, size)
+
+        ctx.moveTo(x + 4, y)
+        ctx.arc(x, y, 4, 0, 2 * Math.PI)
+
+        ctx.stroke()
+      }
+    }
+  </script>
+</body>
+</html>
