@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>hd view</title>
+</head>
+<body onload="init()">
+  <canvas id="id-canvas"></canvas>
+
+  <script type="text/javascript" src="fhd-set-5x5-00.js"></script>
+  <script type="text/javascript" src="fhd-set-5x6-00.js"></script>
+  <script type="text/javascript" src="fhd-set-5x7-00.js"></script>
+  <script type="text/javascript" src="fhd-set-6x5-00.js"></script>
+  <script type="text/javascript" src="fhd-set-6x6-00.js"></script>
+  <script type="text/javascript" src="fhd-set-6x7-00.js"></script>
+  <script type="text/javascript" src="fhd-set-7x5-00.js"></script>
+  <script type="text/javascript" src="fhd-set-8x5-00.js"></script>
+  <script type="text/javascript" src="fhd-set-9x5-00.js"></script>
+  <script type="text/javascript" src="fnc-color.js"></script>
+  <script type="text/javascript" src="fnc-draw-rw-layer.js"></script>
+  <script type="text/javascript" src="fnc-search-params.js"></script>
+  <script>
+    const paletteList = [
+      {
+        list: [[36, 10, 52], [137, 22, 82], [234, 190, 108], [255, 237, 216]],
+        eyes: [60, 60, 60]
+      },
+      {
+        list: [[64, 31, 113], [130, 77, 116], [190, 123, 114], [253, 175, 123]],
+        eyes: [60, 60, 60]
+      },
+      {
+        list: [[255, 175, 69], [251, 109, 72], [215, 75, 118], [103, 63, 105]],
+        eyes: [60, 60, 60]
+      },
+      {
+        list: [[67, 10, 93], [95, 55, 75], [140, 106, 93], [238, 228, 177]],
+        eyes: [30, 30, 30]
+      },
+      {
+        list: [[255, 201, 74], [192, 139, 92], [121, 84, 88], [69, 63, 120]],
+        eyes: [30, 30, 30]
+      },
+      {
+        list: [[108, 3, 69], [220, 107, 25], [247, 197, 102], [255, 248, 220]],
+        eyes: [60, 60, 60]
+      }
+    ]
+    let palette = null
+
+    let layerSetList = [
+      {
+        x: 0, y: 0,
+        size: 10,
+        layerList: [
+          {
+            c: 0,
+            r: 0,
+            n: 3,
+            raw: [0, 0, 1, 1, 0, 0],
+            color: 'black' // name / rgb(0,0,0), none or empty is black(default)
+          }
+        ]
+      }
+    ]
+
+    let canvas
+    let ctx
+
+    let sx = 50
+    let sy = 50
+    let margin = 20
+
+    let sPrmInfo = {
+      id: '5x5',
+      i: 0 // paletteList-i
+    }
+
+    function init() {
+      let fhdSetList = fhdSet5x5List00
+      // fhdSetList = fhdSet5x6List00
+      // fhdSetList = fhdSet5x7List00
+      // fhdSetList = fhdSet6x5List00
+      // fhdSetList = fhdSet6x6List00
+      // fhdSetList = fhdSet6x7List00
+      // fhdSetList = fhdSet7x5List00
+      // fhdSetList = fhdSet8x5List00
+      // fhdSetList = fhdSet9x5List00
+      updateBySearchParams(sPrmInfo)
+      if (sPrmInfo.id === '5x6') fhdSetList = fhdSet5x6List00
+      if (sPrmInfo.id === '5x7') fhdSetList = fhdSet5x7List00
+      if (sPrmInfo.id === '6x5') fhdSetList = fhdSet6x5List00
+      if (sPrmInfo.id === '6x6') fhdSetList = fhdSet6x6List00
+      if (sPrmInfo.id === '6x7') fhdSetList = fhdSet6x7List00
+      if (sPrmInfo.id === '7x5') fhdSetList = fhdSet7x5List00
+      if (sPrmInfo.id === '8x5') fhdSetList = fhdSet8x5List00
+      if (sPrmInfo.id === '9x5') fhdSetList = fhdSet9x5List00
+
+      layerSetList = createLayerSetList(fhdSetList)
+      console.log(layerSetList)
+      const num = Math.floor(fhdSetList.length / 5)
+
+      let canvasW = window.innerWidth - 8 * 2
+      let canvasH = window.innerHeight - 8 * 2
+      canvasH *= num
+      canvas = document.getElementById('id-canvas')
+      ctx = canvas.getContext('2d')
+      canvas.width = canvasW
+      canvas.height = canvasH
+
+      palette = paletteList[sPrmInfo.i % paletteList.length]
+
+      draw()
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      let x = sx
+      let y = sy
+      for (const layerSet of layerSetList) {
+        const lx = layerSet.x + x
+        const ly = layerSet.y + y
+        let maxX = 0
+        let maxY = 0
+        const colorList = createColorList(palette.list, layerSet.layerList.length)
+        colorList[1] = palette.eyes
+        let i = 0
+        for (const layer of layerSet.layerList) {
+          let color = layer.color
+          const c = colorList[i++]
+          color = `rgb(${c[0]},${c[1]},${c[2]})`
+          drawRwLayerColor(ctx, layer, lx, ly, layerSet.size, color)
+          let r = layer.r + Math.floor(layer.raw.length / layer.n)
+          maxY = Math.max(maxY, r * layerSet.size)
+          maxX = Math.max(maxX, (layer.c + layer.n) * layerSet.size)
+        }
+        let mx = lx + maxX + margin
+        i = 0
+        for (const layer of layerSet.layerList) {
+          let color = layer.color
+          const c = colorList[i++]
+          color = `rgb(${c[0]},${c[1]},${c[2]})`
+          drawRwLayerColor(ctx, layer, mx, ly, layerSet.size, color)
+          maxX = Math.max(maxX, (layer.c + layer.n) * layerSet.size)
+          mx += maxX + margin
+        }
+        y += margin + maxY
+      }
+    }
+
+    function createLayerSetList(list) {
+      const result = []
+      for (const str of list) result.push(createLayerSet(str))
+      return result
+    }
+
+    function createLayerSet(str) {
+      const sSplit = str.split('/')
+      const szStr = sSplit[0]
+      const szStrSplit = szStr.split(',')
+      const size = Number(szStrSplit[0])
+      const x = Number(szStrSplit[1])
+      const y = Number(szStrSplit[2])
+      const layerList = []
+      for (let i=1; i<sSplit.length; i++) {
+        const rws = sSplit[i]
+        const rwsSplit = rws.split(',')
+        const rwSplit = rwsSplit[0].split('_')
+        const c = Number(rwSplit[0])
+        const r = Number(rwSplit[1])
+        const n = Number(rwSplit[2])
+        const raw = []
+        for (const rs of rwSplit[3].split('')) raw.push(Number(rs))
+        const colorSplit = rwsSplit[1].split('-')
+        const type = colorSplit[0]
+        let color = 'black'
+        if (type === 'name') color = colorSplit[1]
+        if (type === 'rgb') color = `rgb(${colorSplit[1]},${colorSplit[2]},${colorSplit[3]})`
+        layerList.push({
+          c: c,
+          r: r,
+          n: n,
+          raw: raw,
+          color: color
+        })
+      }
+      return {
+        x: x, y: y, size: size,
+        layerList: layerList,
+        hitBox: { list: [] }
+      }
+    }
+  </script>
+</body>
+</html>
