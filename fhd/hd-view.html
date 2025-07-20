@@ -68,8 +68,8 @@
     let canvas
     let ctx
 
-    let sx = 50
-    let sy = 50
+    let sx = 10
+    let sy = 10
     let margin = 20
 
     let sPrmInfo = {
@@ -103,6 +103,7 @@
 
       let canvasW = window.innerWidth - 8 * 2
       let canvasH = window.innerHeight - 8 * 2
+      canvasW *= num
       canvasH *= num
       canvas = document.getElementById('id-canvas')
       ctx = canvas.getContext('2d')
