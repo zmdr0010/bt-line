@@ -17,11 +17,16 @@
   <script type="text/javascript" src="fhd-set-7x5-00.js"></script>
   <script type="text/javascript" src="fhd-set-8x5-00.js"></script>
   <script type="text/javascript" src="fhd-set-9x5-00.js"></script>
+  <script type="text/javascript" src="color-set-sample-00.js"></script>
+  <script type="text/javascript" src="color-set-sample-01.js"></script>
+  <script type="text/javascript" src="color-set-sample-02.js"></script>
+  <script type="text/javascript" src="color-set-sample-03.js"></script>
+  <script type="text/javascript" src="color-set-sample-select.js"></script>
   <script type="text/javascript" src="fnc-color.js"></script>
   <script type="text/javascript" src="fnc-draw-rw-layer.js"></script>
   <script type="text/javascript" src="fnc-search-params.js"></script>
   <script>
-    const paletteList = [
+    let paletteList = [
       {
         list: [[36, 10, 52], [137, 22, 82], [234, 190, 108], [255, 237, 216]],
         eyes: [60, 60, 60]
@@ -74,7 +79,8 @@
 
     let sPrmInfo = {
       id: '5x5',
-      i: 0 // paletteList-i
+      i: 0, // paletteList-i
+      c: -1, // color-sample-i (00,01,02,03,select)
     }
 
     function init() {
@@ -109,6 +115,29 @@
       ctx = canvas.getContext('2d')
       canvas.width = canvasW
       canvas.height = canvasH
+
+      if (sPrmInfo.c >= 0) {
+        paletteList = []
+        const ci = sPrmInfo.c % 5
+        let sampleSet = colorSetSample00
+        if (ci === 1) sampleSet = colorSetSample01
+        if (ci === 2) sampleSet = colorSetSample02
+        if (ci === 3) sampleSet = colorSetSample03
+        if (ci === 4) sampleSet = colorSetSampleSelect
+        const smSplit = sampleSet.split('\n')
+        for (const sms of smSplit) {
+          const smsSplit = sms.split(',')
+          const plt = []
+          for (const cs of smsSplit) {
+            const csSplit = cs.split('-')
+            plt.push([Number(csSplit[0]), Number(csSplit[1]), Number(csSplit[2])])
+          }
+          paletteList.push({
+            list: plt,
+            eyes: [60, 60, 60]
+          })
+        }
+      }
 
       palette = paletteList[sPrmInfo.i % paletteList.length]
 
