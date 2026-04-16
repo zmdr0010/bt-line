@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>test mk act-st d 01 edit 03</title>
+
+  <style>
+    .item-div {
+      margin: 8px;
+    }
+
+    .canvas-border {
+      border: solid 1px black;
+    }
+  </style>
+</head>
+<body onload="init()">
+<!--  <div class="item-div">-->
+<!--    draw-start-x: <input id="id-input-draw-start-x" type="number" value="100" />-->
+<!--    draw-start-y: <input id="id-input-draw-start-y" type="number" value="100" />-->
+<!--    is-draw-guide: <input id="id-checkbox-is-draw-guide" type="checkbox" checked />-->
+<!--    guide-color: <input id="id-input-guide-color" type="text" value="gray" />-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    unit-part-pos-edit-st-i: <input id="id-input-unit-part-pos-edit-st-i" type="number" value="0" disabled />-->
+<!--    <button onclick="onClickDraw()">draw</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</div>-->
+<!--  <div class="item-div">-->
+<!--    part-i: <input id="id-input-edit-part-i" type="number" value="0" />-->
+<!--    <button onclick="changePartI(-1)">prev</button>-->
+<!--    <button onclick="changePartI(1)">next</button>-->
+<!--    lyr-i: <input id="id-input-edit-lyr-i" type="number" value="0" />-->
+<!--    <button onclick="changeLyrI(-1)">prev</button>-->
+<!--    <button onclick="changeLyrI(1)">next</button>-->
+<!--    spd: <input id="id-input-edit-spd" type="number" value="6" />-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    <button onclick="moveTarget(0, 1)">top</button>-->
+<!--    <button onclick="moveTarget(0, -1)">bottom</button>-->
+<!--    <button onclick="moveTarget(-1, 0)">left</button>-->
+<!--    <button onclick="moveTarget(1, 0)">right</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    is-on-key-edit: <input id="id-checkbox-is-on-key-edit" type="checkbox" />-->
+<!--    ([z]:left [c]:right [x]:bottom [s]:top [-][=]:part-i [ [ ][ ] ]:lyr-i)-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    is-on-mouse-edit: <input id="id-checkbox-is-on-mouse-edit" type="checkbox" />-->
+<!--  </div>-->
+<!--  <div class="item-div">&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</div>-->
+<!--  <div class="item-div">-->
+<!--    <button onclick="onClickMkCalcStgPosStBd()">mk-calc-stg-pos-st-bd</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    calc-stg-pos-st-bd: <textarea id="id-textarea-calc-stg-pos-st-bd" cols="90" rows="3"></textarea>-->
+<!--    <button onclick="clearTextarea('id-textarea-calc-stg-pos-st-bd')">clear</button>-->
+<!--    <button onclick="copyTextarea('id-textarea-calc-stg-pos-st-bd')">copy</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    <button onclick="onClickAddToMvCalcStgPosStBd()">add-to-mv-calc-stg-pos-st-bd</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</div>-->
+<!--  <div class="item-div">-->
+<!--    (mv) calc-stg-pos-st-bd: <textarea id="id-textarea-mv-calc-stg-pos-st-bd" cols="90" rows="4"></textarea>-->
+<!--    <button onclick="clearTextarea('id-textarea-mv-calc-stg-pos-st-bd')">clear</button>-->
+<!--    <button onclick="copyTextarea('id-textarea-mv-calc-stg-pos-st-bd')">copy</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    <button onclick="onClickMkMv()">mk-mv</button>-->
+<!--    <button onclick="onClickSaveMvCalcStgPosStBd()">save</button>-->
+<!--    <button onclick="onClickSaveEachMvCalcStgPosStBd()">save-each</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    frm-i: <input id="id-input-frm-i" type="number" value="0" />-->
+<!--    <button onclick="mvByFrmI()">mv</button>-->
+<!--    <button onclick="changeFrmI(-1)">prev</button>-->
+<!--    <button onclick="changeFrmI(1)">next</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;</div>-->
+<!--  <div class="item-div">-->
+<!--    <button onclick="onClickPrintResultMvCalcStgPosStBd()">print-result-mv</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    result (mv) calc-stg-pos-st-bd: <textarea id="id-textarea-result-mv-calc-stg-pos-st-bd" cols="90" rows="4" ></textarea>-->
+<!--    <button onclick="clearTextarea('id-textarea-result-mv-calc-stg-pos-st-bd')">clear</button>-->
+<!--    <button onclick="copyTextarea('id-textarea-result-mv-calc-stg-pos-st-bd')">copy</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    <button onclick="onClickSaveResultMvCalcStgPosStBd()">save</button>-->
+<!--    <button onclick="onClickSaveEachResultMvCalcStgPosStBd()">save-each</button>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    log: <textarea id="id-textarea-log" cols="50" rows="4" ></textarea>-->
+<!--  </div>-->
+<!--  <div class="item-div">-->
+<!--    <button onclick="clearTextarea('id-textarea-log')">clear</button>-->
+<!--  </div>-->
+  <div class="item-div">
+    <button onclick="onClickSaveToLocal()">save-to-local</button>
+  </div>
+<!--  <div class="item-div">-->
+<!--    <button onclick="onClickSaveToServer()">save</button>-->
+<!--  </div>-->
+  <div class="item-div">
+    <canvas class="canvas-border" id="id-canvas"></canvas>
+  </div>
+  <div class="item-div">
+    <button onclick="onClickAddFrm()">add-frm</button>
+  </div>
+  <div class="item-div" id="id-container-frm">
+  </div>
+
+  <script type="text/javascript" src="fnc/fnc-save.js"></script>
+  <script type="text/javascript" src="fnc-edit/fnc-textarea.js"></script>
+
+  <script type="text/javascript" src="fnc-edit-unit/fnc-mk-unit-by-mk-bd.js"></script>
+
+  <script type="text/javascript" src="str-set/unit-part-pos-edit-st/unit-part-pos-edit-st-000.js"></script>
+<script type="text/javascript" src="str-set/unit-part-pos-edit-st/unit-part-pos-edit-st-000-1.js"></script>
+
+  <script>
+    let canvas
+    let ctx
+
+    let startX = 0
+    let startY = 0
+    let defaultW = 20
+    let defaultH = 20
+    let defaultColor = 'blue'
+
+    let drawStartX = 174
+    let drawStartY = 180
+    let isDrawGuide = true
+    let guideColor = 'gray'
+
+    let unitPsInfo = { // 3d-pos
+      x: 0,
+      y: 0,
+      partPsList: [
+        // {
+        //   code: '',
+        //   x: 0,
+        //   y: 0,
+        //   lyrPsList: [
+        //     {
+        //       x: 0,
+        //       y: 0
+        //     }
+        //   ]
+        // }
+      ]
+    }
+
+    let originUnitPsInfo = {
+      x: 0,
+      y: 0,
+      partPsList: []
+    }
+
+    // unit-part-pos:
+    // part-code/part-x,y/lyr-i,lyr-x,y/lyr-i,lyr-x,y/...
+    // part-code/...
+    // ...
+    //
+    const sampleUnitPartPos = ''
+
+    // draw-part-color-st:
+    // part-i,color/part-i,color/...
+    //
+    const sampleDrawPartColorSt = ''
+
+    // draw-lyr-size-st:
+    // part-i/lyr-i,w,h/lyr-i,w,h/lyr-i,w,h/...
+    // part-i/lyr-i,w,h/...
+    // ...
+    //
+    const sampleDrawLyrSizeSt = ''
+
+    // draw-line-st:
+    // part-i/start-lyr-i,end-lyr-i/start-lyr-i,end-lyr-i/...
+    // part-i/...
+    // ...
+    //
+    const sampleDrawLineSt = ''
+
+    // calc-stg-pos-st-bd:
+    // part-code
+    // lyr-i,x,y(part-x,y(stg-pos in unit)/lyr-i,x,y/...
+    // start-lyr-i,end-lyr-i,distance/start-lyr-i,end-lyr-i,distance/...
+    // lyr-i,x,y/lyr-i,x,y/...
+    // start-lyr-i,end-lyr-i,distance/...
+    // ...
+    //
+    const sampleCalcStgPosStBd = ''
+
+    // calc-line-st:
+    // part-code/start-lyr-i,end-lyr-i/start-lyr-i,end-lyr-i/...
+    // part-code/...
+    // ...
+    //
+    const sampleCalcLineSt = ''
+
+    let drawLineStList = [
+      // {
+      //   partI: 0,
+      //   list: [
+      //     {
+      //       startI: 0,
+      //       endI: 0
+      //     }
+      //   ]
+      // }
+    ]
+
+    // unit-part-pos-edit-st
+    // unit-part-pos
+    // ===
+    // draw-part-color-st
+    // ===
+    // draw-lyr-size-st
+    // ===
+    // draw-line-st
+    //
+    const sampleUnitPartPosEditSt = ''
+
+    const keyInfoList = [
+      {
+        key: 'z',
+        code: 'left',
+        keyFnc: () => { moveTarget(-1, 0) }
+      },
+      {
+        key: 'c',
+        code: 'right',
+        keyFnc: () => { moveTarget(1, 0) }
+      },
+      {
+        key: 's',
+        code: 'top',
+        keyFnc: () => { moveTarget(0, 1) }
+      },
+      {
+        key: 'x',
+        code: 'bottom',
+        keyFnc: () => { moveTarget(0, -1) }
+      },
+      {
+        key: '-',
+        code: 'prev-part-i',
+        keyFnc: () => { changePartI(-1) }
+      },
+      {
+        key: '=',
+        code: 'next-part-i',
+        keyFnc: () => { changePartI(1) }
+      },
+      {
+        key: '[',
+        code: 'prev-lyr-i',
+        keyFnc: () => { changeLyrI(-1) }
+      },
+      {
+        key: ']',
+        code: 'next-lyr-i',
+        keyFnc: () => { changeLyrI(1) }
+      }
+    ]
+
+    let mouseX = 0
+    let mouseY = 0
+    let isMouseDown = false
+    let moveLyrPs = null
+
+    let frmInfoList = [
+      // {
+      //   frmI: 0,
+      //   partList: [
+      //     {
+      //       partCode: '',
+      //       lyrPsList: [
+      //         {
+      //           i: 0,
+      //           x: 0,
+      //           y: 0
+      //         }
+      //       ],
+      //       lineList: [
+      //         {
+      //           startI: 0,
+      //           endI: 0,
+      //           distance: 0
+      //         }
+      //       ]
+      //     }
+      //   ]
+      // }
+    ]
+
+    let crntFrmInfo
+
+    let unitPartPosEditSt = ''
+    let calcLineSt = ''
+
+    let canvasX = 0
+    let canvasY = 0
+
+    let crntBtn
+
+    function init() {
+      canvas = document.getElementById('id-canvas')
+      ctx = canvas.getContext('2d')
+      const canvasW = window.innerWidth - 16
+      const canvasH = window.innerHeight - 16
+      // canvas.width = canvasW * 2
+      // canvas.height = canvasH * 2
+      // canvas.width = canvasW
+      // canvas.height = canvasH - 200
+
+      canvas.width = 350
+      canvas.height = 400
+
+      const canvasBnd = canvas.getBoundingClientRect()
+      canvasX = canvasBnd.left
+      canvasY = canvasBnd.top
+
+      canvas.onmousedown = mouseDown
+      canvas.onmouseup = mouseLeave
+      canvas.onmouseleave = mouseLeave
+
+      canvas.ontouchstart = touchDown
+      // canvas.ontouchmove = touchMove
+      canvas.ontouchend = touchLeave
+
+      // document.addEventListener('keydown', (e) => {
+      //   const isOnKeyEdit = document.getElementById('id-checkbox-is-on-key-edit').checked
+      //   if (!isOnKeyEdit) return
+      //
+      //   const keyName = e.key
+      //   const keyInfo = keyInfoList.find(info => info.key === keyName)
+      //   if (keyInfo) keyInfo.keyFnc()
+      // })
+
+      onClickDraw()
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      for (const dlnSt of drawLineStList) {
+        const partPs = unitPsInfo.partPsList[dlnSt.partI]
+
+        for (const ln of dlnSt.list) {
+          const startLyr = partPs.lyrPsList[ln.startI]
+          const endLyr = partPs.lyrPsList[ln.endI]
+
+          const partX = unitPsInfo.x + partPs.x
+          let partY = unitPsInfo.y + partPs.y
+          partY *= -1
+
+          const sx = partX + startLyr.x + drawStartX
+          const sy = partY + startLyr.y * -1 + drawStartY
+          const ex = partX + endLyr.x + drawStartX
+          const ey = partY + endLyr.y * -1 + drawStartY
+
+          ctx.beginPath()
+          ctx.strokeStyle = partPs.color
+          ctx.moveTo(sx, sy)
+          ctx.lineTo(ex, ey)
+          ctx.stroke()
+        }
+      }
+
+      for (const partPs of unitPsInfo.partPsList) {
+        const partX = unitPsInfo.x + partPs.x
+        let partY = unitPsInfo.y + partPs.y
+        partY *= -1
+
+        let lyrI = 0
+        for (const lyrPs of partPs.lyrPsList) {
+          const lyrX = lyrPs.x + partX + drawStartX
+          const lyrY = lyrPs.y * -1 + partY + drawStartY
+
+          ctx.beginPath()
+          ctx.fillStyle = 'white'
+          ctx.fillRect(lyrX - lyrPs.w * 0.5, lyrY - lyrPs.h * 0.5, lyrPs.w, lyrPs.h)
+
+          ctx.beginPath()
+          ctx.strokeStyle = partPs.color
+          ctx.strokeRect(lyrX - lyrPs.w * 0.5, lyrY - lyrPs.h * 0.5, lyrPs.w, lyrPs.h)
+
+          ctx.fillStyle = partPs.color
+          ctx.font = '16px serif'
+          ctx.fillText(`${lyrI}`, lyrX, lyrY)
+
+          lyrI++
+        }
+
+        // if (isDrawGuide) {
+        //   ctx.beginPath()
+        //   ctx.moveTo(partX - 50 + drawStartX, partY + drawStartY)
+        //   ctx.lineTo(partX + 50 + drawStartX, partY + drawStartY)
+        //   ctx.moveTo(partX + drawStartX, partY - 50 + drawStartY)
+        //   ctx.lineTo(partX + drawStartX, partY + 50 + drawStartY)
+        //   ctx.stroke()
+        // }
+      }
+
+      if (isDrawGuide) {
+        ctx.beginPath()
+        ctx.strokeStyle = guideColor
+        ctx.moveTo(drawStartX - 500, drawStartY)
+        ctx.lineTo(drawStartX + 500, drawStartY)
+        ctx.moveTo(drawStartX, drawStartY - 500)
+        ctx.lineTo(drawStartX, drawStartY + 500)
+        ctx.stroke()
+      }
+    }
+
+    function onClickDraw() {
+      // drawStartX = Number(document.getElementById('id-input-draw-start-x').value)
+      // drawStartY = Number(document.getElementById('id-input-draw-start-y').value)
+      // isDrawGuide = document.getElementById('id-checkbox-is-draw-guide').checked
+      // guideColor = document.getElementById('id-input-guide-color').value
+      //
+      // const unitPartPosEditStI = Number(document.getElementById('id-input-unit-part-pos-edit-st-i').value)
+      // if (unitPartPosEditStI === 0) unitPartPosEditSt = unitPartPosEditSt000
+
+      // unitPartPosEditSt = unitPartPosEditSt000
+      unitPartPosEditSt = unitPartPosEditSt000_1
+
+      const unitPartPosEditStSp = unitPartPosEditSt.split('\n===\n')
+
+      const drawPartColorSt = unitPartPosEditStSp[1]
+      const drwPClrStSp = drawPartColorSt.split('/')
+      const clrInfoList = []
+      for (const dpcSt of drwPClrStSp) {
+        const dpcStSp = dpcSt.split(',')
+        const partI = Number(dpcStSp[0])
+        const color = dpcStSp[1]
+        clrInfoList.push({
+          partI: partI,
+          color: color
+        })
+      }
+
+      drawLineStList = []
+
+      const drawLineSt = unitPartPosEditStSp[3]
+      const dlStSp = drawLineSt.split('\n')
+      for (const dlnSt of dlStSp) {
+        const dlnStSp = dlnSt.split('/')
+        const partI = Number(dlnStSp[0])
+        dlnStSp.shift()
+
+        const dLineSt = {
+          partI: partI,
+          list: []
+        }
+
+        for (const ln of dlnStSp) {
+          const lnSp = ln.split(',')
+          const startI = Number(lnSp[0])
+          const endI = Number(lnSp[1])
+          dLineSt.list.push({
+            startI: startI,
+            endI: endI
+          })
+        }
+
+        drawLineStList.push(dLineSt)
+      }
+
+      const drawLyrSizeSt = unitPartPosEditStSp[2]
+      let drwLyrSzSp = []
+      if (drawLyrSizeSt.length > 0) drwLyrSzSp = drawLyrSizeSt.split('\n')
+      const sizeInfoList = []
+      for (const pSzSt of drwLyrSzSp) {
+        const pSzStSp = pSzSt.split('/')
+        const partI = Number(pSzStSp[0])
+        pSzStSp.shift()
+
+        const partSzInfo = {
+          partI: partI,
+          lyrSzInfoList: []
+        }
+
+        for (const lyrSzSt of pSzStSp) {
+          const lyrSzStSp = lyrSzSt.split(',')
+          const lyrI = Number(lyrSzStSp[0])
+          const lyrW = Number(lyrSzStSp[1])
+          const lyrH = Number(lyrSzStSp[2])
+          partSzInfo.lyrSzInfoList.push({
+            lyrI: lyrI,
+            w: lyrW,
+            h: lyrH
+          })
+        }
+
+        sizeInfoList.push(partSzInfo)
+      }
+
+      unitPsInfo.partPsList = []
+
+      const unitPartPos = unitPartPosEditStSp[0]
+      const upPsStList = unitPartPos.split('\n')
+
+      let partI = 0
+      for (const upPsSt of upPsStList) {
+        const clrInfo = clrInfoList[partI]
+        const partPs = createPartPs(upPsSt, clrInfo.color, defaultW, defaultH)
+
+        const partSzInfo = sizeInfoList.find(info => info.partI === partI)
+        if (partSzInfo) {
+          for (const lyrSzInfo of partSzInfo.lyrSzInfoList) {
+            const lyrPs = partPs.lyrPsList[lyrSzInfo.lyrI]
+            lyrPs.w = lyrSzInfo.w
+            lyrPs.h = lyrSzInfo.h
+          }
+        }
+
+        unitPsInfo.partPsList.push(partPs)
+
+        partI++
+      }
+
+      originUnitPsInfo = JSON.parse(JSON.stringify(unitPsInfo))
+
+      calcLineSt = unitPartPosEditStSp[4]
+
+      draw()
+    }
+
+    // usPsSt (unit-part-pos-st)
+    function createPartPs(upPsSt, color, w, h) {
+      const upPsStSp = upPsSt.split('/')
+      const partCode = upPsStSp[0]
+      const partPosSp = upPsStSp[1].split(',')
+      const partX = Number(partPosSp[0])
+      const partY = Number(partPosSp[1])
+      upPsStSp.shift()
+      upPsStSp.shift()
+
+      const partPs = {
+        code: partCode,
+        x: partX,
+        y: partY,
+        originPos: {
+          x: partX,
+          y: partY
+        },
+        w: 0,
+        h: 0,
+        lyrPsList: [],
+        color: color
+      }
+
+      let left = Number.MAX_SAFE_INTEGER
+      let right = Number.MIN_SAFE_INTEGER
+      let top = Number.MIN_SAFE_INTEGER
+      let bottom = Number.MAX_SAFE_INTEGER
+
+      for (const lyrPsSt of upPsStSp) {
+        const lyrPsStSp = lyrPsSt.split(',')
+        const lyrI = Number(lyrPsStSp[0])
+        const lyrX = Number(lyrPsStSp[1])
+        const lyrY = Number(lyrPsStSp[2])
+        const lyrPs = {
+          x: lyrX,
+          y: lyrY,
+          originPos: {
+            x: lyrX,
+            y: lyrY
+          },
+          w: w,
+          h: h
+        }
+        partPs.lyrPsList.push(lyrPs)
+
+        const hfw = w * 0.5
+        const hfh = h * 0.5
+        left = Math.min(left, lyrX - hfw)
+        right = Math.max(right, lyrX + hfw)
+        top = Math.max(top, lyrY + hfh)
+        bottom = Math.min(bottom, lyrY - hfh)
+      }
+
+      const partW = Math.abs(right - left)
+      const partH = Math.abs(top - bottom)
+
+      partPs.w = partW
+      partPs.h = partH
+
+      return partPs
+    }
+
+    // 3d-pos
+    function moveTarget(dirX, dirY) {
+      const partI = Number(document.getElementById('id-input-edit-part-i').value)
+      const lyrI = Number(document.getElementById('id-input-edit-lyr-i').value)
+      const spd = Number(document.getElementById('id-input-edit-spd').value)
+
+      const partPs = unitPsInfo.partPsList[partI]
+      const lyrPs = partPs.lyrPsList[lyrI]
+
+      const mx = dirX * spd
+      const my = dirY * spd
+
+      lyrPs.x += mx
+      lyrPs.y += my
+
+      draw()
+    }
+
+    function changePartI(dir) {
+      let partI = Number(document.getElementById('id-input-edit-part-i').value)
+      const lastI = unitPsInfo.partPsList.length - 1
+
+      partI += dir
+      if (partI < 0) partI = lastI
+      if (partI > lastI) partI = 0
+
+      document.getElementById('id-input-edit-part-i').value = `${partI}`
+    }
+
+    function changeLyrI(dir) {
+      const partI = Number(document.getElementById('id-input-edit-part-i').value)
+      let lyrI = Number(document.getElementById('id-input-edit-lyr-i').value)
+
+      const partPs = unitPsInfo.partPsList[partI]
+      const lastI = partPs.lyrPsList.length - 1
+
+      lyrI += dir
+      if (lyrI < 0) lyrI = lastI
+      if (lyrI > lastI) lyrI = 0
+
+      document.getElementById('id-input-edit-lyr-i').value = `${lyrI}`
+    }
+
+    function mouseDown(e) {
+      // const isMouseEdit = document.getElementById('id-checkbox-is-on-mouse-edit').checked
+      // if (!isMouseEdit) {
+      //   isMouseDown = false
+      //   canvas.onmousemove = null
+      //   moveLyrPs = null
+      //   return
+      // }
+
+      mouseX = e.offsetX
+      mouseY = e.offsetY
+      console.log(`mouse-down x: ${mouseX}, y: ${mouseY}`)
+
+      let partI = 0
+      for (const partPs of unitPsInfo.partPsList) {
+        const partPs = unitPsInfo.partPsList[partI]
+
+        const partX = unitPsInfo.x + partPs.x
+        let partY = unitPsInfo.y + partPs.y
+        partY *= -1
+
+        for (let i=partPs.lyrPsList.length-1; i>=0; i--) {
+          const lyrPs = partPs.lyrPsList[i]
+          const lyrX = lyrPs.x + partX + drawStartX
+          const lyrY = lyrPs.y * -1 + partY + drawStartY
+          const left = lyrX - defaultW * 0.5
+          const right = lyrX + defaultW * 0.5
+          const top = lyrY - defaultH * 0.5
+          const bottom = lyrY + defaultH * 0.5
+
+          console.log(`lyr-${i}: left: ${left}, right: ${right}, top: ${top}, bottom: ${bottom}`)
+
+          if (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom) {
+            let frmLyrPs = null
+            if (crntFrmInfo) frmLyrPs = crntFrmInfo.partList[partI].lyrPsList[i]
+
+            moveLyrPs = {
+              partX: partX,
+              partY: partY,
+              lyrPs: lyrPs,
+              frmLyrPs: frmLyrPs
+            }
+
+            // document.getElementById('id-input-edit-part-i').value = `${partI}`
+            // document.getElementById('id-input-edit-lyr-i').value = `${i}`
+
+            isMouseDown = true
+            canvas.onmousemove = mouseMove
+            return
+          }
+        }
+
+        partI++
+      }
+    }
+
+    function mouseMove(e) {
+      if (!isMouseDown) {
+        isMouseDown = false
+        canvas.onmousemove = null
+        moveLyrPs = null
+        return
+      }
+
+      mouseX = e.offsetX
+      mouseY = e.offsetY
+
+      if (moveLyrPs) {
+        const lyrX = mouseX - moveLyrPs.partX - drawStartX
+        const lyrY = mouseY - moveLyrPs.partY - drawStartY
+        moveLyrPs.lyrPs.x = lyrX
+        moveLyrPs.lyrPs.y = lyrY * -1
+
+        if (moveLyrPs.frmLyrPs) {
+          moveLyrPs.frmLyrPs.x = mouseX - drawStartX
+          moveLyrPs.frmLyrPs.y = (mouseY - drawStartY) * -1
+        }
+
+        draw()
+      }
+    }
+
+    function mouseLeave(e) {
+      isMouseDown = false
+      canvas.onmousemove = null
+      moveLyrPs = null
+    }
+
+    function touchDown(e) {
+      // const isMouseEdit = document.getElementById('id-checkbox-is-on-mouse-edit').checked
+      // if (!isMouseEdit) {
+      //   isMouseDown = false
+      //   canvas.ontouchmove = null
+      //   moveLyrPs = null
+      //   return
+      // }
+
+      // if (guideColor === 'gray') {
+      //   guideColor = 'red'
+      // } else {
+      //   guideColor = 'gray'
+      // }
+      // draw()
+
+      const tch = e.changedTouches[0]
+
+      mouseX = tch.pageX - canvasX
+      mouseY = tch.pageY - canvasY
+      console.log(`touch-down x: ${mouseX}, y: ${mouseY}`)
+      // printLog(`touch-down x: ${mouseX}, y: ${mouseY}, pageX: ${tch.pageX}, pageY: ${tch.pageY}, canvasX: ${canvasX}, canvasY: ${canvasY}`)
+
+      let partI = 0
+      for (const partPs of unitPsInfo.partPsList) {
+        const partPs = unitPsInfo.partPsList[partI]
+
+        const partX = unitPsInfo.x + partPs.x
+        let partY = unitPsInfo.y + partPs.y
+        partY *= -1
+
+        for (let i=partPs.lyrPsList.length-1; i>=0; i--) {
+          const lyrPs = partPs.lyrPsList[i]
+          const lyrX = lyrPs.x + partX + drawStartX
+          const lyrY = lyrPs.y * -1 + partY + drawStartY
+          const left = lyrX - defaultW * 0.5
+          const right = lyrX + defaultW * 0.5
+          const top = lyrY - defaultH * 0.5
+          const bottom = lyrY + defaultH * 0.5
+
+          console.log(`lyr-${i}: left: ${left}, right: ${right}, top: ${top}, bottom: ${bottom}`)
+          // printLog(`lyr-${i}: left: ${left}, right: ${right}, top: ${top}, bottom: ${bottom}`)
+
+          if (mouseX >= left && mouseX <= right && mouseY >= top && mouseY <= bottom) {
+            let frmLyrPs = null
+            if (crntFrmInfo) frmLyrPs = crntFrmInfo.partList[partI].lyrPsList[i]
+
+            moveLyrPs = {
+              partX: partX,
+              partY: partY,
+              lyrPs: lyrPs,
+              frmLyrPs: frmLyrPs
+            }
+
+            // document.getElementById('id-input-edit-part-i').value = `${partI}`
+            // document.getElementById('id-input-edit-lyr-i').value = `${i}`
+
+            isMouseDown = true
+            canvas.ontouchmove = touchMove
+            return
+          }
+        }
+
+        partI++
+      }
+    }
+
+    function touchMove(e) {
+      // if (guideColor === 'gray') {
+      //   guideColor = 'blue'
+      // } else {
+      //   guideColor = 'gray'
+      // }
+      // draw()
+
+
+      // if (!isMouseDown) {
+      //   isMouseDown = false
+      //   canvas.ontouchmove = null
+      //   moveLyrPs = null
+      //   return
+      // }
+
+      const tch = e.changedTouches[0]
+
+      mouseX = tch.pageX - canvasX
+      mouseY = tch.pageY - canvasY
+
+      if (moveLyrPs) {
+        const lyrX = mouseX - moveLyrPs.partX - drawStartX
+        const lyrY = mouseY - moveLyrPs.partY - drawStartY
+        moveLyrPs.lyrPs.x = lyrX
+        moveLyrPs.lyrPs.y = lyrY * -1
+
+        if (moveLyrPs.frmLyrPs) {
+          moveLyrPs.frmLyrPs.x = mouseX - drawStartX
+          moveLyrPs.frmLyrPs.y = (mouseY - drawStartY) * -1
+        }
+
+        draw()
+      }
+
+      // touchLeave()
+    }
+
+    function touchLeave(e) {
+      isMouseDown = false
+      canvas.ontouchmove = null
+      moveLyrPs = null
+    }
+
+    function onClickMkCalcStgPosStBd() {
+      const calcLineStList = []
+      if (calcLineSt.length > 0) {
+        const clcLineSp = calcLineSt.split('\n')
+        for (const clcLn of clcLineSp) {
+          const clcLnSp = clcLn.split('/')
+          const partCode = clcLnSp[0]
+          const info = {
+            partCode: partCode,
+            list: []
+          }
+
+          clcLnSp.shift()
+          for (const ln of clcLnSp) {
+            const lnSp = ln.split(',')
+            const startI = Number(lnSp[0])
+            const endI = Number(lnSp[1])
+            info.list.push({
+              startI: startI,
+              endI: endI
+            })
+          }
+
+          calcLineStList.push(info)
+        }
+      }
+
+      const calcPartStcStList = []
+      for (const partPs of unitPsInfo.partPsList) {
+        let cpsSt = `${partPs.code}`
+        const cpsLyrStList = []
+        let lyrI = 0
+        for (const lyrPs of partPs.lyrPsList) {
+          let lyrX = partPs.x + lyrPs.x
+          let lyrY = partPs.y + lyrPs.y
+          cpsLyrStList.push(`${lyrI},${lyrX},${lyrY}`)
+          lyrI++
+        }
+        cpsSt += `\n${cpsLyrStList.join('/')}`
+
+        const lineInfo = calcLineStList.find(ln => ln.partCode === partPs.code)
+        if (lineInfo) {
+          const lnList = []
+          for (const lnInfo of lineInfo.list) {
+            let startLyr = null
+            if (lnInfo.startI >= 0) {
+              startLyr = partPs.lyrPsList[lnInfo.startI]
+            } else {
+              startLyr = {
+                x: partPs.x * -1, y: partPs.y * -1
+              }
+            }
+            const endLyr = partPs.lyrPsList[lnInfo.endI]
+            const dx = (endLyr.x + partPs.x) - (startLyr.x + partPs.x)
+            const dy = (endLyr.y + partPs.y) - (startLyr.y + partPs.y)
+            const distance = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy))
+            lnList.push(`${lnInfo.startI},${lnInfo.endI},${distance}`)
+          }
+          cpsSt += `\n${lnList.join('/')}`
+        } else {
+          const lrPs = partPs.lyrPsList[0]
+          const dx = lrPs.x + partPs.x
+          const dy = lrPs.y + partPs.y
+          const distance = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy))
+          cpsSt += `\n-1,0,${distance}`
+        }
+
+        calcPartStcStList.push(cpsSt)
+      }
+
+      document.getElementById('id-textarea-calc-stg-pos-st-bd').value = calcPartStcStList.join('\n===\n')
+    }
+
+    function onClickMkMv() {
+      const mvCalcStgPosStBd = document.getElementById('id-textarea-mv-calc-stg-pos-st-bd').value
+      const calcStgPosStBdList = mvCalcStgPosStBd.split('\n=====\n')
+
+      frmInfoList = []
+
+      for (const calcStgPosStBd of calcStgPosStBdList) {
+        const cspStBdSp = calcStgPosStBd.split('\n===\n')
+
+        const frmInfo = {
+          frmI: frmInfoList.length,
+          partList: []
+        }
+
+        for (const csp of cspStBdSp) {
+          const cspSp = csp.split('\n')
+          const partCode = cspSp[0]
+          const lyrSp = cspSp[1].split('/')
+          const lineSp = cspSp[2].split('/')
+
+          const info = {
+            partCode: partCode,
+            lyrPsList: [],
+            lineList: []
+          }
+
+          for (const lyr of lyrSp) {
+            const lsp = lyr.split(',')
+            const lyrI = Number(lsp[0])
+            const lyrX = Number(lsp[1])
+            const lyrY = Number(lsp[2])
+
+            info.lyrPsList.push({
+              i: lyrI,
+              x: lyrX,
+              y: lyrY
+            })
+          }
+
+          for (const line of lineSp) {
+            const lnSp = line.split(',')
+            const startI = Number(lnSp[0])
+            const endI = Number(lnSp[1])
+            const distance = Number(lnSp[2])
+            info.lineList.push({
+              startI: startI,
+              endI: endI,
+              distance: distance
+            })
+          }
+
+          frmInfo.partList.push(info)
+        }
+
+        frmInfoList.push(frmInfo)
+      }
+
+      document.getElementById('id-input-frm-i').value = '0'
+      mvByFrmI()
+    }
+
+    function mvByFrmI() {
+      const frmI = Number(document.getElementById('id-input-frm-i').value)
+      const frmInfo = frmInfoList[frmI]
+
+      for (const part of frmInfo.partList) {
+        const partPs = unitPsInfo.partPsList.find(ps => ps.code === part.partCode)
+
+        for (const lyr of part.lyrPsList) {
+          const lyrPs = partPs.lyrPsList[lyr.i]
+          lyrPs.x = lyr.x - partPs.x
+          lyrPs.y = lyr.y - partPs.y
+        }
+      }
+
+      crntFrmInfo = frmInfo
+
+      draw()
+    }
+
+    function changeFrmI(dir) {
+      const frmI = Number(document.getElementById('id-input-frm-i').value)
+      const last = frmInfoList.length - 1
+
+      let i = frmI + dir
+      if (i < 0) i = last
+      if (i > last) i = 0
+
+      document.getElementById('id-input-frm-i').value = `${i}`
+
+      mvByFrmI()
+    }
+
+    function onClickPrintResultMvCalcStgPosStBd() {
+      const frmStList = []
+
+      for (const frmInfo of frmInfoList) {
+        const partFrmStList = []
+
+        for (const part of frmInfo.partList) {
+          const lstList = []
+          const lnStList = []
+
+          for (const lyrPs of part.lyrPsList) {
+            lstList.push(`${lyrPs.i},${lyrPs.x},${lyrPs.y}`)
+          }
+
+          for (const ln of part.lineList) {
+            console.log(ln)
+            let startLyr = null
+            if (ln.startI >= 0) {
+              startLyr = part.lyrPsList[ln.startI]
+            } else {
+              startLyr = {
+                x: 0, y: 0
+              }
+            }
+            const endLyr = part.lyrPsList[ln.endI]
+            const dx = endLyr.x - startLyr.x
+            const dy = endLyr.y - startLyr.y
+            const distance = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy))
+
+            lnStList.push(`${ln.startI},${ln.endI},${distance}`)
+          }
+
+          partFrmStList.push(`${part.partCode}\n${lstList.join('/')}\n${lnStList.join('/')}`)
+        }
+
+        frmStList.push(partFrmStList.join('\n===\n'))
+      }
+
+      document.getElementById('id-textarea-result-mv-calc-stg-pos-st-bd').value = frmStList.join('\n=====\n')
+    }
+
+    function onClickAddToMvCalcStgPosStBd() {
+      const calcStgPosStBd = document.getElementById('id-textarea-calc-stg-pos-st-bd').value
+      const mvCalcStgPosStBd = document.getElementById('id-textarea-mv-calc-stg-pos-st-bd').value
+      let mvCalcStgPosStList = []
+      if (mvCalcStgPosStBd.length > 0) mvCalcStgPosStList = mvCalcStgPosStBd.split('\n=====\n')
+      mvCalcStgPosStList.push(calcStgPosStBd)
+      document.getElementById('id-textarea-mv-calc-stg-pos-st-bd').value = mvCalcStgPosStList.join('\n=====\n')
+    }
+
+    function onClickSaveMvCalcStgPosStBd() {
+      const ucode = `mv-calc-stg-pos-st-bd-${getCurrentDateUCode()}`
+      const mvCalcStgPosStBd = document.getElementById('id-textarea-mv-calc-stg-pos-st-bd').value
+      saveString(ucode, mvCalcStgPosStBd)
+    }
+
+    function onClickSaveEachMvCalcStgPosStBd() {
+      const ucode = `mv-calc-stg-pos-st-bd-${getCurrentDateUCode()}`
+      const mvCalcStgPosStBd = document.getElementById('id-textarea-mv-calc-stg-pos-st-bd').value
+
+      const mvList = mvCalcStgPosStBd.split('\n=====\n')
+
+      let cnt = 0
+      for (const str of mvList) {
+        const eachUcode = `${ucode}-each-${cnt}`
+        saveString(eachUcode, str)
+        cnt++
+      }
+    }
+
+    function onClickSaveResultMvCalcStgPosStBd() {
+      const ucode = `result-mv-calc-stg-pos-st-bd-${getCurrentDateUCode()}`
+      const mvStBd = document.getElementById('id-textarea-result-mv-calc-stg-pos-st-bd').value
+      saveString(ucode, mvStBd)
+    }
+
+    function onClickSaveEachResultMvCalcStgPosStBd() {
+      const ucode = `result-mv-calc-stg-pos-st-bd-${getCurrentDateUCode()}`
+      const mvStBd = document.getElementById('id-textarea-result-mv-calc-stg-pos-st-bd').value
+
+      const mvList = mvStBd.split('\n=====\n')
+
+      let cnt = 0
+      for (const str of mvList) {
+        const eachUcode = `${ucode}-each-${cnt}`
+        saveString(eachUcode, str)
+        cnt++
+      }
+    }
+
+    // function printLog(str) {
+    //   const log = document.getElementById('id-textarea-log').value
+    //   let logSp = []
+    //   if (log.length > 0) logSp = log.split('\n')
+    //   logSp.push(str)
+    //   document.getElementById('id-textarea-log').value = logSp.join('\n')
+    // }
+
+    function onClickSaveToLocal() {
+      // const calcStgPosStBd = mkCalcStgPosStBd()
+      const calcStgPosStBd = mkResultMvCalcStgPosStBd()
+      const ucode = `mobile-calc-stg-pos-st-bd-${getCurrentDateUCode()}`
+      saveString(ucode, calcStgPosStBd)
+    }
+
+    function onClickSaveToServer() {
+      // const calcStgPosStBd = mkCalcStgPosStBd()
+      const calcStgPosStBd = mkResultMvCalcStgPosStBd()
+      const ucode = `mobile-calc-stg-pos-st-bd-${getCurrentDateUCode()}`
+
+      const jsonStr = JSON.stringify({ ucode: ucode, str: calcStgPosStBd })
+      console.log(jsonStr)
+
+      const response = fetch('../add-mobile-calc-stg-pos-st-bd', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: jsonStr
+      })
+    }
+
+    function mkCalcStgPosStBd() {
+      const calcLineStList = []
+      if (calcLineSt.length > 0) {
+        const clcLineSp = calcLineSt.split('\n')
+        for (const clcLn of clcLineSp) {
+          const clcLnSp = clcLn.split('/')
+          const partCode = clcLnSp[0]
+          const info = {
+            partCode: partCode,
+            list: []
+          }
+
+          clcLnSp.shift()
+          for (const ln of clcLnSp) {
+            const lnSp = ln.split(',')
+            const startI = Number(lnSp[0])
+            const endI = Number(lnSp[1])
+            info.list.push({
+              startI: startI,
+              endI: endI
+            })
+          }
+
+          calcLineStList.push(info)
+        }
+      }
+
+      const calcPartStcStList = []
+      for (const partPs of unitPsInfo.partPsList) {
+        let cpsSt = `${partPs.code}`
+        const cpsLyrStList = []
+        let lyrI = 0
+        for (const lyrPs of partPs.lyrPsList) {
+          let lyrX = partPs.x + lyrPs.x
+          let lyrY = partPs.y + lyrPs.y
+          cpsLyrStList.push(`${lyrI},${lyrX},${lyrY}`)
+          lyrI++
+        }
+        cpsSt += `\n${cpsLyrStList.join('/')}`
+
+        const lineInfo = calcLineStList.find(ln => ln.partCode === partPs.code)
+        if (lineInfo) {
+          const lnList = []
+          for (const lnInfo of lineInfo.list) {
+            let startLyr = null
+            if (lnInfo.startI >= 0) {
+              startLyr = partPs.lyrPsList[lnInfo.startI]
+            } else {
+              startLyr = {
+                x: partPs.x * -1, y: partPs.y * -1
+              }
+            }
+            const endLyr = partPs.lyrPsList[lnInfo.endI]
+            const dx = (endLyr.x + partPs.x) - (startLyr.x + partPs.x)
+            const dy = (endLyr.y + partPs.y) - (startLyr.y + partPs.y)
+            const distance = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy))
+            lnList.push(`${lnInfo.startI},${lnInfo.endI},${distance}`)
+          }
+          cpsSt += `\n${lnList.join('/')}`
+        } else {
+          const lrPs = partPs.lyrPsList[0]
+          const dx = lrPs.x + partPs.x
+          const dy = lrPs.y + partPs.y
+          const distance = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy))
+          cpsSt += `\n-1,0,${distance}`
+        }
+
+        calcPartStcStList.push(cpsSt)
+      }
+
+      const calcStgPosStBd = calcPartStcStList.join('\n===\n')
+
+      return calcStgPosStBd
+    }
+
+    function onClickAddFrm() {
+      const container = document.getElementById('id-container-frm')
+      const frmI = frmInfoList.length
+      const calcStgPosStBd = mkCalcStgPosStBd()
+      const cspStBdSp = calcStgPosStBd.split('\n===\n')
+
+      const frmInfo = {
+        frmI: frmI,
+        partList: []
+      }
+
+      for (const csp of cspStBdSp) {
+        const cspSp = csp.split('\n')
+        const partCode = cspSp[0]
+        const lyrSp = cspSp[1].split('/')
+        const lineSp = cspSp[2].split('/')
+
+        const info = {
+          partCode: partCode,
+          lyrPsList: [],
+          lineList: []
+        }
+
+        for (const lyr of lyrSp) {
+          const lsp = lyr.split(',')
+          const lyrI = Number(lsp[0])
+          const lyrX = Number(lsp[1])
+          const lyrY = Number(lsp[2])
+
+          info.lyrPsList.push({
+            i: lyrI,
+            x: lyrX,
+            y: lyrY
+          })
+        }
+
+        for (const line of lineSp) {
+          const lnSp = line.split(',')
+          const startI = Number(lnSp[0])
+          const endI = Number(lnSp[1])
+          const distance = Number(lnSp[2])
+          info.lineList.push({
+            startI: startI,
+            endI: endI,
+            distance: distance
+          })
+        }
+
+        frmInfo.partList.push(info)
+      }
+
+      frmInfoList.push(frmInfo)
+
+      const btn = document.createElement('button')
+      btn.style.margin = '4px'
+      btn.innerText = `${frmI}`
+      btn.style.backgroundColor = 'lightblue'
+      if (crntBtn) crntBtn.style.backgroundColor = ''
+      crntBtn = btn
+      btn.onclick = (e) => {
+        for (const part of frmInfo.partList) {
+          const partPs = unitPsInfo.partPsList.find(ps => ps.code === part.partCode)
+
+          for (const lyr of part.lyrPsList) {
+            const lyrPs = partPs.lyrPsList[lyr.i]
+            lyrPs.x = lyr.x - partPs.x
+            lyrPs.y = lyr.y - partPs.y
+          }
+        }
+
+        crntFrmInfo = frmInfo
+
+        if (crntBtn) crntBtn.style.backgroundColor = ''
+        btn.style.backgroundColor = 'lightblue'
+        crntBtn = btn
+
+        draw()
+      }
+
+      container.appendChild(btn)
+    }
+
+    function mkResultMvCalcStgPosStBd() {
+      const frmStList = []
+
+      for (const frmInfo of frmInfoList) {
+        const partFrmStList = []
+
+        for (const part of frmInfo.partList) {
+          const lstList = []
+          const lnStList = []
+
+          for (const lyrPs of part.lyrPsList) {
+            lstList.push(`${lyrPs.i},${lyrPs.x},${lyrPs.y}`)
+          }
+
+          for (const ln of part.lineList) {
+            console.log(ln)
+            let startLyr = null
+            if (ln.startI >= 0) {
+              startLyr = part.lyrPsList[ln.startI]
+            } else {
+              startLyr = {
+                x: 0, y: 0
+              }
+            }
+            const endLyr = part.lyrPsList[ln.endI]
+            const dx = endLyr.x - startLyr.x
+            const dy = endLyr.y - startLyr.y
+            const distance = Math.sqrt(Math.abs(dx * dx) + Math.abs(dy * dy))
+
+            lnStList.push(`${ln.startI},${ln.endI},${distance}`)
+          }
+
+          partFrmStList.push(`${part.partCode}\n${lstList.join('/')}\n${lnStList.join('/')}`)
+        }
+
+        frmStList.push(partFrmStList.join('\n===\n'))
+      }
+
+      return frmStList.join('\n=====\n')
+    }
+  </script>
+</body>
+</html>
