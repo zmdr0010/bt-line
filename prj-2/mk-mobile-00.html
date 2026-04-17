@@ -107,6 +107,10 @@
     <canvas class="canvas-border" id="id-canvas"></canvas>
   </div>
   <div class="item-div">
+    <button onclick="rotateZ(1)">rotate-z-up</button>
+    <button onclick="rotateZ(-1)">rotate-z-down</button>
+  </div>
+  <div class="item-div">
     <button onclick="onClickAddFrm()">add-frm</button>
   </div>
   <div class="item-div" id="id-container-frm">
@@ -116,9 +120,10 @@
   <script type="text/javascript" src="fnc-edit/fnc-textarea.js"></script>
 
   <script type="text/javascript" src="fnc-edit-unit/fnc-mk-unit-by-mk-bd.js"></script>
+  <script type="text/javascript" src="fnc-edit-unit/fnc-rotate-p-3d.js"></script>
 
   <script type="text/javascript" src="str-set/unit-part-pos-edit-st/unit-part-pos-edit-st-000.js"></script>
-<script type="text/javascript" src="str-set/unit-part-pos-edit-st/unit-part-pos-edit-st-000-1.js"></script>
+  <script type="text/javascript" src="str-set/unit-part-pos-edit-st/unit-part-pos-edit-st-000-1.js"></script>
 
   <script>
     let canvas
@@ -1321,6 +1326,44 @@
       }
 
       return frmStList.join('\n=====\n')
+    }
+
+    function rotateZ(dir) {
+      const mvRotX = 0
+      const mvRotY = 0
+      const mvRotZ = dir
+      const rdnX = mvRotX * Math.PI / 180
+      const rdnY = mvRotY * Math.PI / 180
+      const rdnZ = mvRotZ * Math.PI / 180
+
+      for (const partPs of unitPsInfo.partPsList) {
+        const partX = unitPsInfo.x + partPs.x
+        const partY = unitPsInfo.y + partPs.y
+
+        let lyrI = 0
+        for (const lyrPs of partPs.lyrPsList) {
+          const lyrX = lyrPs.x + partX
+          const lyrY = lyrPs.y + partY
+
+          let mx = lyrX
+          let my = lyrY
+          let mz = 0
+
+          const rtxP = rotateXAxis(rdnX, mx, my, mz)
+          const rtyP = rotateYAxis(rdnY, rtxP.x, rtxP.y, rtxP.z)
+          const rtzP = rotateZAxis(rdnZ, rtyP.x, rtyP.y, rtyP.z)
+          mx = rtzP.x
+          my = rtzP.y
+          mz = rtzP.z
+
+          lyrPs.x = mx - partX
+          lyrPs.y = my - partY
+
+          lyrI++
+        }
+      }
+
+      draw()
     }
   </script>
 </body>
