@@ -1336,6 +1336,7 @@
       const rdnY = mvRotY * Math.PI / 180
       const rdnZ = mvRotZ * Math.PI / 180
 
+      let partI = 0
       for (const partPs of unitPsInfo.partPsList) {
         const partX = unitPsInfo.x + partPs.x
         const partY = unitPsInfo.y + partPs.y
@@ -1359,8 +1360,16 @@
           lyrPs.x = mx - partX
           lyrPs.y = my - partY
 
+          if (crntFrmInfo) {
+            const frmLyrPs = crntFrmInfo.partList[partI].lyrPsList[lyrI]
+            frmLyrPs.x = mx
+            frmLyrPs.y = my
+          }
+
           lyrI++
         }
+
+        partI++
       }
 
       draw()
